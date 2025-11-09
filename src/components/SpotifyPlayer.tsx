@@ -205,7 +205,7 @@ export default function SpotifyPlayer({ currentWeek, disableAutoPlay = false }: 
       {song && (
         <div className="spotify-song-info">
           <p className="spotify-current-song">
-            Week {currentWeek}: <strong>{song.artist} - {song.track}</strong>
+            <strong>{song.artist} - {song.track}</strong>
           </p>
           <div className="spotify-controls">
             <button 

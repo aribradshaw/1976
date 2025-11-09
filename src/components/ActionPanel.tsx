@@ -511,7 +511,7 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
                 disabled={isRallyDisabled}
                 data-tooltip={
                   isRallyScheduled ? "Once per week" : 
-                  !canDoRally ? "Lock at least 3 issue positions in weekly events" : 
+                  !canDoRally ? "Lock at least 3 issue positions in weekly interviews" : 
                   undefined
                 }
               >

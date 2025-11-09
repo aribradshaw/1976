@@ -103,12 +103,13 @@ export default function WeeklyEventModal({
               <strong>Your position on this issue will be PERMANENT and LOCKED for the entire campaign.</strong>
             </p>
             <p>
-              Once you choose FOR or AGAINST, you cannot change your position on this topic. This decision will affect:
+              Once you choose FOR or AGAINST, you cannot change your position on this topic. This decision will have a NATIONAL IMPACT:
             </p>
             <ul>
-              <li>All future rallies and ads (you can only use topics you've locked positions on)</li>
-              <li>Your relationship with voters across all states</li>
-              <li>Your ability to campaign on this issue throughout the election</li>
+              <li><strong>National Impact:</strong> Your position affects voter relationships in ALL 50 states</li>
+              <li><strong>All Subgroups:</strong> All voter microgroups (Democrats, Republicans, Independents) will react to your position</li>
+              <li><strong>Future Campaigns:</strong> You can only use topics you've locked positions on in rallies and ads</li>
+              <li><strong>Strategic Choice:</strong> Choose positions that align with your base while appealing to swing voters</li>
             </ul>
             <p>
               <strong>Choose strategically!</strong> Consider how this position will appeal to your base, independents, and swing voters.
@@ -129,9 +130,9 @@ export default function WeeklyEventModal({
         </div>
       )}
       <div className="weekly-event-modal">
-        <h2>Weekly Event</h2>
+        <h2>Weekly Interview</h2>
         <p className="event-description">
-          A major news event has brought attention to an important issue. How will you respond?
+          You've been invited to a major national interview. This is your chance to take a position on an important issue that will be seen by voters across all 50 states.
         </p>
         <div className="event-topic">
           <h3>{topic.name}</h3>

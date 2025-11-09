@@ -27,8 +27,16 @@ export default function NewsTicker({ currentWeek, gameEngine, gameState }: NewsT
     // Add opponent actions from last week if available
     if (gameEngine && gameState && currentWeek > 1) {
       const lastWeek = currentWeek - 1;
-      const opponentEvents = gameEngine.getOpponentEventsForWeek(lastWeek);
       
+      // First, add opponent's weekly interview if available
+      const opponentInterview = gameEngine.getOpponentInterviewForWeek(lastWeek);
+      if (opponentInterview) {
+        const interviewHeadline = formatOpponentInterview(opponentInterview, gameState.playerCandidate);
+        weekHeadlines.push(interviewHeadline);
+      }
+      
+      // Then add other opponent actions
+      const opponentEvents = gameEngine.getOpponentEventsForWeek(lastWeek);
       if (opponentEvents.length > 0) {
         // Format opponent actions into a headline
         const opponentHeadline = formatOpponentActions(opponentEvents, gameState.playerCandidate);
@@ -39,6 +47,35 @@ export default function NewsTicker({ currentWeek, gameEngine, gameState }: NewsT
     setHeadlines(weekHeadlines);
     setLastProcessedWeek(currentWeek);
   }, [currentWeek, gameEngine, gameState, lastProcessedWeek]);
+  
+  /**
+   * Format opponent's weekly interview into a news ticker headline with impact
+   */
+  function formatOpponentInterview(event: CampaignEvent, playerCandidate: 'democrat' | 'republican'): string {
+    const opponentName = playerCandidate === 'democrat' ? 'Ford' : 'Carter';
+    const topic = TOPICS.find(t => t.id === event.adTopic);
+    const topicName = topic ? topic.name : event.adTopic || 'Unknown Topic';
+    const position = event.campaignSize === 'small' ? 'FOR' : 'AGAINST'; // Reused field
+    
+    // Parse impact from rallyTopics array [dem, rep, indie]
+    const impacts = event.rallyTopics || [];
+    const demImpact = impacts[0] ? parseFloat(impacts[0]) : 0;
+    const repImpact = impacts[1] ? parseFloat(impacts[1]) : 0;
+    const indieImpact = impacts[2] ? parseFloat(impacts[2]) : 0;
+    
+    // Format impact descriptions
+    const formatImpact = (impact: number, group: string) => {
+      if (impact > 0.5) {
+        return `<span style="color: #4ade80">+${impact.toFixed(1)}</span> ${group}`;
+      } else if (impact < -0.5) {
+        return `<span style="color: #f87171">${impact.toFixed(1)}</span> ${group}`;
+      } else {
+        return `<span style="color: #94a3b8">${impact.toFixed(1)}</span> ${group}`;
+      }
+    };
+    
+    return `${opponentName} Interview: ${position} ${topicName} • ${formatImpact(demImpact, 'Dems')} • ${formatImpact(repImpact, 'Reps')} • ${formatImpact(indieImpact, 'Indies')}`;
+  }
   
   /**
    * Format opponent actions into a news ticker headline

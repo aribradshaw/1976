@@ -498,7 +498,7 @@ export default function TopicSelector({
         <div className="topic-grid">
           {TOPICS
             .filter(topic => {
-              // Only show topics that have been locked via weekly events
+              // Only show topics that have been locked via weekly interviews
               return localGameState.topicPositions.has(topic.id);
             })
             .map(topic => {

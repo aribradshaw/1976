@@ -16,6 +16,7 @@ import ProjectedVotesModal from './ProjectedVotesModal';
 import { FaDemocrat, FaRepublican } from 'react-icons/fa';
 import { TopicId } from '../data/topics';
 import { playClickSound, playStateSelectSound, playStateDeselectSound } from '../utils/sounds';
+import { isSpotifyConnected, searchTrack, playTrack } from '../utils/spotify';
 import './GameInterface.css';
 
 interface GameInterfaceProps {
@@ -41,6 +42,29 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
     setGameState(gameEngine.getGameState());
   }, [gameEngine]);
 
+  // Play "Rock'n Me" by Steve Miller Band when game ends (it was #1 the week of the election)
+  useEffect(() => {
+    if (gameState.gameStatus === 'won' || gameState.gameStatus === 'lost') {
+      const playElectionSong = async () => {
+        if (!isSpotifyConnected()) return;
+        
+        try {
+          // Search for "Rock'n Me" by Steve Miller Band
+          const trackId = await searchTrack('Steve Miller Band', "Rock'n Me");
+          if (trackId) {
+            await playTrack(trackId);
+          }
+        } catch (error) {
+          console.error('Error playing election song:', error);
+        }
+      };
+      
+      // Play after a short delay to ensure game state is fully updated
+      const timeout = setTimeout(playElectionSong, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [gameState.gameStatus]);
+
   const handleAction = (action: CampaignAction) => {
     const success = gameEngine.executeAction(action);
     if (success) {
@@ -56,14 +80,15 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
   };
 
   const handleEndTurn = () => {
-    // Process the turn, then show weekly event modal
+    // Process the turn, then show weekly interview modal
     gameEngine.endTurn();
     setGameState(gameEngine.getGameState());
     setShowWeeklyEvent(true);
   };
 
   const handleWeeklyEventAnswer = (topicId: TopicId, position: 'for' | 'against') => {
-    // Apply the weekly event effects (this also locks the position globally)
+    // Apply the weekly interview effects (this also locks the position globally)
+    // Weekly interviews have national impact on all subgroups in all states
     gameEngine.applyWeeklyEvent(topicId, position);
     setGameState(gameEngine.getGameState());
     setShowWeeklyEvent(false);

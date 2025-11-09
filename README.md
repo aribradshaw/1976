@@ -1,15 +1,38 @@
 # 1976: Election Simulation Game
 
-A turn-based strategy game simulating the 1976 U.S. Presidential Election between Gerald Ford and Jimmy Carter.
+A turn-based strategy game simulating the 1976 U.S. Presidential Election between Gerald Ford and Jimmy Carter. Campaign across all 50 states, manage resources, build momentum, and compete for 270 electoral votes in this historically-accurate political strategy game.
 
 ## Features
 
-- **50 States**: Each state has unique demographics, electoral votes, and campaign costs
-- **25-Week Campaign**: Navigate a full campaign season with weekly turns
-- **Polling System**: States show polling data with 3-10% margin of error for strategic uncertainty
-- **Campaign Actions**: Fundraising, media campaigns, events, and surrogate campaigning
+### Core Gameplay
+- **50 States**: Each state has unique demographics, electoral votes, historical data, and campaign costs
+- **25-Week Campaign**: Navigate a full campaign season from May to November 1976
+- **Dynamic Polling System**: Real-time polling with 3-10% margin of error for strategic uncertainty
+- **Momentum System**: Build momentum in states to convert undecided voters and sway swingable voters
+- **Resource Management**: Manage funds, energy, actions per turn, and fundraising potential
+
+### Campaign Actions
+- **Campaign Headquarters (HQ)**: Build and upgrade HQs (Levels 1-5) in states for weekly momentum boosts and turnout increases
+- **Launch Ads**: Run TV/radio ad campaigns with three sizes:
+  - **Small**: $300K, +2 momentum
+  - **Medium**: $600K, +6 momentum
+  - **Large**: $1M, +10 momentum
+- **Rallies**: Hold campaign rallies with 3 topics to boost relationships and momentum (+2 momentum)
+- **Large Donor Fundraisers**: Raise funds from wealthy donors (amount varies by state)
+
+### Strategic Systems
+- **Weekly Events**: Each week, choose your position on a major issue (positions are permanent and locked)
+- **Microgroup Relationships**: Build relationships with 11 different voter microgroups in each state
+- **Momentum Competition**: Momentum differential drives poll changes - compete with AI opponent for momentum advantage
+- **Topic Positions**: Lock positions on 20 different topics (Watergate, Economy, Energy, etc.)
+- **AI Opponent**: Three difficulty levels (Easy, Medium, Hard) with strategic AI that competes for momentum and electoral votes
+
+### Visual & Audio
+- **CRT TV Aesthetic**: Retro 1976 television interface with scanlines and flicker effects
 - **Dynamic State Colors**: States colored by polling data (red/blue/purple shades)
-- **Resource Management**: Manage funds, energy, momentum, and actions per turn
+- **News Ticker**: Weekly headlines and opponent action updates
+- **Sound Effects**: Immersive audio feedback for actions and state selection
+- **Spotify Integration**: Optional 1976-era music playlist integration
 
 ## Getting Started
 
@@ -19,17 +42,23 @@ A turn-based strategy game simulating the 1976 U.S. Presidential Election betwee
 
 ### Installation
 
-1. Install dependencies:
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd 1976
+```
+
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Start development server:
+3. Start development server:
 ```bash
 npm run dev
 ```
 
-3. Build for production:
+4. Build for production:
 ```bash
 npm run build
 ```
@@ -38,65 +67,122 @@ The built files will be in the `dist` directory, ready for deployment.
 
 ## Deployment
 
-### Deploying to itch.io
+### Deploying to a Web Server
 
 1. Build the project: `npm run build`
-2. Zip the contents of the `dist` folder
-3. Upload to itch.io as an HTML5 game
-
-### Deploying to HostGator
-
-1. Build the project: `npm run build`
-2. Upload all files from the `dist` folder to your web server's public directory (usually `public_html` or `www`)
+2. Upload all files from the `dist` folder to your web server's public directory
 3. Ensure your server is configured to serve `index.html` for all routes (for React Router compatibility)
+4. For subdirectory deployments (e.g., `/1976/`), the app automatically handles base URL configuration
 
 ### Build Output
 
 The `dist` folder contains:
 - `index.html` - Main HTML file
 - `assets/` - JavaScript and CSS bundles
-- All static assets
+- `audio/` - Sound effect files
+- All static assets (images, etc.)
 
 ## Gameplay
 
-1. **Choose Your Candidate**: Start by selecting either Jimmy Carter (Democrat) or Gerald Ford (Republican)
-2. **Weekly Turns**: Each week, you have 3 actions to spend
-3. **Campaign Actions**:
-   - **Fundraising**: Raise money for your campaign (free action)
-   - **Media Campaign**: Run TV/radio ads in a state (~$300K)
-   - **Campaign Event**: Hold rallies or town halls (~$500K)
-   - **Surrogate Campaign**: Send VP or surrogates to campaign (~$150K)
-4. **State Management**: Click on any state to view detailed polling information
-5. **Win Condition**: First candidate to reach 270 electoral votes wins
+### Starting a Game
+
+1. **Choose Your Candidate**: Select either Jimmy Carter (Democrat) or Gerald Ford (Republican)
+2. **Select Difficulty**: Choose Easy (random AI), Medium (strategic AI), or Hard (aggressive strategic AI)
+3. **Begin Campaign**: Start with $5M in funds and 6 actions per week
+
+### Weekly Turn Structure
+
+1. **Plan Actions**: Select states and actions for the week
+2. **Execute Actions**: Build HQs, launch ads, hold rallies, or fundraise
+3. **End Turn**: Process opponent actions, update polling, and advance to next week
+4. **Weekly Event**: Respond to a major news event (if topics remain unlocked)
+
+### Campaign Strategy
+
+- **Momentum is Key**: Momentum differential drives poll changes each week
+  - Higher momentum converts more undecided voters to your side
+  - Large momentum advantages can convert swingable voters from opponent's side
+  - Momentum compounds over time - build early advantages
+- **HQ Strategy**: Build HQs in key states for weekly momentum boosts
+  - Higher level HQs provide more momentum per week
+  - HQs also boost voter turnout
+- **Ad Campaigns**: Use large campaigns strategically in high-value states
+  - Large campaigns provide major momentum boosts
+  - Best used when close to winning big states or when you need to leapfrog opponent
+- **State Targeting**: Focus on swing states and states where you can gain momentum advantage
+  - Big states (10+ electoral votes) are high value
+  - States where you're close to winning are prime targets
+  - Compete for momentum in states where opponent has advantage
+
+### Win Condition
+
+First candidate to reach **270 electoral votes** wins the election. Electoral votes are projected based on current polling data.
 
 ## Technical Details
 
+### Technology Stack
 - **Framework**: React 18 + TypeScript
 - **Build Tool**: Vite
-- **State Management**: GameEngine class with React state
-- **Styling**: CSS modules with modern design
+- **State Management**: GameEngine class with React state hooks
+- **Styling**: CSS with retro CRT TV aesthetic
+- **Icons**: React Icons
 
-## Project Structure
+### Key Systems
+- **GameEngine**: Core game logic, AI opponent, polling calculations, momentum system
+- **Relationship Calculator**: Calculates voter microgroup relationship changes based on topic positions
+- **Demographics System**: Detailed voter breakdowns (hardcore, likely, swingable) for each state
+- **Polling System**: Dynamic polling updates based on relationships, momentum, and weekly events
+
+### Project Structure
 
 ```
 src/
 ├── components/      # React UI components
+│   ├── GameInterface.tsx    # Main game interface
+│   ├── StateMap.tsx          # Interactive electoral map
+│   ├── ActionPanel.tsx       # Campaign action selection
+│   ├── StateInfoPanel.tsx    # State detail view
+│   └── ...
 ├── game/           # Game engine and logic
-├── states/         # Individual state data files (50 states)
+│   ├── GameEngine.ts         # Core game engine
+│   └── relationshipCalculator.ts
+├── states/         # Individual state data files (50 states + DC)
+├── data/           # Game data
+│   ├── topics.ts             # 20 campaign topics
+│   ├── weeklySongs.ts        # 1976 Billboard songs
+│   └── newsHeadlines.ts      # Historical headlines
 ├── types/          # TypeScript type definitions
+├── utils/          # Utility functions
+│   ├── demographics.ts       # Demographics calculations
+│   ├── sounds.ts             # Sound effect management
+│   └── spotify.ts            # Spotify integration
 ├── App.tsx         # Main app component
 └── main.tsx        # Entry point
 ```
 
 ## Development
 
-- `npm run dev` - Start development server
+### Available Scripts
+
+- `npm run dev` - Start development server (http://localhost:5173)
 - `npm run build` - Build for production
-- `npm run preview` - Preview production build
+- `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint
+
+### Key Design Decisions
+
+- **Momentum-Driven Polling**: Momentum is the primary driver of poll changes, making it critical for winning states
+- **Permanent Topic Positions**: Once you choose a position on a topic, it's locked for the entire campaign
+- **Separate Player/Opponent HQs**: Each candidate can have their own HQ in each state, tracked separately
+- **Strategic AI**: Medium and Hard difficulties use sophisticated AI that competes for momentum and targets high-value states
+- **Historical Accuracy**: State demographics, electoral votes, and historical data based on 1976 election
 
 ## License
 
 This project is open source and available for educational purposes.
 
+## Credits
 
+- Historical data based on the 1976 U.S. Presidential Election
+- State demographics from 1976 census and election data
+- Music integration via Spotify API

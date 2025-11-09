@@ -1,0 +1,127 @@
+.spotify-connection-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.spotify-connection-modal {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  border: 2px solid #1db954;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(29, 185, 84, 0.3);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.spotify-connection-modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.spotify-connection-modal-header h2 {
+  color: #1db954;
+  font-size: 1.75rem;
+  margin: 0;
+  text-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
+}
+
+.spotify-connection-modal-content {
+  text-align: center;
+}
+
+.spotify-connection-description {
+  color: #f5f5dc;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.spotify-connection-note {
+  color: #aaa;
+  font-size: 0.875rem;
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.spotify-connection-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.spotify-connect-btn-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
+}
+
+.spotify-connect-btn-modal:hover {
+  background: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+  box-shadow: 0 6px 16px rgba(29, 185, 84, 0.6);
+  transform: translateY(-2px);
+}
+
+.spotify-connect-btn-modal:active {
+  transform: translateY(0);
+}
+
+.spotify-icon-modal {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.spotify-skip-btn-modal {
+  padding: 0.75rem 2rem;
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #555;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.spotify-skip-btn-modal:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #777;
+  color: #f5f5dc;
+}
+
+.spotify-skip-btn-modal:active {
+  transform: scale(0.98);
+}
+

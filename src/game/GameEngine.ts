@@ -18,6 +18,9 @@ export class GameEngine {
     });
 
     this.gameState = this.initializeGame(playerCandidate, difficulty);
+    
+    // Start game logging
+    gameLogger.startGame(difficulty, playerCandidate);
   }
 
   // Calculate the Tuesday for a given week (25 weeks before Nov 2, 1976)
@@ -204,12 +207,26 @@ export class GameEngine {
     const allEvents: CampaignEvent[] = [];
     this.gameState.campaignEvents.forEach((events) => {
       events.forEach(event => {
-        if (event.isOpponent && event.week === week) {
+        if (event.isOpponent && event.week === week && event.state !== 'NATIONAL') {
           allEvents.push(event);
         }
       });
     });
     return allEvents;
+  }
+  
+  /**
+   * Get opponent's weekly interview event for a specific week
+   */
+  getOpponentInterviewForWeek(week: number): CampaignEvent | null {
+    const nationalEvents = this.gameState.campaignEvents.get('NATIONAL') || [];
+    const interviewEvent = nationalEvents.find(event => 
+      event.isOpponent && 
+      event.week === week && 
+      event.state === 'NATIONAL' &&
+      event.adTopic // Interview events have adTopic set
+    );
+    return interviewEvent || null;
   }
   
   getStatesWonByParty(): { democrat: string[], republican: string[] } {
@@ -412,6 +429,14 @@ export class GameEngine {
       }
     }
 
+    // Capture BEFORE state for logging
+    const beforePolling = this.gameState.polling.get(action.targetState);
+    const beforeMomentum = {
+      player: this.gameState.stateMomentum.get(action.targetState) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(action.targetState) || 0,
+    };
+    const beforeRelationships = this.gameState.microgroupRelationships.get(action.targetState);
+    
     // Execute the action
     this.gameState.resources.funds -= action.cost;
     this.gameState.resources.actionsRemaining -= 1;
@@ -419,6 +444,53 @@ export class GameEngine {
 
     // Apply action effects first (this creates the fundraising booth with the actual amount)
     this.applyActionEffects(action);
+
+    // Capture AFTER state for logging
+    const afterPolling = this.gameState.polling.get(action.targetState);
+    const afterMomentum = {
+      player: this.gameState.stateMomentum.get(action.targetState) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(action.targetState) || 0,
+    };
+    const afterRelationships = this.gameState.microgroupRelationships.get(action.targetState);
+    
+    // Log comprehensive action data
+    if (beforePolling && afterPolling && beforeRelationships && afterRelationships) {
+      const relationshipChanges: Record<string, number> = {};
+      Object.keys(beforeRelationships).forEach(key => {
+        const beforeValue = beforeRelationships[key as keyof MicrogroupRelationships];
+        const afterValue = afterRelationships[key as keyof MicrogroupRelationships];
+        relationshipChanges[key] = afterValue - beforeValue;
+      });
+      
+      gameLogger.logAction({
+        week: this.gameState.currentWeek,
+        actor: 'player',
+        actionType: action.type,
+        state: action.targetState,
+        topicId: action.adTopic,
+        position: action.type === 'rally' ? undefined : undefined, // Rally doesn't have position
+        campaignSize: action.campaignSize,
+        hqLevel: action.hqLevel,
+        rallyTopics: action.rallyTopics,
+        cost: action.cost,
+        stateEffects: [{
+          stateAbbrev: action.targetState,
+          beforePolling: {
+            demSupport: beforePolling.democraticSupport,
+            repSupport: beforePolling.republicanSupport,
+            turnout: beforePolling.turnoutRate,
+          },
+          afterPolling: {
+            demSupport: afterPolling.democraticSupport,
+            repSupport: afterPolling.republicanSupport,
+            turnout: afterPolling.turnoutRate,
+          },
+          beforeMomentum: beforeMomentum,
+          afterMomentum: afterMomentum,
+          relationshipChanges: relationshipChanges,
+        }],
+      });
+    }
 
     // Log the event after effects are applied (so we can get the actual fundraising amount from the booth)
     this.logCampaignEvent(action);
@@ -890,6 +962,14 @@ export class GameEngine {
     // Process HQ effects (turnout boosts and momentum)
     this.processHQEffects();
     
+    // On hard difficulty, give opponent passive momentum boost in all states
+    if (this.gameState.difficulty === 'hard') {
+      this.gameState.opponentStateMomentum.forEach((momentum, stateAbbrev) => {
+        const newMomentum = Math.min(100, momentum + 0.1);
+        this.gameState.opponentStateMomentum.set(stateAbbrev, newMomentum);
+      });
+    }
+    
     // Calculate weekly fundraising
     this.calculateWeeklyFundraising();
 
@@ -909,11 +989,18 @@ export class GameEngine {
   }
 
   /**
-   * Apply weekly event effects to all microgroups in all states
+   * Apply weekly interview effects to all microgroups in all states (NATIONAL IMPACT)
+   * Weekly interviews have a stronger national impact than regular campaign actions
    * @param topicId The topic that was selected
    * @param position The position chosen (for/against)
    */
   applyWeeklyEvent(topicId: string, position: 'for' | 'against'): void {
+    // Capture BEFORE state for logging (all states)
+    const beforeRelationships: Record<string, Record<string, number>> = {};
+    this.gameState.microgroupRelationships.forEach((relationships, stateAbbrev) => {
+      beforeRelationships[stateAbbrev] = { ...relationships };
+    });
+    
     // Lock the position globally (this is the ONLY place positions can be locked)
     this.setTopicPosition(topicId, position);
     
@@ -931,25 +1018,80 @@ export class GameEngine {
       'hardcore_rep_indie',
     ];
 
-    // Apply relationship changes to all states
+    // Calculate impact on different voter groups
+    const demGroups = ['hardcore_dem', 'lean_dem', 'swingable_dem', 'hardcore_dem_indie', 'lean_dem_indie'];
+    const repGroups = ['hardcore_rep', 'lean_rep', 'swingable_rep', 'lean_rep_indie', 'hardcore_rep_indie'];
+    const indieGroups = ['swingable_indie'];
+    
+    const nationalImpactMultiplier = 2.0; // Weekly interviews have 2x impact
+    
+    let demImpact = 0;
+    let repImpact = 0;
+    let indieImpact = 0;
+    
+    demGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, topicId as TopicId, this.gameState.playerCandidate, position);
+      demImpact += baseChange * nationalImpactMultiplier;
+    });
+    demImpact = demImpact / demGroups.length;
+    
+    repGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, topicId as TopicId, this.gameState.playerCandidate, position);
+      repImpact += baseChange * nationalImpactMultiplier;
+    });
+    repImpact = repImpact / repGroups.length;
+    
+    indieGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, topicId as TopicId, this.gameState.playerCandidate, position);
+      indieImpact += baseChange * nationalImpactMultiplier;
+    });
+    indieImpact = indieImpact / indieGroups.length;
+
+    // Apply relationship changes to ALL states (NATIONAL IMPACT)
+    // Weekly interviews have 2x the impact of regular campaign actions
+    const afterRelationships: Record<string, Record<string, number>> = {};
+    
     this.gameState.microgroupRelationships.forEach((relationships, stateAbbrev) => {
       const updated: MicrogroupRelationships = { ...relationships };
       
       microgroups.forEach(microgroup => {
-        const change = calculateTopicRelationshipChange(
+        const baseChange = calculateTopicRelationshipChange(
           microgroup,
           topicId as TopicId,
           this.gameState.playerCandidate,
           position
         );
         
+        // Apply national impact multiplier (weekly interviews have stronger effect)
+        const change = baseChange * nationalImpactMultiplier;
+        
         // Apply the change (capped at 1-10)
         updated[microgroup] = Math.max(1, Math.min(10, updated[microgroup] + change));
       });
       
       this.gameState.microgroupRelationships.set(stateAbbrev, updated);
+      afterRelationships[stateAbbrev] = { ...updated };
       
       // Note: Polling will be updated once per turn in endTurn(), not after each action
+    });
+    
+    // Log player's weekly interview
+    gameLogger.logAction({
+      week: this.gameState.currentWeek,
+      actor: 'player',
+      actionType: 'weekly_interview',
+      state: 'NATIONAL',
+      topicId: topicId,
+      position: position,
+      nationalEffects: {
+        beforeRelationships: beforeRelationships,
+        afterRelationships: afterRelationships,
+        impactOnGroups: {
+          democrats: demImpact,
+          republicans: repImpact,
+          independents: indieImpact,
+        },
+      },
     });
   }
   
@@ -961,8 +1103,9 @@ export class GameEngine {
   }
   
   /**
-   * Process opponent's weekly event answer
+   * Process opponent's weekly interview answer
    * The opponent answers one question per turn to help their base support
+   * Weekly interviews have national impact on all subgroups in all states
    */
   private processOpponentWeeklyEvent(opponentCandidate: Candidate): void {
     // Get available topics (not yet locked by opponent)
@@ -1027,15 +1170,74 @@ export class GameEngine {
     // Choose position that helps base more
     const position: 'for' | 'against' = chosenTopic.forScore > chosenTopic.againstScore ? 'for' : 'against';
     
-    // Apply the weekly event (this locks the position globally)
+    // Calculate impact on different voter groups for news ticker
+    const demGroups = ['hardcore_dem', 'lean_dem', 'swingable_dem', 'hardcore_dem_indie', 'lean_dem_indie'];
+    const repGroups = ['hardcore_rep', 'lean_rep', 'swingable_rep', 'lean_rep_indie', 'hardcore_rep_indie'];
+    const indieGroups = ['swingable_indie'];
+    
+    const nationalImpactMultiplier = 2.0; // Weekly interviews have 2x impact
+    
+    let demImpact = 0;
+    let repImpact = 0;
+    let indieImpact = 0;
+    
+    demGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, chosenTopic.topicId as TopicId, opponentCandidate, position);
+      demImpact += baseChange * nationalImpactMultiplier;
+    });
+    demImpact = demImpact / demGroups.length;
+    
+    repGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, chosenTopic.topicId as TopicId, opponentCandidate, position);
+      repImpact += baseChange * nationalImpactMultiplier;
+    });
+    repImpact = repImpact / repGroups.length;
+    
+    indieGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, chosenTopic.topicId as TopicId, opponentCandidate, position);
+      indieImpact += baseChange * nationalImpactMultiplier;
+    });
+    indieImpact = indieImpact / indieGroups.length;
+    
+    // Apply the weekly interview (this locks the position globally, national impact)
     this.applyOpponentWeeklyEvent(chosenTopic.topicId, position, opponentCandidate);
+    
+    // Log the opponent's weekly interview event (store in a special "national" state)
+    const topic = TOPICS.find(t => t.id === chosenTopic.topicId);
+    const topicName = topic ? topic.name : chosenTopic.topicId;
+    const positionLabel = position === 'for' ? 'FOR' : 'AGAINST';
+    
+    // Store interview event with impact data (we'll use a special key for national events)
+    const interviewEvent: CampaignEvent = {
+      type: 'rally', // Reuse rally type for now, but we'll check for interview-specific data
+      state: 'NATIONAL', // Special marker for national events
+      week: this.gameState.currentWeek,
+      description: `Weekly Interview: ${positionLabel} ${topicName}`,
+      isOpponent: true,
+      adTopic: chosenTopic.topicId, // Reuse adTopic field to store interview topic
+      campaignSize: position === 'for' ? 'small' : 'medium', // Reuse to store position (for='small', against='medium')
+      // Store impact in rallyTopics array as stringified numbers [dem, rep, indie]
+      rallyTopics: [`${demImpact.toFixed(1)}`, `${repImpact.toFixed(1)}`, `${indieImpact.toFixed(1)}`],
+    };
+    
+    // Store in campaignEvents under a special "NATIONAL" key
+    const nationalEvents = this.gameState.campaignEvents.get('NATIONAL') || [];
+    nationalEvents.push(interviewEvent);
+    this.gameState.campaignEvents.set('NATIONAL', nationalEvents);
   }
   
   /**
-   * Apply opponent's weekly event answer
+   * Apply opponent's weekly interview answer (NATIONAL IMPACT)
    * Similar to applyWeeklyEvent but for the opponent candidate
+   * Weekly interviews have 2x the impact of regular campaign actions
    */
   private applyOpponentWeeklyEvent(topicId: string, position: 'for' | 'against', opponentCandidate: Candidate): void {
+    // Capture BEFORE state for logging (all states)
+    const beforeRelationships: Record<string, Record<string, number>> = {};
+    this.gameState.microgroupRelationships.forEach((relationships, stateAbbrev) => {
+      beforeRelationships[stateAbbrev] = { ...relationships };
+    });
+    
     // Lock the position globally for the opponent (separate from player)
     this.gameState.opponentTopicPositions.set(topicId, position);
     
@@ -1053,25 +1255,80 @@ export class GameEngine {
       'hardcore_rep_indie',
     ];
 
-    // Apply relationship changes to all states
+    // Calculate impact on different voter groups
+    const demGroups = ['hardcore_dem', 'lean_dem', 'swingable_dem', 'hardcore_dem_indie', 'lean_dem_indie'];
+    const repGroups = ['hardcore_rep', 'lean_rep', 'swingable_rep', 'lean_rep_indie', 'hardcore_rep_indie'];
+    const indieGroups = ['swingable_indie'];
+    
+    const nationalImpactMultiplier = 2.0; // Weekly interviews have 2x impact
+    
+    let demImpact = 0;
+    let repImpact = 0;
+    let indieImpact = 0;
+    
+    demGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, topicId as TopicId, opponentCandidate, position);
+      demImpact += baseChange * nationalImpactMultiplier;
+    });
+    demImpact = demImpact / demGroups.length;
+    
+    repGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, topicId as TopicId, opponentCandidate, position);
+      repImpact += baseChange * nationalImpactMultiplier;
+    });
+    repImpact = repImpact / repGroups.length;
+    
+    indieGroups.forEach(mg => {
+      const baseChange = calculateTopicRelationshipChange(mg as Microgroup, topicId as TopicId, opponentCandidate, position);
+      indieImpact += baseChange * nationalImpactMultiplier;
+    });
+    indieImpact = indieImpact / indieGroups.length;
+
+    // Apply relationship changes to ALL states (NATIONAL IMPACT)
+    // Weekly interviews have 2x the impact of regular campaign actions
+    const afterRelationships: Record<string, Record<string, number>> = {};
+    
     this.gameState.microgroupRelationships.forEach((relationships, stateAbbrev) => {
       const updated: MicrogroupRelationships = { ...relationships };
       
       microgroups.forEach(microgroup => {
-        const change = calculateTopicRelationshipChange(
+        const baseChange = calculateTopicRelationshipChange(
           microgroup,
           topicId as TopicId,
           opponentCandidate,
           position
         );
         
+        // Apply national impact multiplier (weekly interviews have stronger effect)
+        const change = baseChange * nationalImpactMultiplier;
+        
         // Apply the change (capped at 1-10)
         updated[microgroup] = Math.max(1, Math.min(10, updated[microgroup] + change));
       });
       
       this.gameState.microgroupRelationships.set(stateAbbrev, updated);
+      afterRelationships[stateAbbrev] = { ...updated };
       
       // Note: Polling will be updated once per turn in endTurn(), not after each action
+    });
+    
+    // Log opponent's weekly interview
+    gameLogger.logAction({
+      week: this.gameState.currentWeek,
+      actor: 'opponent',
+      actionType: 'weekly_interview',
+      state: 'NATIONAL',
+      topicId: topicId,
+      position: position,
+      nationalEffects: {
+        beforeRelationships: beforeRelationships,
+        afterRelationships: afterRelationships,
+        impactOnGroups: {
+          democrats: demImpact,
+          republicans: repImpact,
+          independents: indieImpact,
+        },
+      },
     });
   }
   
@@ -1224,6 +1481,14 @@ export class GameEngine {
    * Execute opponent HQ action
    */
   private executeOpponentHQ(abbrev: string, opponentCandidate: Candidate): void {
+    // Capture BEFORE state for logging
+    const beforePolling = this.gameState.polling.get(abbrev);
+    const beforeMomentum = {
+      player: this.gameState.stateMomentum.get(abbrev) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(abbrev) || 0,
+    };
+    const beforeRelationships = this.gameState.microgroupRelationships.get(abbrev);
+    
     const activities = this.gameState.campaignActivities.get(abbrev) || [];
     // Find opponent's HQ (not player's)
     const hqActivity = activities.find(a => a.type === 'hq' && a.actor === 'opponent');
@@ -1272,23 +1537,49 @@ export class GameEngine {
           const currentOpponentMomentum = this.gameState.opponentStateMomentum.get(abbrev) || 0;
           this.gameState.opponentStateMomentum.set(abbrev, Math.min(100, currentOpponentMomentum + stateMomentumIncrease));
         }
-        
-        const beforePolling = this.gameState.polling.get(abbrev);
-        const beforePollingData = beforePolling ? {
-          demSupport: beforePolling.democraticSupport,
-          repSupport: beforePolling.republicanSupport,
-          turnout: beforePolling.turnoutRate,
-        } : { demSupport: 0, repSupport: 0, turnout: 0 };
-        
-        gameLogger.logAction({
-          week: this.gameState.currentWeek,
-          actor: 'opponent',
-          actionType: 'campaign_hq',
-          state: abbrev,
-          beforePolling: beforePollingData,
-          afterPolling: beforePollingData,
-        });
       }
+    }
+    
+    // Capture AFTER state for logging
+    const afterPolling = this.gameState.polling.get(abbrev);
+    const afterMomentum = {
+      player: this.gameState.stateMomentum.get(abbrev) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(abbrev) || 0,
+    };
+    const afterRelationships = this.gameState.microgroupRelationships.get(abbrev);
+    
+    // Log comprehensive action data
+    if (beforePolling && afterPolling && beforeRelationships && afterRelationships) {
+      const relationshipChanges: Record<string, number> = {};
+      Object.keys(beforeRelationships).forEach(key => {
+        const beforeValue = beforeRelationships[key as keyof MicrogroupRelationships];
+        const afterValue = afterRelationships[key as keyof MicrogroupRelationships];
+        relationshipChanges[key] = afterValue - beforeValue;
+      });
+      
+      gameLogger.logAction({
+        week: this.gameState.currentWeek,
+        actor: 'opponent',
+        actionType: 'campaign_hq',
+        state: abbrev,
+        hqLevel: nextLevel,
+        stateEffects: [{
+          stateAbbrev: abbrev,
+          beforePolling: {
+            demSupport: beforePolling.democraticSupport,
+            repSupport: beforePolling.republicanSupport,
+            turnout: beforePolling.turnoutRate,
+          },
+          afterPolling: {
+            demSupport: afterPolling.democraticSupport,
+            repSupport: afterPolling.republicanSupport,
+            turnout: afterPolling.turnoutRate,
+          },
+          beforeMomentum: beforeMomentum,
+          afterMomentum: afterMomentum,
+          relationshipChanges: relationshipChanges,
+        }],
+      });
     }
   }
 
@@ -1296,6 +1587,14 @@ export class GameEngine {
    * Execute opponent ads action
    */
   private executeOpponentAds(abbrev: string, opponentCandidate: Candidate, adTopic: string, campaignSize: 'small' | 'medium' | 'large'): void {
+    // Capture BEFORE state for logging
+    const beforePolling = this.gameState.polling.get(abbrev);
+    const beforeMomentum = {
+      player: this.gameState.stateMomentum.get(abbrev) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(abbrev) || 0,
+    };
+    const beforeRelationships = this.gameState.microgroupRelationships.get(abbrev);
+    
     const relationships = this.gameState.microgroupRelationships.get(abbrev);
     if (relationships) {
       const powerMultiplier = campaignSize === 'small' ? 1 : campaignSize === 'medium' ? 3 : 5;
@@ -1335,27 +1634,62 @@ export class GameEngine {
     const currentOpponentMomentum = this.gameState.opponentStateMomentum.get(abbrev) || 0;
     this.gameState.opponentStateMomentum.set(abbrev, Math.min(100, currentOpponentMomentum + momentumBoost));
     
-    const beforePolling = this.gameState.polling.get(abbrev);
-    const beforePollingData = beforePolling ? {
-      demSupport: beforePolling.democraticSupport,
-      repSupport: beforePolling.republicanSupport,
-      turnout: beforePolling.turnoutRate,
-    } : { demSupport: 0, repSupport: 0, turnout: 0 };
+    // Capture AFTER state for logging
+    const afterPolling = this.gameState.polling.get(abbrev);
+    const afterMomentum = {
+      player: this.gameState.stateMomentum.get(abbrev) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(abbrev) || 0,
+    };
+    const afterRelationships = this.gameState.microgroupRelationships.get(abbrev);
     
-    gameLogger.logAction({
-      week: this.gameState.currentWeek,
-      actor: 'opponent',
-      actionType: 'launch_ads',
-      state: abbrev,
-      beforePolling: beforePollingData,
-      afterPolling: beforePollingData,
-    });
+    // Log comprehensive action data
+    if (beforePolling && afterPolling && beforeRelationships && afterRelationships) {
+      const relationshipChanges: Record<string, number> = {};
+      Object.keys(beforeRelationships).forEach(key => {
+        const beforeValue = beforeRelationships[key as keyof MicrogroupRelationships];
+        const afterValue = afterRelationships[key as keyof MicrogroupRelationships];
+        relationshipChanges[key] = afterValue - beforeValue;
+      });
+      
+      gameLogger.logAction({
+        week: this.gameState.currentWeek,
+        actor: 'opponent',
+        actionType: 'launch_ads',
+        state: abbrev,
+        topicId: adTopic,
+        campaignSize: campaignSize,
+        stateEffects: [{
+          stateAbbrev: abbrev,
+          beforePolling: {
+            demSupport: beforePolling.democraticSupport,
+            repSupport: beforePolling.republicanSupport,
+            turnout: beforePolling.turnoutRate,
+          },
+          afterPolling: {
+            demSupport: afterPolling.democraticSupport,
+            repSupport: afterPolling.republicanSupport,
+            turnout: afterPolling.turnoutRate,
+          },
+          beforeMomentum: beforeMomentum,
+          afterMomentum: afterMomentum,
+          relationshipChanges: relationshipChanges,
+        }],
+      });
+    }
   }
 
   /**
    * Execute opponent rally action
    */
   private executeOpponentRally(abbrev: string, opponentCandidate: Candidate, rallyTopics: string[]): void {
+    // Capture BEFORE state for logging
+    const beforePolling = this.gameState.polling.get(abbrev);
+    const beforeMomentum = {
+      player: this.gameState.stateMomentum.get(abbrev) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(abbrev) || 0,
+    };
+    const beforeRelationships = this.gameState.microgroupRelationships.get(abbrev);
+    
     const relationships = this.gameState.microgroupRelationships.get(abbrev);
     if (relationships) {
       const updated = applyTopicRelationshipChanges(
@@ -1383,27 +1717,61 @@ export class GameEngine {
     const currentOpponentMomentum = this.gameState.opponentStateMomentum.get(abbrev) || 0;
     this.gameState.opponentStateMomentum.set(abbrev, Math.min(100, currentOpponentMomentum + 2));
     
-    const beforePolling = this.gameState.polling.get(abbrev);
-    const beforePollingData = beforePolling ? {
-      demSupport: beforePolling.democraticSupport,
-      repSupport: beforePolling.republicanSupport,
-      turnout: beforePolling.turnoutRate,
-    } : { demSupport: 0, repSupport: 0, turnout: 0 };
+    // Capture AFTER state for logging
+    const afterPolling = this.gameState.polling.get(abbrev);
+    const afterMomentum = {
+      player: this.gameState.stateMomentum.get(abbrev) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(abbrev) || 0,
+    };
+    const afterRelationships = this.gameState.microgroupRelationships.get(abbrev);
     
-    gameLogger.logAction({
-      week: this.gameState.currentWeek,
-      actor: 'opponent',
-      actionType: 'rally',
-      state: abbrev,
-      beforePolling: beforePollingData,
-      afterPolling: beforePollingData,
-    });
+    // Log comprehensive action data
+    if (beforePolling && afterPolling && beforeRelationships && afterRelationships) {
+      const relationshipChanges: Record<string, number> = {};
+      Object.keys(beforeRelationships).forEach(key => {
+        const beforeValue = beforeRelationships[key as keyof MicrogroupRelationships];
+        const afterValue = afterRelationships[key as keyof MicrogroupRelationships];
+        relationshipChanges[key] = afterValue - beforeValue;
+      });
+      
+      gameLogger.logAction({
+        week: this.gameState.currentWeek,
+        actor: 'opponent',
+        actionType: 'rally',
+        state: abbrev,
+        rallyTopics: rallyTopics,
+        stateEffects: [{
+          stateAbbrev: abbrev,
+          beforePolling: {
+            demSupport: beforePolling.democraticSupport,
+            repSupport: beforePolling.republicanSupport,
+            turnout: beforePolling.turnoutRate,
+          },
+          afterPolling: {
+            demSupport: afterPolling.democraticSupport,
+            repSupport: afterPolling.republicanSupport,
+            turnout: afterPolling.turnoutRate,
+          },
+          beforeMomentum: beforeMomentum,
+          afterMomentum: afterMomentum,
+          relationshipChanges: relationshipChanges,
+        }],
+      });
+    }
   }
 
   /**
    * Execute opponent fundraiser action
    */
   private executeOpponentFundraiser(abbrev: string): void {
+    // Capture BEFORE state for logging
+    const beforePolling = this.gameState.polling.get(abbrev);
+    const beforeMomentum = {
+      player: this.gameState.stateMomentum.get(abbrev) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(abbrev) || 0,
+    };
+    const beforeRelationships = this.gameState.microgroupRelationships.get(abbrev);
+    
     const state = this.states.get(abbrev);
     const fundraisingAmount = this.calculateFundraisingAmount(abbrev);
     this.logOpponentEvent({
@@ -1413,13 +1781,55 @@ export class GameEngine {
       description: `Large Donor Fundraiser in ${state?.name || abbrev}`,
       fundraisingAmount,
     });
+    
+    // Capture AFTER state for logging (fundraisers don't change polling/momentum immediately)
+    const afterPolling = this.gameState.polling.get(abbrev);
+    const afterMomentum = {
+      player: this.gameState.stateMomentum.get(abbrev) || 0,
+      opponent: this.gameState.opponentStateMomentum.get(abbrev) || 0,
+    };
+    const afterRelationships = this.gameState.microgroupRelationships.get(abbrev);
+    
+    // Log comprehensive action data
+    if (beforePolling && afterPolling && beforeRelationships && afterRelationships) {
+      const relationshipChanges: Record<string, number> = {};
+      Object.keys(beforeRelationships).forEach(key => {
+        const beforeValue = beforeRelationships[key as keyof MicrogroupRelationships];
+        const afterValue = afterRelationships[key as keyof MicrogroupRelationships];
+        relationshipChanges[key] = afterValue - beforeValue;
+      });
+      
+      gameLogger.logAction({
+        week: this.gameState.currentWeek,
+        actor: 'opponent',
+        actionType: 'large_donor_fundraiser',
+        state: abbrev,
+        cost: fundraisingAmount,
+        stateEffects: [{
+          stateAbbrev: abbrev,
+          beforePolling: {
+            demSupport: beforePolling.democraticSupport,
+            repSupport: beforePolling.republicanSupport,
+            turnout: beforePolling.turnoutRate,
+          },
+          afterPolling: {
+            demSupport: afterPolling.democraticSupport,
+            repSupport: afterPolling.republicanSupport,
+            turnout: afterPolling.turnoutRate,
+          },
+          beforeMomentum: beforeMomentum,
+          afterMomentum: afterMomentum,
+          relationshipChanges: relationshipChanges,
+        }],
+      });
+    }
   }
 
   private processOpponentTurn(): void {
     const opponentCandidate = this.gameState.playerCandidate === 'democrat' ? 'republican' : 'democrat';
     const difficulty = this.gameState.difficulty;
     
-    // First, answer a weekly event question if available
+    // First, answer a weekly interview question if available (national impact)
     this.processOpponentWeeklyEvent(opponentCandidate);
     
     // Check if AI is out of money (heuristic: if they've taken many expensive actions)
@@ -1436,7 +1846,10 @@ export class GameEngine {
     // Track if AI needs fundraising (will be one of the actions if needed)
     // Note: Fundraising can happen in ANY state, even where opponent is ahead in both polling and momentum,
     // because fundraising is about money, not campaigning. We always pick the best fundraising opportunity.
-    const needsFundraising = expensiveActionCount > 5;
+    // On hard difficulty, be more conservative with fundraising - only when really needed
+    // Prioritize HQs and ads over fundraising
+    const fundraisingThreshold = difficulty === 'hard' ? 10 : 5; // Hard: only fundraise if 10+ expensive actions
+    const needsFundraising = expensiveActionCount > fundraisingThreshold;
     let fundraisingState: string | null = null;
     
     if (needsFundraising) {
@@ -1632,13 +2045,37 @@ export class GameEngine {
     // First, build HQs - adjust count based on difficulty
     // Hard: More HQs to compete aggressively, Medium: Fewer HQs
     let hqTargetCount: number;
+    
+    // Give AI extra HQ action if player is ahead by a lot (catch-up mechanic)
+    const projectedVotesForHQ = this.getProjectedElectoralVotes();
+    const playerVotesForHQ = this.gameState.playerCandidate === 'democrat' 
+      ? projectedVotesForHQ.democrat 
+      : projectedVotesForHQ.republican;
+    
+    let extraHQActions = 0;
+    // If player has over 270 projected votes, give AI 1 extra HQ action
+    if (playerVotesForHQ > 270) {
+      extraHQActions += 1;
+    }
+    // If player has over 350 projected votes, give AI 1 more extra HQ action (2 total)
+    if (playerVotesForHQ > 350) {
+      extraHQActions += 1; // Additional HQ action on top of the 270+ bonus
+    }
+    
     if (difficulty === 'hard') {
-      hqTargetCount = this.gameState.currentWeek <= 3 ? 3 : 2; // 3 HQs in first 3 turns, 2 after
+      // Hard: Very aggressive HQ building - 5 HQs in first 3 weeks, 4-5 after
+      // Prioritize building and upgrading HQs for momentum advantage
+      // Target 100+ HQs over 25 weeks to compete with player
+      hqTargetCount = this.gameState.currentWeek <= 3 ? 5 : 4;
     } else if (difficulty === 'medium') {
-      hqTargetCount = this.gameState.currentWeek <= 3 ? 2 : 1; // 2 HQs in first 3 turns, 1 after
+      // Medium: 4 HQs in first 3 weeks, 3 after
+      hqTargetCount = this.gameState.currentWeek <= 3 ? 4 : 3;
     } else {
       hqTargetCount = this.gameState.currentWeek <= 3 ? 2 : 1; // Easy: 2 HQs in first 3 turns, 1 after
     }
+    
+    // Add extra HQ actions if player is ahead
+    hqTargetCount += extraHQActions;
     const statesWithoutMaxHq = allStates.filter(abbrev => {
       const activities = this.gameState.campaignActivities.get(abbrev) || [];
       // Check opponent's HQ level (not player's)
@@ -1678,13 +2115,16 @@ export class GameEngine {
           const isOpponentWinning = pollingMargin > 0;
           
           // Check if opponent is ahead in both polling AND momentum
-          // If so, skip this state (opponent doesn't need to act here)
+          // For HQs, we still want to upgrade them even if ahead (momentum compounds)
+          // Only skip if opponent is WAY ahead (margin > 10 points) AND has significant momentum advantage (> 5 points)
           const isOpponentAheadInMomentum = opponentMomentum > playerMomentum;
+          const momentumAdvantage = opponentMomentum - playerMomentum;
           const isOpponentAheadInBoth = isOpponentWinning && isOpponentAheadInMomentum;
           
-          // Skip states where opponent is ahead in both
-          if (isOpponentAheadInBoth) {
-            return null;
+          // Only skip states where opponent is WAY ahead in both (margin > 10 AND momentum > 5)
+          // This allows the AI to still act in states where it's ahead but not by much
+          if (isOpponentAheadInBoth && pollingMargin > 10 && momentumAdvantage > 5) {
+            return null; // Skip only if WAY ahead
           }
           
           const activities = this.gameState.campaignActivities.get(abbrev) || [];
@@ -1752,14 +2192,16 @@ export class GameEngine {
             priority += 100;
           }
           
-          // 5. HQ LEVEL BONUS: Upgrade existing HQs to maximize momentum
-          if (hasHq && currentHqLevel < 5) {
-            // Existing HQ - upgrade to maximize momentum gain
-            priority += 50 + (currentHqLevel * 10); // Higher level = more valuable to upgrade
-          } else if (!hasHq) {
-            // No HQ - building one is valuable
-            priority += 40;
-          }
+             // 5. HQ LEVEL BONUS: Upgrade existing HQs to maximize momentum
+             // Prioritize upgrades more aggressively - momentum compounds over time
+             if (hasHq && currentHqLevel < 5) {
+               // Existing HQ - upgrade to maximize momentum gain
+               // Higher level = more valuable to upgrade (momentum compounds)
+               priority += 100 + (currentHqLevel * 20); // Much higher priority for upgrades
+             } else if (!hasHq) {
+               // No HQ - building one is valuable
+               priority += 80; // Higher priority for new HQs
+             }
           
           // 6. BONUS: If opponent needs votes to reach 270, prioritize winnable states
           const projectedVotes = this.getProjectedElectoralVotes();
@@ -1779,8 +2221,25 @@ export class GameEngine {
       
       // Strategic selection: Prioritize states that maximize electoral votes and momentum
       // Select top priority states (already sorted by strategic value)
+      // On hard difficulty, prioritize upgrades more - upgrade existing HQs before building new ones
       const selectedHQs = hqPriorities.slice(0, hqTargetCount);
-      selectedHQs.forEach(hq => hqTargets.push(hq.abbrev));
+      
+      // Separate upgrades from new builds
+      const upgrades = selectedHQs.filter(hq => hq.hasHq && hq.currentHqLevel < 5);
+      const newBuilds = selectedHQs.filter(hq => !hq.hasHq);
+      
+      // On hard difficulty, prioritize upgrades (momentum compounds over time)
+      if (difficulty === 'hard' && upgrades.length > 0) {
+        // Take all upgrades first, then fill remaining slots with new builds
+        upgrades.forEach(hq => hqTargets.push(hq.abbrev));
+        const remainingSlots = hqTargetCount - upgrades.length;
+        if (remainingSlots > 0) {
+          newBuilds.slice(0, remainingSlots).forEach(hq => hqTargets.push(hq.abbrev));
+        }
+      } else {
+        // Medium/Easy: Use original priority order
+        selectedHQs.forEach(hq => hqTargets.push(hq.abbrev));
+      }
     } else {
       // Easy: Randomly choose states
       const statesWithoutHq = statesWithoutMaxHq.filter(abbrev => {
@@ -1875,7 +2334,24 @@ export class GameEngine {
     
     // Calculate how many additional actions we need to reach target total
     // Hard: 7-8 actions, Medium: 6 actions, Easy: 3-6 actions
-    const totalActionTarget = difficulty === 'hard' ? 8 : difficulty === 'medium' ? 6 : 6;
+    let totalActionTarget = difficulty === 'hard' ? 8 : difficulty === 'medium' ? 6 : 6;
+    
+    // Give AI extra actions if player is ahead by a lot (catch-up mechanic)
+    const projectedVotes = this.getProjectedElectoralVotes();
+    const playerVotes = this.gameState.playerCandidate === 'democrat' 
+      ? projectedVotes.democrat 
+      : projectedVotes.republican;
+    
+    // If player has over 270 projected votes, give AI 1 extra action (up to 7 total)
+    if (playerVotes > 270) {
+      totalActionTarget += 1;
+    }
+    
+    // If player has over 350 projected votes, give AI 2 extra actions total (up to 8 total)
+    // Note: This stacks with the above, so at 350+ it's +2 total (not +3)
+    if (playerVotes > 350) {
+      totalActionTarget += 1; // Additional action on top of the 270+ bonus
+    }
     
     // Account for fundraising if needed (counts as 1 action)
     const fundraisingCount = fundraisingState ? 1 : 0;
@@ -1909,6 +2385,21 @@ export class GameEngine {
       const numNeeded = remainingActions - targetStates.length;
       const additionalStates = availableStates.sort(() => Math.random() - 0.5).slice(0, numNeeded);
       targetStates = [...targetStates, ...additionalStates];
+    }
+    
+    // On hard difficulty, ensure minimum actions are taken
+    // If we don't have enough target states, add more random states
+    if (difficulty === 'hard') {
+      const currentTotalActions = hqTargets.length + (fundraisingState ? 1 : 0) + targetStates.length;
+      const minActions = 6; // Minimum 6 actions per week on hard
+      if (currentTotalActions < minActions) {
+        const usedStates = new Set([...hqTargets, ...targetStates]);
+        if (fundraisingState) usedStates.add(fundraisingState);
+        const availableStates = allStates.filter(abbrev => !usedStates.has(abbrev));
+        const numNeeded = minActions - currentTotalActions;
+        const additionalStates = availableStates.sort(() => Math.random() - 0.5).slice(0, numNeeded);
+        targetStates = [...targetStates, ...additionalStates];
+      }
     }
     
     // Execute fundraising first if needed (counts as 1 of the 6 actions)
@@ -1945,14 +2436,37 @@ export class GameEngine {
         
         // Note: Polling will be updated once per turn in endTurn(), not after each action
         // Log action (polling will be updated later)
-        gameLogger.logAction({
-          week: this.gameState.currentWeek,
-          actor: 'opponent',
-          actionType: 'large_donor_fundraiser',
-          state: fundraisingState,
-          beforePolling: beforePollingData,
-          afterPolling: beforePollingData, // Use beforePolling since polling hasn't updated yet
-        });
+        const beforeMomentum = {
+          player: this.gameState.stateMomentum.get(fundraisingState) || 0,
+          opponent: this.gameState.opponentStateMomentum.get(fundraisingState) || 0,
+        };
+        const beforeRelationships = this.gameState.microgroupRelationships.get(fundraisingState);
+        const afterRelationships = this.gameState.microgroupRelationships.get(fundraisingState);
+        
+        if (beforeRelationships && afterRelationships) {
+          const relationshipChanges: Record<string, number> = {};
+          Object.keys(beforeRelationships).forEach(key => {
+            const beforeValue = beforeRelationships[key as keyof MicrogroupRelationships];
+            const afterValue = afterRelationships[key as keyof MicrogroupRelationships];
+            relationshipChanges[key] = afterValue - beforeValue;
+          });
+          
+          gameLogger.logAction({
+            week: this.gameState.currentWeek,
+            actor: 'opponent',
+            actionType: 'large_donor_fundraiser',
+            state: fundraisingState,
+            cost: fundraisingAmount,
+            stateEffects: [{
+              stateAbbrev: fundraisingState,
+              beforePolling: beforePollingData,
+              afterPolling: beforePollingData, // Use beforePolling since polling hasn't updated yet
+              beforeMomentum: beforeMomentum,
+              afterMomentum: beforeMomentum, // No change from fundraiser
+              relationshipChanges: relationshipChanges,
+            }],
+          });
+        }
       }
     }
     
@@ -2131,8 +2645,22 @@ export class GameEngine {
           ? (demSupport / total) * 100
           : (repSupport / total) * 100;
         
-        // Action helps if it increases opponent support
-        return simulatedOpponentSupport >= currentOpponentSupport;
+        // Action helps if it:
+        // 1. Increases opponent support (direct polling gain)
+        // 2. Maintains opponent support (prevents decline)
+        // 3. Builds momentum (HQs always help with momentum)
+        // 4. Is close to current support (within 0.5% - maintains advantage)
+        
+        const supportChange = simulatedOpponentSupport - currentOpponentSupport;
+        
+        // Always allow HQs - they build momentum which is critical
+        if (testActionType === 'campaign_hq') {
+          return true; // HQs always help with momentum
+        }
+        
+        // Allow actions that increase support OR maintain it (within 0.5%)
+        // This is less restrictive - allows actions that maintain advantage
+        return supportChange >= -0.5; // Allow if support increases or stays within 0.5%
       };
       
     // Execute actions in target states, ensuring we take helpful actions
@@ -2267,11 +2795,16 @@ export class GameEngine {
               // Prefer actions that help base (never hurt base) and build momentum
               // Only choose ads/rallies if positions are locked
               // Prioritize momentum-building actions when competing
+              // On hard difficulty, be more aggressive with HQs
+              // Prioritize HQs heavily - they build momentum which compounds over time
+              const hqPriority = difficulty === 'hard' ? 0.8 : 0.5; // Hard: 80% chance, Medium: 50% chance
+              
               if (isCompeting && currentHqLevel < 5 && Math.random() < aggressionLevel) {
                 // When competing, prioritize HQs to build momentum
                 actionType = 'campaign_hq';
                 actionData.hqLevel = currentHqLevel + 1;
-              } else if (currentHqLevel < 5 && Math.random() < 0.3) {
+              } else if (currentHqLevel < 5 && Math.random() < hqPriority) {
+                // Higher priority for HQs on hard difficulty
                 actionType = 'campaign_hq';
                 actionData.hqLevel = currentHqLevel + 1;
               } else if (canDoAds && (isCompeting ? Math.random() < aggressionLevel : Math.random() < 0.4)) {
@@ -2364,18 +2897,36 @@ export class GameEngine {
                 actionFound = true; // Found a helpful action
               } else {
                 // Action wouldn't help, try a different one
-                actionType = undefined as any;
-                actionData = {};
-                continue; // Try again
+                // BUT: Always allow HQs - they build momentum which is critical
+                if (actionType === 'campaign_hq') {
+                  actionFound = true; // Always allow HQs
+                } else {
+                  actionType = undefined as any;
+                  actionData = {};
+                  continue; // Try again
+                }
               }
             } else {
               actionFound = true; // Easy doesn't check
             }
           }
           
-          // If we couldn't find a helpful action after max attempts, skip this state
+          // If we couldn't find a helpful action after max attempts, try a fallback
           if (!actionFound || !actionType) {
-            return false;
+            // Fallback: Try HQ if not at max level (HQs always help with momentum)
+            const activities = this.gameState.campaignActivities.get(abbrev) || [];
+            const hqActivity = activities.find(a => a.type === 'hq' && a.actor === 'opponent');
+            const currentHqLevel = hqActivity?.hqLevel || 0;
+            
+            if (currentHqLevel < 5) {
+              // Fallback to HQ - always helps with momentum
+              actionType = 'campaign_hq';
+              actionData.hqLevel = currentHqLevel + 1;
+              actionFound = true;
+            } else {
+              // No valid action found, skip this state
+              return false;
+            }
           }
           
           // Execute the action
@@ -2646,16 +3197,25 @@ export class GameEngine {
     
     const { democrat, republican } = this.gameState.electoralVotes;
     const isPlayerDem = this.gameState.playerCandidate === 'democrat';
+    const playerVotes = isPlayerDem ? democrat : republican;
+    const opponentVotes = isPlayerDem ? republican : democrat;
 
     // Check final results
+    let playerWon = false;
     if (democrat > republican) {
       this.gameState.gameStatus = isPlayerDem ? 'won' : 'lost';
+      playerWon = isPlayerDem;
     } else if (republican > democrat) {
       this.gameState.gameStatus = isPlayerDem ? 'lost' : 'won';
+      playerWon = !isPlayerDem;
     } else {
       // Tie - player loses (historical: Carter won)
       this.gameState.gameStatus = 'lost';
+      playerWon = false;
     }
+    
+    // End game logging
+    gameLogger.endGame(playerWon, playerVotes, opponentVotes);
   }
 
   getStateColor(abbreviation: string): string {

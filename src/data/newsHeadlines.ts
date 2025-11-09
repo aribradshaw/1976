@@ -27,7 +27,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>All the President\'s Men</i> Stays at #1', week: 2 },
   
   // Week 3 - Jun 01, 1976
-  { headline: 'Soweto Student Protests Erupt Against Apartheid Education Policies', week: 3 },
+  { headline: 'South African Students Prepare for School Year Amid Tensions', week: 3 },
   { headline: 'US Unemployment Dips Slightly in Latest Labor Report', week: 3 },
   { headline: 'NASA Prepares for Viking Mission Milestones to Mars', week: 3 },
   { headline: 'International Trade Talks Stall Over Tariff Disputes', week: 3 },
@@ -36,7 +36,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>The Missouri Breaks</i> Reaches #1', week: 3 },
   
   // Week 4 - Jun 08, 1976
-  { headline: 'Soweto Uprising Continues with Clashes in Johannesburg', week: 4 },
+  { headline: 'Soweto Student Protests Erupt Against Apartheid Education Policies', week: 4 },
   { headline: 'Concorde Supersonic Jet Completes Successful Transatlantic Test', week: 4 },
   { headline: 'US Bicentennial Preparations Ramp Up for July Celebrations', week: 4 },
   { headline: 'Chicago Cubs Fire Manager Jim Hickman After Slump', week: 4 },
@@ -45,7 +45,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>The Missouri Breaks</i> Stays at #1', week: 4 },
   
   // Week 5 - Jun 15, 1976
-  { headline: 'Soweto Death Toll Rises as Protests Spread Across South Africa', week: 5 },
+  { headline: 'Soweto Uprising Continues with Clashes in Johannesburg', week: 5 },
   { headline: 'PGA Tour Hosts US Open Golf at Pebble Beach', week: 5 },
   { headline: 'US Inflation Rate Holds Steady at 5.7 Percent', week: 5 },
   { headline: 'New York Yankees Acquire Slugger Willie Randolph', week: 5 },
@@ -54,7 +54,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>Mother, Jugs & Speed</i> Reaches #1', week: 5 },
   
   // Week 6 - Jun 22, 1976
-  { headline: 'South African Government Declares State of Emergency in Soweto', week: 6 },
+  { headline: 'Soweto Uprising Continues as Protests Spread Across South Africa', week: 6 },
   { headline: 'US Approves $2 Bill for Bicentennial Circulation', week: 6 },
   { headline: 'NASA Viking 1 Orbiter Captures First Close-Ups of Mars', week: 6 },
   { headline: 'Montreal Prepares for Summer Olympics Amid Boycott Threats', week: 6 },
@@ -63,7 +63,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>Midway</i> Reaches #1', week: 6 },
   
   // Week 7 - Jun 29, 1976
-  { headline: 'Viking 1 Lander Touches Down on Martian Surface Successfully', week: 7 },
+  { headline: 'Viking 1 Prepares for Mars Landing Mission in Coming Days', week: 7 },
   { headline: 'US Heat Wave Grips Midwest with Record Temperatures', week: 7 },
   { headline: 'International Olympic Committee Addresses African Boycott', week: 7 },
   { headline: 'New York Mets Struggling in NL East Standings', week: 7 },
@@ -72,7 +72,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>The Omen</i> Reaches #1', week: 7 },
   
   // Week 8 - Jul 06, 1976
-  { headline: 'Viking 1 Transmits First Images from Mars Surface', week: 8 },
+  { headline: 'Viking 1 Lander Touches Down on Martian Surface Successfully', week: 8 },
   { headline: 'US Celebrates Independence Day with Massive Bicentennial Parades', week: 8 },
   { headline: 'Queen Elizabeth II Arrives for Official US Bicentennial Visit', week: 8 },
   { headline: 'Montreal Olympics Open Amid Global Tensions', week: 8 },
@@ -90,7 +90,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>The Omen</i> Stays at #1', week: 9 },
   
   // Week 10 - Jul 20, 1976
-  { headline: 'Tangshan Earthquake Devastates China, Thousands Feared Dead', week: 10 },
+  { headline: 'Viking 1 Transmits First Images from Mars Surface', week: 10 },
   { headline: 'Nadia Comaneci Makes History with Multiple Perfect Scores', week: 10 },
   { headline: 'US Boxer Sugar Ray Leonard Wins Olympic Gold', week: 10 },
   { headline: 'Montreal Olympics Feature Record TV Viewership', week: 10 },
@@ -99,11 +99,11 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>The Omen</i> Stays at #1', week: 10 },
   
   // Week 11 - Jul 27, 1976
+  { headline: 'Tangshan Earthquake Devastates China, Thousands Feared Dead', week: 11 },
   { headline: 'Legionnaires\' Disease Outbreak Hits Philadelphia Convention', week: 11 },
   { headline: 'Montreal Olympics Close with East Germany Topping Medals', week: 11 },
-  { headline: 'Death Toll from Tangshan Quake Rises to Over 240,000', week: 11 },
   { headline: 'US Economy Grows 4.1 Percent in Second Quarter', week: 11 },
-  { headline: 'Bob Marley Shot in Assassination Attempt in Jamaica', week: 11 },
+  { headline: 'Philadelphia Investigates Mysterious Convention Illness', week: 11 },
   { headline: 'Billboard Hot 100: "Kiss and Say Goodbye" by The Manhattans Reaches #1', week: 11 },
   { headline: 'Box Office: <i>The Omen</i> Stays at #1', week: 11 },
   
@@ -163,7 +163,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'Box Office: <i>Survive!</i> Reaches #1', week: 17 },
   
   // Week 18 - Sep 14, 1976
-  { headline: 'Mao Zedong Dies at 82, Ending Era in Chinese Politics', week: 18 },
+  { headline: 'China Mourns Death of Mao Zedong at 82, Ending Era in Chinese Politics', week: 18 },
   { headline: 'Viking 2 Sends Back Stunning Images of Martian Landscape', week: 18 },
   { headline: 'US Stock Market Hits New Highs Amid Economic Optimism', week: 18 },
   { headline: 'Philadelphia Legion Disease Linked to Bacteria in Water', week: 18 },

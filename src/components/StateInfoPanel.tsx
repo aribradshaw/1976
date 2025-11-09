@@ -270,7 +270,7 @@ export default function StateInfoPanel({
                   !canAffordAds ? "You need to raise more money" :
                   allSlotsFilled ? "All 6 action slots filled" :
                   isAdsScheduled ? "Once per week" : 
-                  !canDoAds ? "Lock 1+ positions in weekly events" : 
+                  !canDoAds ? "Lock 1+ positions in weekly interviews" : 
                   "Launch Ads"
                 }
                 data-tooltip-red={!canAffordAds ? "true" : undefined}
@@ -320,7 +320,7 @@ export default function StateInfoPanel({
                   !canAffordRally ? "You need to raise more money" :
                   allSlotsFilled ? "All 6 action slots filled" :
                   isRallyScheduled ? "Once per week" : 
-                  !canDoRally ? "Lock 3+ positions in weekly events" : 
+                  !canDoRally ? "Lock 3+ positions in weekly interviews" : 
                   "Hold Rally"
                 }
                 data-tooltip-red={!canAffordRally ? "true" : undefined}
