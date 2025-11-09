@@ -68,9 +68,24 @@ export interface CampaignActivity {
   type: 'hq' | 'ads' | 'fundraising_booth';
   state: string;
   weekCreated: number;
+  actor?: 'player' | 'opponent';  // Distinguish between player and opponent activities
   initialValue?: number;  // For fundraising booths, the initial fundraising amount
   hqLevel?: number;  // For HQ: level 1-5
   adTopic?: string;  // For ads: the topic used
+  campaignSize?: 'small' | 'medium' | 'large';  // For ads: campaign size
+}
+
+export interface CampaignEvent {
+  type: 'rally' | 'large_donor_fundraiser' | 'launch_ads' | 'campaign_hq';
+  state: string;
+  week: number;
+  description: string;
+  adTopic?: string;  // For ads: the topic used
+  rallyTopics?: string[];  // For rallies: the topics used
+  hqLevel?: number;  // For HQ: level 1-5
+  campaignSize?: 'small' | 'medium' | 'large';  // For ads: campaign size
+  fundraisingAmount?: number;  // For fundraisers: amount raised
+  isOpponent?: boolean;  // True if this is an opponent action
 }
 
 export interface FundraisingBooth {
@@ -107,7 +122,8 @@ export interface GameState {
     energy: number;               // 0-100
     weeklyFundraising: number;      // Weekly fundraising amount
   };
-  stateMomentum: Map<string, number>;  // State -> momentum (-100 to 100)
+  stateMomentum: Map<string, number>;  // State -> player momentum (-100 to 100)
+  opponentStateMomentum: Map<string, number>;  // State -> opponent momentum (-100 to 100)
   polling: Map<string, PollingData>;
   electoralVotes: {
     democrat: number;
@@ -115,10 +131,12 @@ export interface GameState {
   };
   actionsThisWeek: CampaignAction[];
   campaignActivities: Map<string, CampaignActivity[]>;  // State -> activities
+  campaignEvents: Map<string, CampaignEvent[]>;  // State -> event log (all events)
   fundraisingBooths: FundraisingBooth[];  // Active fundraising booths
   microgroupRelationships: Map<string, MicrogroupRelationships>;  // State -> relationships
   fundraisingPotential: Map<string, number>;  // State -> fundraising potential (100-125%)
-  topicPositions: Map<string, 'for' | 'against'>;  // Topic ID -> position (locked globally)
+  topicPositions: Map<string, 'for' | 'against'>;  // Topic ID -> position (locked globally for player)
+  opponentTopicPositions: Map<string, 'for' | 'against'>;  // Topic ID -> position (locked globally for opponent)
   gameStatus: 'playing' | 'won' | 'lost' | 'paused';
   difficulty: 'easy' | 'medium' | 'hard';
 }

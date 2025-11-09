@@ -191,7 +191,7 @@ export default function StateDetail({ gameEngine, stateAbbreviation, onClose, on
                     ActivityIconComponent = FaAdversal;
                     activityDetails = `Running since Week ${activity.weekCreated}`;
                   } else if (activity.type === 'fundraising_booth') {
-                    activityName = 'Fundraising Booth';
+                    activityName = 'Fundraising';
                     ActivityIconComponent = FaDollarSign;
                     if (fundraisingBooth) {
                       const weeksSinceCreation = gameState.currentWeek - fundraisingBooth.weekCreated;

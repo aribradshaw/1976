@@ -11,8 +11,11 @@ import NewsTicker from './NewsTicker';
 import CRTOverlay from './CRTOverlay';
 import WeeklyEventModal from './WeeklyEventModal';
 import SpotifyPlayer from './SpotifyPlayer';
+import SettingsModal from './SettingsModal';
+import ProjectedVotesModal from './ProjectedVotesModal';
 import { FaDemocrat, FaRepublican } from 'react-icons/fa';
 import { TopicId } from '../data/topics';
+import { playClickSound, playStateSelectSound, playStateDeselectSound } from '../utils/sounds';
 import './GameInterface.css';
 
 interface GameInterfaceProps {
@@ -30,6 +33,8 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
   const [expandedEvParty, setExpandedEvParty] = useState<'democrat' | 'republican' | null>(null);
   const [preSelectedActionType, setPreSelectedActionType] = useState<CampaignAction['type'] | null>(null);
   const [showWeeklyEvent, setShowWeeklyEvent] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showProjectedVotes, setShowProjectedVotes] = useState<'democrat' | 'republican' | null>(null);
 
   useEffect(() => {
     // Update game state when it changes
@@ -67,10 +72,12 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
   const handleStateClick = (abbreviation: string) => {
     // Clicking a state toggles selection - if already selected, deselect
     if (selectedState === abbreviation) {
+      playStateDeselectSound(); // Play deselect sound
       setSelectedState(null);
       setShowStateDetail(false);
       setShowActionPanel(false);
     } else {
+      playStateSelectSound(); // Play select sound
       setSelectedState(abbreviation);
       setShowStateDetail(false);
       setShowActionPanel(false);
@@ -79,11 +86,15 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
   
   const handleStateDoubleClick = (abbreviation: string) => {
     // Double-clicking shows state details
+    if (selectedState !== abbreviation) {
+      playStateSelectSound(); // Play select sound if selecting a new state
+    }
     setSelectedState(abbreviation);
     setShowStateDetail(true);
   };
 
   const handleCloseStateDetail = () => {
+    playStateDeselectSound(); // Play deselect sound
     setShowStateDetail(false);
     setSelectedState(null);
   };
@@ -134,19 +145,27 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
       <div className="game-header">
         <div className="header-left">
           <img 
-            src={playerCandidate === 'democrat' ? '/Jimmy_Carter_1977_cropped.jpg' : '/Gerald_Ford_presidential_portrait_(cropped_2).jpg'}
+            src={playerCandidate === 'democrat' ? `${import.meta.env.BASE_URL}Jimmy_Carter_1977_cropped.jpg` : `${import.meta.env.BASE_URL}Gerald_Ford_presidential_portrait_(cropped_2).jpg`}
             alt={playerCandidate === 'democrat' ? 'Jimmy Carter' : 'Gerald Ford'}
             className="header-candidate-image"
           />
           <div className="header-title-section">
-            <h1>1976 Election Campaign</h1>
+            <h1>1976: As Seen on TV!</h1>
             <div className="candidate-info">
               Playing as: <strong>{playerCandidate === 'democrat' ? 'Jimmy Carter (D)' : 'Gerald Ford (R)'}</strong>
             </div>
           </div>
         </div>
-        <button className="settings-btn-small" onClick={onSettings || onReset}>Settings</button>
+        <button className="settings-btn-small" onClick={() => {
+          playClickSound(); // Play random click sound
+          setShowSettings(true);
+        }}>Settings</button>
       </div>
+      <SettingsModal 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)}
+        gameState={gameState}
+      />
 
       <div className="game-main">
         <div className="left-panel">
@@ -163,63 +182,63 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
             <div className="ev-display">
               <div 
                 className="ev-item democrat clickable"
-                onClick={() => setExpandedEvParty(expandedEvParty === 'democrat' ? null : 'democrat')}
+                onClick={() => {
+                  playClickSound(); // Play random click sound
+                  setShowProjectedVotes('democrat');
+                }}
               >
-                <span>
-                  <FaDemocrat className="party-icon" />
-                  Democrat:
-                </span>
+                <FaDemocrat className="party-icon" />
                 <span className="ev-value">{gameEngine.getProjectedElectoralVotes().democrat}</span>
               </div>
-              {expandedEvParty === 'democrat' && (() => {
-                const statesWon = gameEngine.getStatesWonByParty();
-                return statesWon.democrat.length > 0 ? (
-                  <div className="ev-states-list democrat">
-                    {statesWon.democrat.map(abbrev => {
-                      const state = gameEngine.getStateData(abbrev);
-                      return state ? (
-                        <span key={abbrev} className="state-badge">
-                          {state.abbreviation} ({state.electoralVotes})
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                ) : (
-                  <div className="ev-states-list democrat empty">
-                    No states clearly won yet
-                  </div>
-                );
-              })()}
               <div 
                 className="ev-item republican clickable"
-                onClick={() => setExpandedEvParty(expandedEvParty === 'republican' ? null : 'republican')}
+                onClick={() => {
+                  playClickSound(); // Play random click sound
+                  setShowProjectedVotes('republican');
+                }}
               >
-                <span>
-                  <FaRepublican className="party-icon" />
-                  Republican:
-                </span>
+                <FaRepublican className="party-icon" />
                 <span className="ev-value">{gameEngine.getProjectedElectoralVotes().republican}</span>
               </div>
-              {expandedEvParty === 'republican' && (() => {
-                const statesWon = gameEngine.getStatesWonByParty();
-                return statesWon.republican.length > 0 ? (
-                  <div className="ev-states-list republican">
-                    {statesWon.republican.map(abbrev => {
-                      const state = gameEngine.getStateData(abbrev);
-                      return state ? (
-                        <span key={abbrev} className="state-badge">
-                          {state.abbreviation} ({state.electoralVotes})
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                ) : (
-                  <div className="ev-states-list republican empty">
-                    No states clearly won yet
-                  </div>
-                );
-              })()}
             </div>
+            {expandedEvParty === 'democrat' && (() => {
+              const statesWon = gameEngine.getStatesWonByParty();
+              return statesWon.democrat.length > 0 ? (
+                <div className="ev-states-list democrat">
+                  {statesWon.democrat.map(abbrev => {
+                    const state = gameEngine.getStateData(abbrev);
+                    return state ? (
+                      <span key={abbrev} className="state-badge">
+                        {state.abbreviation} ({state.electoralVotes})
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              ) : (
+                <div className="ev-states-list democrat empty">
+                  No states clearly won yet
+                </div>
+              );
+            })()}
+            {expandedEvParty === 'republican' && (() => {
+              const statesWon = gameEngine.getStatesWonByParty();
+              return statesWon.republican.length > 0 ? (
+                <div className="ev-states-list republican">
+                  {statesWon.republican.map(abbrev => {
+                    const state = gameEngine.getStateData(abbrev);
+                    return state ? (
+                      <span key={abbrev} className="state-badge">
+                        {state.abbreviation} ({state.electoralVotes})
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              ) : (
+                <div className="ev-states-list republican empty">
+                  No states clearly won yet
+                </div>
+              );
+            })()}
           </div>
         </div>
 
@@ -236,6 +255,9 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
             }}
             onMapClick={() => {
               // Clicking the map background deselects
+              if (selectedState !== null) {
+                playStateDeselectSound(); // Play deselect sound only if a state was selected
+              }
               setSelectedState(null);
               setShowStateDetail(false);
               setShowActionPanel(false);
@@ -251,10 +273,24 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
               gameState={gameState}
               stateAbbreviation={selectedState}
               onClose={() => {
+                playStateDeselectSound(); // Play deselect sound
                 setSelectedState(null);
                 setShowActionPanel(false);
               }}
               onActionSelect={(abbrev, actionType) => {
+                // Check if HQ is at max level before opening ActionPanel
+                if (actionType === 'campaign_hq') {
+                  const activities = gameEngine.getStateActivities(abbrev);
+                  const hqActivity = activities.find(a => a.type === 'hq' && a.actor === 'player');
+                  const currentLevel = hqActivity?.hqLevel || 0;
+                  
+                  // If already at max level, don't open ActionPanel
+                  if (currentLevel >= 5) {
+                    // HQ is at max level - don't open panel
+                    return;
+                  }
+                }
+                
                 // Switch to ActionPanel with state pre-selected and action type
                 setShowActionPanel(true);
                 setSelectedState(abbrev);
@@ -268,6 +304,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
               onAction={(action) => {
                 handleAction(action);
                 setPreSelectedActionType(null); // Clear after action
+                playStateDeselectSound(); // Play deselect sound
                 setSelectedState(null); // Deselect state after action
                 setShowActionPanel(false); // Reset to show StateInfoPanel if state is selected again
               }}
@@ -276,10 +313,12 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
               playerCandidate={playerCandidate}
               onStateSelect={(state) => {
                 if (state === null) {
+                  playStateDeselectSound(); // Play deselect sound
                   setSelectedState(null);
                   setShowActionPanel(false);
                   setPreSelectedActionType(null);
                 } else {
+                  playStateSelectSound(); // Play select sound
                   setSelectedState(state);
                   setShowActionPanel(false);
                   setPreSelectedActionType(null);
@@ -309,7 +348,11 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
         />
       )}
       
-      <NewsTicker currentWeek={gameState.currentWeek} />
+      <NewsTicker 
+        currentWeek={gameState.currentWeek} 
+        gameEngine={gameEngine}
+        gameState={gameState}
+      />
       
       {showWeeklyEvent && (
         <WeeklyEventModal
@@ -317,6 +360,17 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
           gameState={gameState}
           playerCandidate={playerCandidate}
           onAnswer={handleWeeklyEventAnswer}
+          onClose={() => setShowWeeklyEvent(false)}
+        />
+      )}
+      
+      {showProjectedVotes && (
+        <ProjectedVotesModal
+          isOpen={true}
+          onClose={() => setShowProjectedVotes(null)}
+          gameEngine={gameEngine}
+          gameState={gameState}
+          party={showProjectedVotes}
         />
       )}
     </div>

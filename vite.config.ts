@@ -8,7 +8,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-  }
+  },
+  server: {
+    host: '127.0.0.1', // Use 127.0.0.1 instead of localhost for Spotify compatibility
+    port: 5173,
+  },
 })
 
 

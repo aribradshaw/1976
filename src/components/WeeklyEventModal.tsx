@@ -9,13 +9,15 @@ interface WeeklyEventModalProps {
   gameState: GameState;
   playerCandidate: Candidate;
   onAnswer: (topicId: TopicId, position: 'for' | 'against') => void;
+  onClose?: () => void;
 }
 
 export default function WeeklyEventModal({ 
   gameEngine, 
   gameState, 
   playerCandidate,
-  onAnswer 
+  onAnswer,
+  onClose
 }: WeeklyEventModalProps) {
   const [randomTopic, setRandomTopic] = useState<TopicId | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<'for' | 'against' | null>(null);
@@ -34,7 +36,15 @@ export default function WeeklyEventModal({
     
     if (availableTopics.length === 0) {
       // All topics are locked, don't show event
+      // Close the modal to prevent showing "Loading..." indefinitely
       setRandomTopic(null);
+      // Close the modal if onClose callback is provided
+      if (onClose) {
+        // Use setTimeout to avoid calling onClose during render
+        setTimeout(() => {
+          onClose();
+        }, 0);
+      }
       return;
     }
     

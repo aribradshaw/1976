@@ -131,6 +131,7 @@ export const NEWS_HEADLINES: NewsHeadline[] = [
   { headline: 'US Inflation Concerns Ease with Lower July Figures', week: 14 },
   { headline: 'New York Times Publishes Exposé on Corporate Corruption', week: 14 },
   { headline: 'Olympic Aftermath: Doping Scandals Emerge in Track', week: 14 },
+  { headline: 'Sandisfield Frog Jumping Contest in MA', week: 14 },
   { headline: 'Billboard Hot 100: "Don\'t Go Breaking My Heart" by Elton John and Kiki Dee Stays at #1', week: 14 },
   { headline: 'Box Office: <i>Silent Movie</i> Stays at #1', week: 14 },
   

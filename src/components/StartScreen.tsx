@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Candidate } from '../types/game';
 import CRTOverlay from './CRTOverlay';
+import SpotifyPlayer from './SpotifyPlayer';
+import SettingsModal from './SettingsModal';
+import { playClickSound, playEndTurnSound } from '../utils/sounds';
 import './StartScreen.css';
 
 interface StartScreenProps {
@@ -10,19 +13,38 @@ interface StartScreenProps {
 export default function StartScreen({ onStart }: StartScreenProps) {
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   const handleCandidateSelect = (candidate: Candidate) => {
+    playClickSound(); // Play click sound
     setSelectedCandidate(candidate);
   };
 
   const handleStart = () => {
     if (selectedCandidate) {
+      playEndTurnSound(); // Play end week sound for start game
       onStart(selectedCandidate, selectedDifficulty);
     }
   };
 
   return (
     <div className="start-screen">
+      <div className="spotify-corner">
+        <SpotifyPlayer currentWeek={1} />
+      </div>
+      <button className="settings-btn-corner" onClick={() => {
+        playClickSound(); // Play click sound
+        setShowSettings(true);
+      }}>
+        ⚙️ Settings
+      </button>
+      <SettingsModal 
+        isOpen={showSettings} 
+        onClose={() => {
+          playClickSound(); // Play click sound
+          setShowSettings(false);
+        }} 
+      />
       <div className="tv-cabinet">
         <div className="tv-screen-area">
           <div className="tv-screen-bezel">
@@ -44,7 +66,7 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                         onClick={() => handleCandidateSelect('democrat')}
                       >
                         <img 
-                          src="/Jimmy_Carter_1977_cropped.jpg" 
+                          src={`${import.meta.env.BASE_URL}Jimmy_Carter_1977_cropped.jpg`}
                           alt="Jimmy Carter" 
                           className="candidate-image"
                         />
@@ -56,7 +78,7 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                         onClick={() => handleCandidateSelect('republican')}
                       >
                         <img 
-                          src="/Gerald_Ford_presidential_portrait_(cropped_2).jpg" 
+                          src={`${import.meta.env.BASE_URL}Gerald_Ford_presidential_portrait_(cropped_2).jpg`}
                           alt="Gerald Ford" 
                           className="candidate-image"
                         />
@@ -71,19 +93,28 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                     <div className="difficulty-buttons">
                       <button
                         className={`difficulty-btn ${selectedDifficulty === 'easy' ? 'selected' : ''}`}
-                        onClick={() => setSelectedDifficulty('easy')}
+                        onClick={() => {
+                          playClickSound(); // Play click sound
+                          setSelectedDifficulty('easy');
+                        }}
                       >
                         Easy
                       </button>
                       <button
                         className={`difficulty-btn ${selectedDifficulty === 'medium' ? 'selected' : ''}`}
-                        onClick={() => setSelectedDifficulty('medium')}
+                        onClick={() => {
+                          playClickSound(); // Play click sound
+                          setSelectedDifficulty('medium');
+                        }}
                       >
                         Medium
                       </button>
                       <button
                         className={`difficulty-btn ${selectedDifficulty === 'hard' ? 'selected' : ''}`}
-                        onClick={() => setSelectedDifficulty('hard')}
+                        onClick={() => {
+                          playClickSound(); // Play click sound
+                          setSelectedDifficulty('hard');
+                        }}
                       >
                         Hard
                       </button>

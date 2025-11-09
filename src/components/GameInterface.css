@@ -110,18 +110,205 @@
 }
 
 .center-panel {
-  /* CRT TV style - dark blue with cream borders */
-  background: #1a2a5a;
-  border: 2px solid #f5f5dc;
-  border-radius: 15px;
-  padding: 1vh 1vw;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3),
-              0 0 10px rgba(245, 245, 220, 0.2);
+  /* CRT TV Cabinet - Dark Wood Frame */
+  background: linear-gradient(135deg, #5c3e2a 0%, #4a2e1a 50%, #3a1e0a 100%);
+  border: 8px solid #2a1a0a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 
+    0 0 0 4px #3a2a1a,
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    inset 0 2px 10px rgba(255, 255, 255, 0.1),
+    inset 0 -2px 10px rgba(0, 0, 0, 0.5);
+  position: relative;
   overflow: hidden;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  color: #f5f5dc;
+}
+
+/* Top trim accent */
+.center-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(90deg, #8b6f47 0%, #a0825f 50%, #8b6f47 100%);
+  border-radius: 12px 12px 0 0;
+  z-index: 1;
+}
+
+/* TV Screen Bezel - Light Beige/Off-White */
+.center-panel::after {
+  content: '';
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  background: #e8e0d0;
+  background: linear-gradient(135deg, #f0e8d8 0%, #e0d8c8 100%);
+  border-radius: 12px;
+  box-shadow: 
+    inset 0 2px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 2px #d0c8b8,
+    0 0 0 4px #c0b8a8;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Map container inside CRT TV */
+.center-panel > * {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0.5rem;
+}
+
+/* CRT Screen - Dark Display Area */
+.center-panel .state-map-container {
+  background: #1a1a1a !important;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%) !important;
+  border-radius: 8px;
+  padding: 1rem;
+  position: relative;
+  box-shadow: 
+    inset 0 0 40px rgba(0, 0, 0, 0.8),
+    inset 0 0 20px rgba(0, 0, 0, 0.5),
+    0 0 0 2px #0a0a0a;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: none !important;
+  animation: crt-periodic-flicker 8s ease-in-out infinite;
+}
+
+/* CRT Screen Curvature Effect */
+.center-panel .state-map-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 0 60px rgba(0, 0, 0, 0.6),
+    inset -20px -20px 80px rgba(0, 0, 0, 0.4),
+    inset 20px 20px 80px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* CRT Scanlines */
+.center-panel .state-map-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.5;
+}
+
+/* Additional CRT glow effect */
+.center-panel .state-map-container {
+  position: relative;
+}
+
+.center-panel .state-map-container::before {
+  animation: crt-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes crt-glow-pulse {
+  0%, 100% {
+    box-shadow: 
+      inset 0 0 60px rgba(0, 0, 0, 0.6),
+      inset -20px -20px 80px rgba(0, 0, 0, 0.4),
+      inset 20px 20px 80px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 
+      inset 0 0 65px rgba(0, 0, 0, 0.65),
+      inset -20px -20px 85px rgba(0, 0, 0, 0.45),
+      inset 20px 20px 85px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Ensure map content is above effects */
+.center-panel .state-map-container > * {
+  position: relative;
+  z-index: 3;
+}
+
+/* Update map SVG styling inside CRT */
+.center-panel .state-map-container .map-svg {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Periodic CRT flicker - realistic, not annoying */
+@keyframes crt-periodic-flicker {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  48% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  49% {
+    opacity: 0.98;
+    filter: brightness(0.98);
+  }
+  49.5% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.99;
+    filter: brightness(0.99);
+  }
+  50.5% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  95% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  96% {
+    opacity: 0.97;
+    filter: brightness(0.97);
+  }
+  96.5% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  97% {
+    opacity: 0.98;
+    filter: brightness(0.98);
+  }
+  97.5% {
+    opacity: 1;
+    filter: brightness(1);
+  }
 }
 
 .electoral-votes {
@@ -137,14 +324,18 @@
 
 .ev-display {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  flex-direction: row;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
 }
 
 .ev-item {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
   padding: 0.75rem;
   border: 1px solid #f5f5dc;
   border-radius: 8px;
@@ -165,10 +356,8 @@
               0 0 5px rgba(245, 245, 220, 0.2);
 }
 
-.ev-item span {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.ev-item .party-icon {
+  flex-shrink: 0;
 }
 
 .ev-value {

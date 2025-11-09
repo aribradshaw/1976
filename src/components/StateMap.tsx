@@ -27,7 +27,6 @@ export default function StateMap({ gameEngine, onStateClick, onStateDoubleClick,
 
   return (
     <div className="state-map-container">
-      <h2>United States Electoral Map</h2>
       <div className="state-map">
         <svg 
           viewBox={statePaths.viewBox} 
@@ -114,6 +113,27 @@ export default function StateMap({ gameEngine, onStateClick, onStateDoubleClick,
             );
           })}
         </svg>
+        {/* DC Box - separate clickable box */}
+        <div className="dc-box-container">
+          <div 
+            className="dc-box"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStateClick('DC');
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              onStateDoubleClick?.('DC');
+            }}
+            style={{
+              backgroundColor: gameEngine.getStateColor('DC'),
+              border: selectedState === 'DC' ? '3px solid #667eea' : '2px solid #ffffff',
+              cursor: 'pointer',
+            }}
+          >
+            <div className="dc-label">DC</div>
+          </div>
+        </div>
         <div className="map-legend">
           <div className="legend-group">
             <div className="legend-group-title">Dem</div>

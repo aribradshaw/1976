@@ -10,6 +10,41 @@
   overflow: hidden;
 }
 
+.spotify-corner {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  max-width: 280px;
+}
+
+.settings-btn-corner {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  padding: 0.75rem 1.5rem;
+  background: #1a1a1a;
+  color: #f5f5dc;
+  border: 2px solid #f5f5dc;
+  border-radius: 8px;
+  font-size: clamp(0.9rem, 1vw, 1rem);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 5px rgba(245, 245, 220, 0.2);
+  text-shadow: 0 0 2px rgba(245, 245, 220, 0.3);
+}
+
+.settings-btn-corner:hover {
+  background: #0f0f0f;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(245, 245, 220, 0.3);
+  transform: translateY(-2px);
+}
+
 /* TV Cabinet - Dark Wood Frame */
 .tv-cabinet {
   width: 90%;
@@ -88,6 +123,7 @@
     inset 0 0 20px rgba(0, 0, 0, 0.5),
     0 0 0 2px #0a0a0a;
   overflow: hidden;
+  animation: crt-periodic-flicker 8s ease-in-out infinite;
 }
 
 /* CRT Screen Curvature Effect */
@@ -529,6 +565,54 @@
   
   .tv-screen {
     min-height: 400px;
+  }
+}
+
+/* Periodic CRT flicker - realistic, not annoying */
+@keyframes crt-periodic-flicker {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  48% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  49% {
+    opacity: 0.98;
+    filter: brightness(0.98);
+  }
+  49.5% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.99;
+    filter: brightness(0.99);
+  }
+  50.5% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  95% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  96% {
+    opacity: 0.97;
+    filter: brightness(0.97);
+  }
+  96.5% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  97% {
+    opacity: 0.98;
+    filter: brightness(0.98);
+  }
+  97.5% {
+    opacity: 1;
+    filter: brightness(1);
   }
 }
 

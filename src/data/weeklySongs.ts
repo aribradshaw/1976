@@ -9,7 +9,7 @@ export interface WeeklySong {
 }
 
 export const WEEKLY_SONGS: WeeklySong[] = [
-  { week: 1, artist: 'The Sylvers', track: 'Boogie Fever' },
+  { week: 1, artist: 'The Sylvers', track: 'Boogie Fever', spotifyId: '3FZB0xezeoc1ddx72eg7iF' },
   { week: 2, artist: 'Wings', track: 'Silly Love Songs' },
   { week: 3, artist: 'Diana Ross', track: 'Love Hangover' },
   { week: 4, artist: 'Diana Ross', track: 'Love Hangover' },
@@ -21,10 +21,10 @@ export const WEEKLY_SONGS: WeeklySong[] = [
   { week: 10, artist: 'Starland Vocal Band', track: 'Afternoon Delight' },
   { week: 11, artist: 'The Manhattans', track: 'Kiss and Say Goodbye' },
   { week: 12, artist: 'The Manhattans', track: 'Kiss and Say Goodbye' },
-  { week: 13, artist: 'Elton John', track: "Don't Go Breaking My Heart", spotifyId: '4J7keQYHM6D88zsNr1YQge' }, // Elton John and Kiki Dee
-  { week: 14, artist: 'Elton John', track: "Don't Go Breaking My Heart", spotifyId: '4J7keQYHM6D88zsNr1YQge' },
-  { week: 15, artist: 'Elton John', track: "Don't Go Breaking My Heart", spotifyId: '4J7keQYHM6D88zsNr1YQge' },
-  { week: 16, artist: 'Elton John', track: "Don't Go Breaking My Heart", spotifyId: '4J7keQYHM6D88zsNr1YQge' },
+  { week: 13, artist: 'Elton John', track: "Don't Go Breaking My Heart", spotifyId: '7HW5WIw7ZgZORCzUxv5gW5' }, // Elton John and Kiki Dee
+  { week: 14, artist: 'Elton John', track: "Don't Go Breaking My Heart", spotifyId: '7HW5WIw7ZgZORCzUxv5gW5' },
+  { week: 15, artist: 'Elton John', track: "Don't Go Breaking My Heart", spotifyId: '7HW5WIw7ZgZORCzUxv5gW5' },
+  { week: 16, artist: 'Elton John', track: "Don't Go Breaking My Heart", spotifyId: '7HW5WIw7ZgZORCzUxv5gW5' },
   { week: 17, artist: 'Bee Gees', track: 'You Should Be Dancing' },
   { week: 18, artist: 'KC and the Sunshine Band', track: '(Shake, Shake, Shake) Shake Your Booty' },
   { week: 19, artist: 'KC and the Sunshine Band', track: '(Shake, Shake, Shake) Shake Your Booty' },

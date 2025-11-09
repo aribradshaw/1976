@@ -4,6 +4,7 @@ import { GameEngine } from '../game/GameEngine';
 import { GameState, CampaignAction, Candidate } from '../types/game';
 import { calculateTopicRelationshipChange } from '../game/relationshipCalculator';
 import { calculateDetailedDemographics } from '../utils/demographics';
+import { playClickSound } from '../utils/sounds';
 import './TopicSelector.css';
 
 interface TopicSelectorProps {
@@ -505,18 +506,33 @@ export default function TopicSelector({
             const position = localGameState.topicPositions.get(topic.id);
             const isPositionLocked = position !== undefined;
             
+            // Check if this topic is already used for ads in this state (only for ads action)
+            const isAlreadyUsed = actionType === 'launch_ads' ? (() => {
+              const activities = localGameState.campaignActivities.get(stateAbbreviation) || [];
+              return activities.some(a => a.type === 'ads' && a.adTopic === topic.id);
+            })() : false;
+            
             return (
               <div key={topic.id} className="topic-item-wrapper">
                 <button
-                  className={`topic-button ${isSelected ? 'selected' : ''} ${isPositionLocked ? 'position-locked' : ''}`}
-                  onClick={() => handleTopicClick(topic.id)}
-                  disabled={!isSelected && selectedTopics.length >= maxSelections}
+                  className={`topic-button ${isSelected ? 'selected' : ''} ${isPositionLocked ? 'position-locked' : ''} ${isAlreadyUsed ? 'already-used' : ''}`}
+                  onClick={() => {
+                    if (isAlreadyUsed) {
+                      // Don't allow selection if already used
+                      return;
+                    }
+                    handleTopicClick(topic.id);
+                  }}
+                  disabled={(!isSelected && selectedTopics.length >= maxSelections) || isAlreadyUsed}
+                  data-tooltip={isAlreadyUsed ? "Already used for ads in this state" : undefined}
+                  data-tooltip-red={isAlreadyUsed ? "true" : undefined}
                 >
                   {topic.name}
                   {isSelected && <span className="checkmark">✓</span>}
                   {isPositionLocked && (
                     <span className="position-badge">{position === 'for' ? 'FOR' : 'AGAINST'}</span>
                   )}
+                  {isAlreadyUsed && <span className="already-used-badge">USED</span>}
                 </button>
                 {isSelected && !isPositionLocked && (
                   <div className="position-buttons">
@@ -635,12 +651,18 @@ export default function TopicSelector({
         })()}
 
         <div className="topic-selector-actions">
-          <button className="cancel-btn" onClick={onCancel}>Cancel</button>
+          <button className="cancel-btn" onClick={() => {
+            playClickSound(); // Play random click sound
+            onCancel();
+          }}>Cancel</button>
           {actionType === 'launch_ads' ? (
             <>
               <button 
                 className="confirm-btn campaign-size-btn" 
-                onClick={() => onConfirm('small')}
+                onClick={() => {
+                  playClickSound(); // Play random click sound
+                  onConfirm('small');
+                }}
                 onMouseEnter={() => setPreviewCampaignSize('small')}
                 disabled={!canConfirm}
               >
@@ -648,7 +670,10 @@ export default function TopicSelector({
               </button>
               <button 
                 className="confirm-btn campaign-size-btn" 
-                onClick={() => onConfirm('medium')}
+                onClick={() => {
+                  playClickSound(); // Play random click sound
+                  onConfirm('medium');
+                }}
                 onMouseEnter={() => setPreviewCampaignSize('medium')}
                 disabled={!canConfirm}
               >
@@ -656,7 +681,10 @@ export default function TopicSelector({
               </button>
               <button 
                 className="confirm-btn campaign-size-btn" 
-                onClick={() => onConfirm('large')}
+                onClick={() => {
+                  playClickSound(); // Play random click sound
+                  onConfirm('large');
+                }}
                 onMouseEnter={() => setPreviewCampaignSize('large')}
                 disabled={!canConfirm}
               >
@@ -666,7 +694,10 @@ export default function TopicSelector({
           ) : (
             <button 
               className="confirm-btn" 
-              onClick={() => onConfirm('medium')}
+              onClick={() => {
+                playClickSound(); // Play random click sound
+                onConfirm('medium');
+              }}
               disabled={!canConfirm}
             >
               Confirm<br />${(rallyCost / 1000).toFixed(0)}K

@@ -2,8 +2,36 @@
 // Note: For production, you'll need a backend server to securely handle token exchange
 // This implementation uses the Authorization Code flow which requires a backend
 
-const SPOTIFY_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID || '';
-const SPOTIFY_REDIRECT_URI = `${window.location.origin}`;
+// Debug: Log the environment variable
+console.log('VITE_SPOTIFY_CLIENT_ID:', import.meta.env.VITE_SPOTIFY_CLIENT_ID);
+console.log('All env vars:', import.meta.env);
+
+// Fallback to hardcoded Client ID if env var is not available
+const SPOTIFY_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID || '143be4020f584a91b6f203515fa77685';
+
+// Use 127.0.0.1 instead of localhost for Spotify redirect URI (localhost is not allowed)
+// Replace localhost with 127.0.0.1 in the origin
+// Include the full pathname to support subdirectory deployments
+const getRedirectUri = () => {
+  let origin = window.location.origin;
+  // Replace localhost with 127.0.0.1 for Spotify compatibility
+  if (origin.includes('localhost')) {
+    origin = origin.replace('localhost', '127.0.0.1');
+  }
+  // Include the base pathname to support subdirectory deployments (e.g., /1976/)
+  // Extract the base path from the current location's pathname
+  const pathname = window.location.pathname;
+  // Extract the first path segment (e.g., '1976' from '/1976/' or '/1976/some-route')
+  const pathSegments = pathname.split('/').filter(Boolean);
+  if (pathSegments.length > 0) {
+    // Return origin + base path with trailing slash (e.g., 'https://www.brickstone.plus/1976/')
+    return origin + '/' + pathSegments[0] + '/';
+  }
+  // If at root, return origin only
+  return origin;
+};
+
+const SPOTIFY_REDIRECT_URI = getRedirectUri();
 const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming';
 
 export interface SpotifyToken {
@@ -24,6 +52,33 @@ function generateRandomString(length: number): string {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
+}
+
+/**
+ * Generate code verifier for PKCE
+ */
+function generateCodeVerifier(): string {
+  return generateRandomString(128);
+}
+
+/**
+ * Generate code challenge from verifier (SHA256 hash, base64url encoded)
+ */
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return base64UrlEncode(new Uint8Array(digest));
+}
+
+/**
+ * Base64 URL encode (without padding)
+ */
+function base64UrlEncode(array: Uint8Array): string {
+  return btoa(String.fromCharCode(...array))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
 }
 
 /**
@@ -62,6 +117,7 @@ export function storeToken(token: SpotifyToken): void {
 export function removeStoredToken(): void {
   localStorage.removeItem('spotify_token');
   localStorage.removeItem('spotify_auth_state');
+  localStorage.removeItem('spotify_code_verifier');
 }
 
 /**
@@ -73,10 +129,9 @@ export function isSpotifyConnected(): boolean {
 
 /**
  * Initiate Spotify OAuth flow
- * Note: This uses Implicit Grant flow (deprecated but works for frontend-only apps)
- * For production, use Authorization Code flow with a backend
+ * Uses Authorization Code flow with PKCE (recommended for frontend-only apps)
  */
-export function connectSpotify(): void {
+export async function connectSpotify(): Promise<void> {
   if (!SPOTIFY_CLIENT_ID) {
     console.error('Spotify Client ID not configured. Please set VITE_SPOTIFY_CLIENT_ID in your .env file.');
     alert('Spotify integration is not configured. Please set VITE_SPOTIFY_CLIENT_ID in your .env file.');
@@ -84,31 +139,67 @@ export function connectSpotify(): void {
   }
 
   const state = generateRandomString(16);
-  localStorage.setItem('spotify_auth_state', state);
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-  // Use Implicit Grant flow for frontend-only (deprecated but functional)
+  // Store state and code verifier for later verification
+  localStorage.setItem('spotify_auth_state', state);
+  localStorage.setItem('spotify_code_verifier', codeVerifier);
+
+  // Use Authorization Code flow with PKCE
   const authUrl = new URL('https://accounts.spotify.com/authorize');
   authUrl.searchParams.append('client_id', SPOTIFY_CLIENT_ID);
-  authUrl.searchParams.append('response_type', 'token'); // Implicit Grant
+  authUrl.searchParams.append('response_type', 'code'); // Authorization Code
   authUrl.searchParams.append('redirect_uri', SPOTIFY_REDIRECT_URI);
   authUrl.searchParams.append('scope', SPOTIFY_SCOPES);
   authUrl.searchParams.append('state', state);
+  authUrl.searchParams.append('code_challenge_method', 'S256'); // PKCE with SHA256
+  authUrl.searchParams.append('code_challenge', codeChallenge);
   authUrl.searchParams.append('show_dialog', 'true');
 
   window.location.href = authUrl.toString();
 }
 
 /**
- * Handle OAuth callback and extract token from URL hash
+ * Exchange authorization code for access token (Authorization Code flow with PKCE)
  */
-export function handleSpotifyCallback(): boolean {
-  const hash = window.location.hash;
-  if (!hash) return false;
+async function exchangeCodeForToken(code: string, codeVerifier: string): Promise<SpotifyToken | null> {
+  try {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: SPOTIFY_REDIRECT_URI,
+        client_id: SPOTIFY_CLIENT_ID,
+        code_verifier: codeVerifier,
+      }),
+    });
 
-  const params = new URLSearchParams(hash.substring(1));
-  const accessToken = params.get('access_token');
-  const tokenType = params.get('token_type');
-  const expiresIn = params.get('expires_in');
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Token exchange error:', errorData);
+      return null;
+    }
+
+    const token: SpotifyToken = await response.json();
+    storeToken(token);
+    return token;
+  } catch (error) {
+    console.error('Error exchanging code for token:', error);
+    return null;
+  }
+}
+
+/**
+ * Handle OAuth callback and exchange code for token (Authorization Code flow)
+ */
+export async function handleSpotifyCallback(): Promise<boolean> {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
   const state = params.get('state');
   const error = params.get('error');
 
@@ -117,22 +208,32 @@ export function handleSpotifyCallback(): boolean {
     return false;
   }
 
+  if (!code) {
+    return false; // No code in URL, not a callback
+  }
+
   const storedState = localStorage.getItem('spotify_auth_state');
+  const codeVerifier = localStorage.getItem('spotify_code_verifier');
+
   if (state !== storedState) {
     console.error('State mismatch in Spotify callback');
     return false;
   }
 
-  if (accessToken && tokenType && expiresIn) {
-    const token: SpotifyToken = {
-      access_token: accessToken,
-      token_type: tokenType,
-      expires_in: parseInt(expiresIn, 10),
-    };
-    storeToken(token);
+  if (!codeVerifier) {
+    console.error('Code verifier not found');
+    return false;
+  }
+
+  // Exchange code for token
+  const token = await exchangeCodeForToken(code, codeVerifier);
+
+  if (token) {
+    // Clean up
     localStorage.removeItem('spotify_auth_state');
+    localStorage.removeItem('spotify_code_verifier');
     
-    // Clean up URL hash
+    // Clean up URL parameters
     window.history.replaceState(null, '', window.location.pathname);
     return true;
   }
@@ -173,6 +274,40 @@ export async function searchTrack(artist: string, track: string): Promise<string
     return null;
   } catch (error) {
     console.error('Error searching for track:', error);
+    return null;
+  }
+}
+
+/**
+ * Get the currently playing track ID from Spotify
+ */
+export async function getCurrentlyPlayingTrackId(): Promise<string | null> {
+  const token = getStoredToken();
+  if (!token) return null;
+
+  try {
+    const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        removeStoredToken();
+      }
+      return null;
+    }
+
+    // 204 means no content (nothing playing)
+    if (response.status === 204) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data.item?.id || null;
+  } catch (error) {
+    console.error('Error getting currently playing track:', error);
     return null;
   }
 }
@@ -223,6 +358,101 @@ export async function playTrack(trackId: string): Promise<boolean> {
   } catch (error) {
     console.error('Error playing track:', error);
     return false;
+  }
+}
+
+/**
+ * Pause playback on Spotify
+ */
+export async function pausePlayback(): Promise<boolean> {
+  const token = getStoredToken();
+  if (!token) return false;
+
+  try {
+    const response = await fetch('https://api.spotify.com/v1/me/player/pause', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        removeStoredToken();
+      }
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error pausing playback:', error);
+    return false;
+  }
+}
+
+/**
+ * Resume playback on Spotify
+ */
+export async function resumePlayback(): Promise<boolean> {
+  const token = getStoredToken();
+  if (!token) return false;
+
+  try {
+    const response = await fetch('https://api.spotify.com/v1/me/player/play', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        removeStoredToken();
+      }
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error resuming playback:', error);
+    return false;
+  }
+}
+
+/**
+ * Get current playback state (is playing or paused)
+ */
+export async function getPlaybackState(): Promise<{ isPlaying: boolean; trackId: string | null } | null> {
+  const token = getStoredToken();
+  if (!token) return null;
+
+  try {
+    const response = await fetch('https://api.spotify.com/v1/me/player', {
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        removeStoredToken();
+      }
+      return null;
+    }
+
+    // 204 means no content (nothing playing)
+    if (response.status === 204) {
+      return { isPlaying: false, trackId: null };
+    }
+
+    const data = await response.json();
+    return {
+      isPlaying: data.is_playing || false,
+      trackId: data.item?.id || null,
+    };
+  } catch (error) {
+    console.error('Error getting playback state:', error);
+    return null;
   }
 }
 

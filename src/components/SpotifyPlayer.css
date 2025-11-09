@@ -1,14 +1,18 @@
 .spotify-player {
   padding: 1rem;
-  background: rgba(30, 215, 96, 0.1);
+  background: #1a1a1a;
   border: 2px solid #1db954;
   border-radius: 8px;
-  margin: 1rem 0;
+  margin: 0;
   text-align: center;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 10px rgba(29, 185, 84, 0.2);
 }
 
 .spotify-player.connected {
-  background: rgba(30, 215, 96, 0.15);
+  background: #1a1a1a;
+  border-color: #1db954;
 }
 
 .spotify-connect-btn {
@@ -104,5 +108,40 @@
   color: #1db954;
   font-style: italic;
   margin-top: 0.25rem;
+}
+
+.spotify-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.spotify-play-pause-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(29, 185, 84, 0.3);
+  font-size: 1rem;
+  padding: 0;
+}
+
+.spotify-play-pause-btn:hover {
+  background: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.5);
+  transform: scale(1.1);
+}
+
+.spotify-play-pause-btn:active {
+  transform: scale(0.95);
 }
 

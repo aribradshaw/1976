@@ -6,6 +6,7 @@ import TopicSelector from './TopicSelector';
 import { FaDollarSign, FaAdversal } from 'react-icons/fa';
 import { RiHqFill } from 'react-icons/ri';
 import { TbPodium } from 'react-icons/tb';
+import { playClickSound, playEndTurnSound } from '../utils/sounds';
 import './ActionPanel.css';
 
 interface ActionPanelProps {
@@ -88,13 +89,16 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
       } else if (preSelectedActionType === 'campaign_hq') {
         // Check current HQ level and auto-execute
         const activities = gameEngine.getStateActivities(currentSelectedState);
-        const hqActivity = activities.find(a => a.type === 'hq');
+        // Check player's HQ (not opponent's)
+        const hqActivity = activities.find(a => a.type === 'hq' && a.actor === 'player');
         const currentLevel = hqActivity?.hqLevel || 0;
         const nextLevel = Math.min(5, currentLevel + 1);
         
         // If already at max level, don't execute
         if (currentLevel >= 5) {
           setSelectedActionType(null);
+          // Close the panel if at max level
+          onStateSelect?.(null);
           return;
         }
         
@@ -230,10 +234,13 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
       adTopic,
       rallyTopics,
       hqLevel,
+      campaignSize, // Include campaign size for ads
     };
   };
 
   const handleActionClick = (actionType: CampaignAction['type']) => {
+    playClickSound(); // Play random click sound
+    
     if (!currentSelectedState) {
       // Need to select a state first
       setSelectedActionType(actionType);
@@ -276,7 +283,8 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
       }
       
       const activities = gameEngine.getStateActivities(currentSelectedState);
-      const hqActivity = activities.find(a => a.type === 'hq');
+      // Check player's HQ (not opponent's)
+      const hqActivity = activities.find(a => a.type === 'hq' && a.actor === 'player');
       const currentLevel = hqActivity?.hqLevel || 0;
       const nextLevel = Math.min(5, currentLevel + 1);
       
@@ -352,6 +360,7 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
   const dayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   const handleFundraiserAccept = () => {
+    playClickSound(); // Play random click sound
     if (selectedActionType === 'large_donor_fundraiser' && currentSelectedState) {
       const action = createAction(selectedActionType, currentSelectedState);
       if (action) {
@@ -368,6 +377,7 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
   };
 
   const handleFundraiserDeny = () => {
+    playClickSound(); // Play random click sound
     // Go back to state view (StateInfoPanel)
     setShowFundraiserConfirmation(false);
     setSelectedActionType(null);
@@ -462,7 +472,8 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
           
           {(() => {
             const activities = gameEngine.getStateActivities(currentSelectedState);
-            const hqActivity = activities.find(a => a.type === 'hq');
+            // Check player's HQ (not opponent's)
+            const hqActivity = activities.find(a => a.type === 'hq' && a.actor === 'player');
             const currentLevel = hqActivity?.hqLevel || 0;
             const isHqMaxLevel = currentLevel >= 5;
             const isHqScheduled = isActionTypeScheduledForState('campaign_hq', currentSelectedState);
@@ -536,7 +547,10 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
               <div 
                 key={index} 
                 className="action-slot filled-slot"
-                onClick={() => onRemoveAction?.(index)}
+                onClick={() => {
+                  playClickSound(); // Play random click sound
+                  onRemoveAction?.(index);
+                }}
                 title="Click to remove this action"
               >
                 <div className="slot-day">{dayLabel}</div>
@@ -571,7 +585,10 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
       <div className="end-turn-section">
         <button
           className={`end-turn-btn ${allSlotsFilled ? 'highlighted' : ''}`}
-          onClick={onEndTurn}
+          onClick={() => {
+            playEndTurnSound(); // Play end turn sound (different from click sounds)
+            onEndTurn();
+          }}
           disabled={!canEndTurn}
           title={!canEndTurn ? `Queue ${maxActions - queuedActionsCount} more action${maxActions - queuedActionsCount !== 1 ? 's' : ''} to end the week` : ''}
         >

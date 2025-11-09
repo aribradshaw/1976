@@ -13,7 +13,7 @@ export const TOPICS = [
   { id: 'defense', name: 'Increased Defense Spending' },
   { id: 'environment', name: 'Environmental Regulations' },
   { id: 'welfare', name: 'Expanded Welfare Programs' },
-  { id: 'farm_policy', name: 'Farm Price Supports' },
+  { id: 'farm_policy', name: 'Farm Subsidies' },
   { id: 'labor', name: 'Union Rights & Collective Bargaining' },
   { id: 'crime', name: 'Tough on Crime Policies' },
   { id: 'gun_control', name: 'Gun Control Legislation' },

@@ -50,6 +50,7 @@ import { Vermont } from './Vermont';
 import { Alaska } from './Alaska';
 import { Virginia } from './Virginia';
 import { Georgia } from './Georgia';
+import { DC } from './DC';
 
 export function getAllStates(): StateData[] {
   return [
@@ -103,6 +104,7 @@ export function getAllStates(): StateData[] {
     Alaska,
     Virginia,
     Georgia,
+    DC,
   ];
 }
 
