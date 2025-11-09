@@ -1,0 +1,28 @@
+,1976,Group,Carter,Ford
+TOTAL,All Voters,Pct.,50%,48%
+SEX,Men,51,52,48
+Women,49,52,48
+RACE,White,89,48,52
+African-American,9,83,17
+Hispanic,1,82,18
+AGE,18-21,9,49,51
+22-29,23,56,44
+30-44,29,52,48
+45-59,26,48,52
+60 & over,14,48,52
+INCOME,"<$8,000",17,62,38
+"$8-12,000",24,57,43
+"$12,001-20,000",35,50,50
+"Over $20,000",24,38,62
+UNION HOUSEHOLD,Yes,29,62,38
+No,71,48,52
+REGION,East,28,54,46
+Midwest,30,49,51
+South,23,54,46
+West,18,50,50
+PARTY,Democrat,37,80,20
+Republican,22,11,89
+Independent,41,48,52
+POLITICAL PHILOSOPHY,Liberal,20,74,26
+Moderate,49,53,47
+Conservative,31,30,70

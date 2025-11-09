@@ -1,0 +1,108 @@
+.spotify-player {
+  padding: 1rem;
+  background: rgba(30, 215, 96, 0.1);
+  border: 2px solid #1db954;
+  border-radius: 8px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.spotify-player.connected {
+  background: rgba(30, 215, 96, 0.15);
+}
+
+.spotify-connect-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: clamp(0.9rem, 1vw, 1rem);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(29, 185, 84, 0.3);
+  margin: 0 auto;
+}
+
+.spotify-connect-btn:hover {
+  background: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.5);
+  transform: translateY(-2px);
+}
+
+.spotify-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.spotify-hint {
+  font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+  color: #f5f5dc;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+}
+
+.spotify-note {
+  font-size: clamp(0.7rem, 0.8vw, 0.75rem);
+  color: #f5f5dc;
+  margin-top: 0.25rem;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.spotify-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.spotify-status-text {
+  color: #1db954;
+  font-weight: bold;
+  font-size: clamp(0.9rem, 1vw, 1rem);
+}
+
+.spotify-disconnect-btn {
+  padding: 0.25rem 0.75rem;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  border-radius: 4px;
+  font-size: clamp(0.75rem, 0.85vw, 0.85rem);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.spotify-disconnect-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.spotify-song-info {
+  margin-top: 0.5rem;
+}
+
+.spotify-current-song {
+  font-size: clamp(0.85rem, 0.95vw, 0.95rem);
+  color: #f5f5dc;
+  margin: 0.25rem 0;
+}
+
+.spotify-current-song strong {
+  color: #1db954;
+}
+
+.spotify-playing {
+  font-size: clamp(0.75rem, 0.85vw, 0.85rem);
+  color: #1db954;
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
