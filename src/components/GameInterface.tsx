@@ -23,6 +23,8 @@ import { EVENTS_1976 } from '../data/events1976';
 import { getEventForWeek } from '../game/simulation/events';
 import { CAMPAIGN_SAVE_KEY } from '../game/persistence';
 import { playClickSound, playStateSelectSound, playStateDeselectSound } from '../utils/sounds';
+import TutorialOverlay from './TutorialOverlay';
+import { shouldLaunchTutorial } from './tutorial';
 import './GameInterface.css';
 
 interface GameInterfaceProps {
@@ -44,7 +46,9 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
   const [weekRecap, setWeekRecap] = useState<WeekRecap | null>(null);
   const [showHistoricalEvent, setShowHistoricalEvent] = useState(false);
   const [mapView, setMapView] = useState<'map' | 'table'>('map');
+  const [showTutorial, setShowTutorial] = useState(() => shouldLaunchTutorial());
   const resolutionBaseline = useRef(gameState);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Update game state when it changes
@@ -181,6 +185,19 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
     setShowStateDetail(true);
   };
 
+  const handleStateTableOpen = (abbreviation: string) => {
+    playStateSelectSound();
+    setSelectedState(abbreviation);
+    setShowStateDetail(false);
+    setShowActionPanel(false);
+
+    window.requestAnimationFrame(() => {
+      const stateDesk = rightPanelRef.current?.querySelector<HTMLElement>('.state-info-panel');
+      stateDesk?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      stateDesk?.focus({ preventScroll: true });
+    });
+  };
+
   const handleCloseStateDetail = () => {
     playStateDeselectSound(); // Play deselect sound
     setShowStateDetail(false);
@@ -204,7 +221,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
 
   return (
     <div className="game-interface">
-      <div className="game-header">
+      <div className="game-header" data-tutorial-target="campaign-header">
         <div className="header-left">
           <img 
             src={playerCandidate === 'democrat' ? `${import.meta.env.BASE_URL}Jimmy_Carter_1977_cropped.jpg` : `${import.meta.env.BASE_URL}Gerald_Ford_presidential_portrait_(cropped_2).jpg`}
@@ -219,10 +236,13 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
             <div className="campaign-meta">Autosaved · Seed {gameState.simulationSeed}</div>
           </div>
         </div>
-        <button className="settings-btn-small" onClick={() => {
-          playClickSound(); // Play random click sound
-          setShowSettings(true);
-        }}>Settings</button>
+        <div className="header-utilities">
+          <button className="settings-btn-small" type="button" onClick={() => setShowTutorial(true)}>Tour</button>
+          <button className="settings-btn-small" onClick={() => {
+            playClickSound(); // Play random click sound
+            setShowSettings(true);
+          }}>Settings</button>
+        </div>
       </div>
       <SettingsModal 
         isOpen={showSettings} 
@@ -311,7 +331,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
         </div>
 
         <div className="center-panel">
-          <div className="map-workspace">
+          <div className="map-workspace" data-tutorial-target="electoral-map">
             <div className="map-view-switcher" aria-label="State board view">
               <button className={mapView === 'map' ? 'active' : ''} aria-pressed={mapView === 'map'} onClick={() => setMapView('map')}>Map</button>
               <button className={mapView === 'table' ? 'active' : ''} aria-pressed={mapView === 'table'} onClick={() => setMapView('table')}>State table</button>
@@ -333,13 +353,13 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
               <StateTable
                 states={gameEngine.getAllStates()}
                 gameState={gameState}
-                onSelect={handleStateClick}
+                onSelect={handleStateTableOpen}
               />
             )}
           </div>
         </div>
 
-        <div className="right-panel">
+        <div className="right-panel" ref={rightPanelRef} data-tutorial-target="campaign-actions">
           {selectedState && !showActionPanel ? (
             <StateInfoPanel
               gameEngine={gameEngine}
@@ -459,6 +479,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
       {weekRecap && (
         <WeeklyRecapModal recap={weekRecap} onContinue={() => setWeekRecap(null)} />
       )}
+      <TutorialOverlay isOpen={showTutorial} onClose={() => setShowTutorial(false)} />
     </div>
   );
 }

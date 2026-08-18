@@ -1,0 +1,155 @@
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  pointer-events: none;
+  color: var(--tv-paper, #f4ecd8);
+}
+
+.tutorial-dimmer,
+.tutorial-spotlight {
+  position: fixed;
+  pointer-events: none;
+}
+
+.tutorial-dimmer {
+  inset: 0;
+  background: rgba(5, 10, 20, 0.74);
+}
+
+.tutorial-spotlight {
+  border: 2px solid var(--tv-amber, #c4922d);
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: 0 0 0 9999px rgba(5, 10, 20, 0.74), 0 0 0 4px rgba(244, 236, 216, 0.45);
+  transition: left var(--tv-cut, 150ms linear), top var(--tv-cut, 150ms linear), width var(--tv-cut, 150ms linear), height var(--tv-cut, 150ms linear);
+}
+
+.tutorial-pointer {
+  position: fixed;
+  z-index: 1;
+  height: 2px;
+  transform-origin: left center;
+  background: var(--tv-amber, #c4922d);
+  box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.6);
+  transition: left var(--tv-cut, 150ms linear), top var(--tv-cut, 150ms linear), width var(--tv-cut, 150ms linear), transform var(--tv-cut, 150ms linear);
+}
+
+.tutorial-pointer::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--tv-paper, #f4ecd8);
+  border-radius: 50%;
+  background: var(--tv-amber, #c4922d);
+  transform: translate(50%, -50%);
+}
+
+.tutorial-callout {
+  position: fixed;
+  z-index: 2;
+  pointer-events: auto;
+  border: 2px solid var(--tv-rule, #b7a579);
+  border-radius: 3px;
+  background: var(--tv-navy-deep, #0d1930);
+  box-shadow: var(--tv-shadow-hard, 5px 5px 0 rgba(8, 13, 24, 0.48));
+  padding: var(--tv-space-4, 16px);
+  transition: left var(--tv-cut, 150ms linear), top var(--tv-cut, 150ms linear);
+}
+
+.tutorial-callout__topline,
+.tutorial-callout__controls,
+.tutorial-callout__pagination {
+  display: flex;
+  align-items: center;
+}
+
+.tutorial-callout__topline {
+  justify-content: space-between;
+  gap: var(--tv-space-2, 8px);
+  color: var(--tv-paper-muted, #d8cbaa);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tutorial-callout__topline p { margin: 0; }
+
+.tutorial-callout h2 {
+  margin: var(--tv-space-2, 8px) 0;
+  color: var(--tv-paper, #f4ecd8);
+  font-family: var(--tv-display, 'Source Sans 3 Variable', sans-serif);
+  font-size: clamp(1.3rem, 2.2vw, 1.72rem);
+  line-height: 1.08;
+}
+
+.tutorial-callout__description {
+  margin: 0;
+  color: var(--tv-paper, #f4ecd8);
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+.tutorial-callout__controls {
+  justify-content: space-between;
+  gap: var(--tv-space-2, 8px);
+  margin-top: var(--tv-space-4, 16px);
+}
+
+.tutorial-callout button {
+  min-height: 44px;
+  border: 1px solid var(--tv-rule, #b7a579);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--tv-paper, #f4ecd8);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.45rem 0.7rem;
+}
+
+.tutorial-callout button:hover:not(:disabled),
+.tutorial-callout button:focus-visible {
+  border-color: var(--tv-paper, #f4ecd8);
+  background: rgba(244, 236, 216, 0.12);
+}
+
+.tutorial-callout button:disabled { cursor: not-allowed; opacity: 0.45; }
+
+.tutorial-callout__pagination { gap: var(--tv-space-1, 4px); }
+
+.tutorial-callout .tutorial-next {
+  border-color: var(--tv-amber, #c4922d);
+  background: var(--tv-amber, #c4922d);
+  color: var(--tv-ink, #101827);
+}
+
+.tutorial-callout .tutorial-next:hover,
+.tutorial-callout .tutorial-next:focus-visible { background: #d4a644; }
+
+.tutorial-skip {
+  border-color: transparent !important;
+  color: var(--tv-paper-muted, #d8cbaa) !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 759px) {
+  .tutorial-callout { max-height: calc(100vh - 24px); overflow: auto; padding: 14px; }
+  .tutorial-callout__description { font-size: 0.93rem; }
+  .tutorial-pointer { opacity: 0.8; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-spotlight,
+  .tutorial-callout,
+  .tutorial-pointer { transition: none; }
+}
+
+:root[data-reduced-motion='true'] .tutorial-spotlight,
+:root[data-reduced-motion='true'] .tutorial-callout,
+:root[data-reduced-motion='true'] .tutorial-pointer { transition: none; }

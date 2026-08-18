@@ -30,7 +30,7 @@ export default function StateTable({ states, gameState, onSelect }: StateTablePr
               <td>{state.poll?.democraticSupport.toFixed(1) ?? '–'}%</td>
               <td>{state.poll?.republicanSupport.toFixed(1) ?? '–'}%</td>
               <td>{Math.round(state.democraticWinProbability * 100)}%</td>
-              <td><button onClick={() => onSelect(state.state)}>Open</button></td>
+              <td><button aria-label={`Open ${state.name} campaign desk`} onClick={() => onSelect(state.state)}>Open</button></td>
             </tr>
           ))}
         </tbody>

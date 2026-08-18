@@ -16,11 +16,20 @@ This creates a `dist` folder with all production-ready files.
 
 ## Deploying to itch.io
 
-1. Build the project (see above)
-2. Zip the entire contents of the `dist` folder
-3. Go to your itch.io project page
-4. Upload the zip file as an HTML5 game
-5. Set the game to run `index.html` as the main file
+The live project is `aribradshaw/1976`. Use itch.io's official Butler uploader so releases are incremental and versioned.
+
+1. Build and verify the project.
+2. Authenticate once with `butler login`.
+3. Push the built directory as the HTML5 channel:
+
+```bash
+butler push dist aribradshaw/1976:html5 --userversion 2.7.10
+```
+
+4. In the itch.io edit page, mark the `html5` upload as **This file will be played in the browser** and save.
+5. Verify the public game at `https://aribradshaw.itch.io/1976` in both desktop and mobile layouts.
+
+Use `butler status aribradshaw/1976:html5` to confirm the processed build and displayed version.
 
 ## Deploying to HostGator
 

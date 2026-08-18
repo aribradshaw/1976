@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.7.10",
+    "date": "2026-08-18",
+    "title": "Mobile campaign tour and state drill-in",
+    "notes": [
+      "A responsive first-campaign tour now dims the board, spotlights live controls, and moves a connected briefing card through four core gameplay concepts.",
+      "The tour scrolls targets into view, supports Back, Next, Skip, Escape, manual replay, persistent completion, 44px controls, and reduced motion.",
+      "State Table Open now scrolls to and focuses the selected state's campaign desk on stacked mobile layouts.",
+      "Narrow-screen dialogs, historical choices, state details, and primary touch targets remain reachable throughout the weekly loop.",
+      "Five phone and tablet viewports now complete all 25 weeks through the 538-EV election-night result in automated browser coverage."
+    ]
+  },
+  {
     "version": "2.7.9",
     "date": "2026-08-18",
     "title": "Two-family broadcast typography",

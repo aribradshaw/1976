@@ -7,6 +7,16 @@ Production-style releases use the same Arizona-calendar versioning policy as Cam
 - The first live push in a new year advances the major number, sets minor to the Arizona calendar month minus one, and resets patch to `1`.
 - Rebuilds of the same commit do not create another release.
 
+## 2.7.10, August 18, 2026
+
+Mobile campaign tour and state drill-in
+
+- Added a first-campaign guided tour that dims the board, spotlights live controls, and moves a connected briefing card through the campaign header, map controls, action desk, and End Week button.
+- Made the tour responsive from 320px phones through desktop, with automatic target scrolling, Back, Next, Skip, Escape, persistent completion, manual replay, 44px controls, and reduced-motion behavior.
+- Fixed State Table `Open` so it scrolls to and focuses the selected state's campaign desk instead of appearing to do nothing on a stacked mobile layout.
+- Reworked narrow-screen modal overflow, historical choices, state-detail grids, and primary touch targets so the full decision and weekly-resolution loop remains reachable.
+- Expanded quality coverage to 33 deterministic and unit tests plus 17 shipped Chromium journeys, including complete 25-week campaigns at five phone and tablet viewports.
+
 ## 2.7.9, August 18, 2026
 
 Two-family broadcast typography

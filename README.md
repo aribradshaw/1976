@@ -41,6 +41,7 @@ The design combines the clarity of an electoral map game with the tradeoffs of a
 - Deterministic seeds, autosave and exact resume, and seeded 538-EV election night
 - Electoral map and keyboard-operable state table
 - Responsive desktop and mobile layouts, reduced motion, optional CRT effects, semantic dialogs, and visible focus
+- A responsive first-campaign tour with live spotlights, persistent completion, and manual replay
 
 ## Run locally
 
@@ -65,7 +66,7 @@ npm run build
 npm run test:e2e
 ```
 
-Version 2.7.9 passes 31 deterministic and unit tests plus ten Chromium journeys. Browser coverage includes setup, the two-family typography and spacing system, short-screen and receiver breakpoint behavior, portrait-safe candidate cards, removal of legacy music authorization state, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, a 390px mobile campaign, and a complete 25-week game through election night. The complete dependency tree audits cleanly.
+Version 2.7.10 passes 33 deterministic and unit tests plus 17 shipped Chromium journeys. Browser coverage includes setup, the responsive spotlight tutorial, the two-family typography and spacing system, short-screen and receiver breakpoint behavior, portrait-safe candidate cards, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, State Table drill-in, and complete 25-week campaigns at 320x568, 360x640, 390x844, 430x932, and 768x1024 through election night. The complete dependency tree audits cleanly.
 
 ## Architecture
 

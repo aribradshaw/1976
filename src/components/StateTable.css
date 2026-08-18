@@ -28,6 +28,8 @@
 .state-table tbody tr:hover { background: rgba(242, 207, 120, 0.08); }
 .state-table th span { color: rgba(245, 245, 220, 0.6); font-size: 0.7em; }
 .state-table button {
+  min-width: 44px;
+  min-height: 44px;
   padding: 0.35rem 0.55rem;
   border: 1px solid #f2cf78;
   border-radius: 4px;

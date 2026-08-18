@@ -569,6 +569,12 @@
   }
 }
 
+.header-utilities {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .map-workspace {
   gap: 0.45rem;
 }

@@ -223,10 +223,16 @@ export default function StateInfoPanel({
   const fundraisingBooth = gameState.fundraisingBooths.find(b => b.state === stateAbbreviation);
 
   return (
-    <div className="state-info-panel">
+    <div className="state-info-panel" tabIndex={-1} aria-label={`${state.name} campaign desk`}>
       <div className="state-info-header">
         <h2>{state.name}</h2>
-        <button className="close-state-info-btn" onClick={onClose}>×</button>
+        <button
+          className="close-state-info-btn"
+          onClick={onClose}
+          aria-label={`Close ${state.name} campaign desk`}
+        >
+          ×
+        </button>
       </div>
       
       <div className="state-info-content">
@@ -244,6 +250,7 @@ export default function StateInfoPanel({
                     onActionSelect?.(stateAbbreviation, 'large_donor_fundraiser');
                   }
                 }}
+                aria-label={`Schedule a fundraiser in ${state.name}`}
                 data-tooltip={allSlotsFilled ? "All 6 action slots filled" : isFundraiserScheduled ? "Once per week" : "Fundraiser"}
                 disabled={isFundraiserScheduled || allSlotsFilled}
               >
@@ -262,6 +269,7 @@ export default function StateInfoPanel({
                     onActionSelect?.(stateAbbreviation, 'launch_ads');
                   }
                 }}
+                aria-label={`Launch ads in ${state.name}`}
                 data-tooltip={
                   !canAffordAds ? "You need to raise more money" :
                   allSlotsFilled ? "All 6 action slots filled" :
@@ -287,6 +295,7 @@ export default function StateInfoPanel({
                     onActionSelect?.(stateAbbreviation, 'campaign_hq');
                   }
                 }}
+                aria-label={`Open a campaign headquarters in ${state.name}`}
                 data-tooltip={
                   !canAffordHq ? "You need to raise more money" :
                   allSlotsFilled ? "All 6 action slots filled" : 
@@ -312,6 +321,7 @@ export default function StateInfoPanel({
                     onActionSelect?.(stateAbbreviation, 'rally');
                   }
                 }}
+                aria-label={`Hold a rally in ${state.name}`}
                 data-tooltip={
                   !canAffordRally ? "You need to raise more money" :
                   allSlotsFilled ? "All 6 action slots filled" :

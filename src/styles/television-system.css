@@ -1574,6 +1574,17 @@ html body .election-night__play-again:hover {
 }
 
 @media (max-width: 960px) {
+  html body .map-view-switcher button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  html body .quick-action-btn,
+  html body .close-state-info-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
   html body .game-interface {
     overflow-y: auto;
   }
@@ -1809,6 +1820,95 @@ html body .election-night__play-again:hover {
 
   html body .topic-grid {
     grid-template-columns: 1fr;
+  }
+
+  html body .map-view-switcher button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  html body .state-table-wrap {
+    max-height: 62vh;
+  }
+
+  html body .right-panel {
+    scroll-margin-top: 8px;
+  }
+
+  html body .state-info-panel:focus {
+    outline: none;
+  }
+
+  html body .weekly-event-overlay,
+  html body .settings-modal-overlay,
+  html body .topic-selector-overlay,
+  html body .projected-votes-modal-overlay,
+  html body .state-detail-overlay,
+  html body .historical-event-overlay,
+  html body .weekly-recap-overlay,
+  html body .tip-popup-overlay {
+    align-items: start;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  html body .weekly-event-modal,
+  html body .settings-modal,
+  html body .topic-selector-modal,
+  html body .projected-votes-modal,
+  html body .state-detail-modal,
+  html body .tip-popup,
+  html body .historical-event-card,
+  html body .weekly-recap-card {
+    width: min(100%, 680px);
+    max-height: none;
+    margin: auto 0;
+  }
+
+  html body .weekly-event-modal,
+  html body .settings-modal,
+  html body .topic-selector-modal,
+  html body .projected-votes-modal,
+  html body .state-detail-modal,
+  html body .tip-popup {
+    padding: 16px;
+  }
+
+  html body .position-btn,
+  html body .confirm-btn,
+  html body .historical-event-card footer button,
+  html body .weekly-recap-card button {
+    min-height: 44px;
+  }
+
+  html body .historical-event-choices {
+    grid-template-columns: 1fr;
+  }
+
+  html body .historical-event-choices button {
+    min-height: 0;
+  }
+
+  html body .weekly-recap-movers > div {
+    gap: 0.5rem;
+  }
+
+  html body .weekly-recap-scoreboard,
+  html body .state-detail-modal .demographics,
+  html body .state-detail-modal .polling-display,
+  html body .state-detail-modal .voter-stats,
+  html body .state-detail-modal .costs {
+    grid-template-columns: 1fr;
+  }
+
+  html body .quick-action-btn,
+  html body .close-state-info-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  html body .end-turn-btn {
+    min-height: 48px;
   }
 }
 

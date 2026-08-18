@@ -15,6 +15,8 @@ async function startCampaign(page: Page, difficulty: 'Easy' | 'Medium' | 'Hard' 
   await page.getByRole('button', { name: new RegExp(`^${difficulty}`, 'i') }).click();
   await page.getByRole('button', { name: 'Start Game' }).click();
   await expect(page.getByText(/Playing as:\s*Jimmy Carter \(D\)/i)).toBeVisible();
+  const skipTour = page.getByRole('button', { name: 'Skip tour' });
+  if (await skipTour.isVisible()) await skipTour.click();
 }
 
 async function readSavedCampaign(page: Page): Promise<SavedCampaign> {
