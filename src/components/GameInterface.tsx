@@ -212,7 +212,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
             className="header-candidate-image"
           />
           <div className="header-title-section">
-            <h1>Election '76 Campaign Desk</h1>
+            <h1>1976: As Seen on TV!</h1>
             <div className="candidate-info">
               Playing as: <strong>{playerCandidate === 'democrat' ? 'Jimmy Carter (D)' : 'Gerald Ford (R)'}</strong>
             </div>

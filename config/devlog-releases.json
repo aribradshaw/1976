@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.7.8",
+    "date": "2026-08-18",
+    "title": "Responsive title receiver polish",
+    "notes": [
+      "The full 1976: As Seen on TV! product name is restored while the network election desk remains the visual art direction.",
+      "Candidate choices now use responsive portrait frames and focal points so faces and names remain intact across supported viewports.",
+      "The opening receiver fits short desktop, compact desktop, and mobile screens without page scrolling, and decorative controls disappear before crowding the cabinet.",
+      "The version now lives in the bottom-left corner as a link to the DevLog.",
+      "The browser quality gate protects short-wide, 911px, and 390px title-screen layouts."
+    ]
+  },
+  {
     "version": "2.7.7",
     "date": "2026-08-18",
     "title": "Network election desk",

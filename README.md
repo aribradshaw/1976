@@ -65,7 +65,7 @@ npm run build
 npm run test:e2e
 ```
 
-Version 2.7.7 passes 31 deterministic and unit tests plus nine Chromium journeys. Browser coverage includes setup, the 1976 network television design system, removal of legacy music authorization state, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, a 390px mobile campaign, and a complete 25-week game through election night. The complete dependency tree audits cleanly.
+Version 2.7.8 passes 31 deterministic and unit tests plus ten Chromium journeys. Browser coverage includes setup, the 1976 network television design system, short-screen and receiver breakpoint behavior, portrait-safe candidate cards, removal of legacy music authorization state, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, a 390px mobile campaign, and a complete 25-week game through election night. The complete dependency tree audits cleanly.
 
 ## Architecture
 

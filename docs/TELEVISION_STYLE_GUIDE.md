@@ -93,7 +93,7 @@ The news line is a network wire, not a modern notification pill. The label is am
 
 - Above 1200px: three-column control-room layout with the map dominant.
 - 900px to 1200px: narrower side desks and reduced decorative hardware.
-- Below 900px: a vertical flow with masthead, map, campaign desk, and plan. Physical TV controls are removed.
+- Below 960px: a vertical flow with masthead, map, campaign desk, and plan. Physical TV controls are removed before they can crowd the receiver.
 - Below 560px: 44px minimum touch targets, simplified labels, horizontally scrollable data tables, and no decorative cabinet frame.
 
 The design must remain usable at 200% zoom, with CRT effects disabled, and with reduced motion enabled. Focus rings use signal amber and must never depend on party color alone.

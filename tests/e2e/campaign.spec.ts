@@ -58,10 +58,49 @@ test('applies the network election-desk visual system to setup and gameplay', as
   });
 
   await startCampaign(page);
-  await expect(page.getByRole('heading', { name: "Election '76 Campaign Desk" })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '1976: As Seen on TV!' })).toBeVisible();
   const interfaceFilter = await page.locator('.game-interface').evaluate((element) => getComputedStyle(element).filter);
   expect(interfaceFilter).toBe('none');
   await expect(page.locator('.news-ticker-label')).toHaveText('WIRE');
+
+  await page.setViewportSize({ width: 911, height: 900 });
+  await page.goto('/');
+  await expect(page.locator('.tv-controls')).toBeHidden();
+  const hasReceiverOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+  expect(hasReceiverOverflow).toBe(false);
+  const devlogLink = page.getByRole('link', { name: /development log/i });
+  await expect(devlogLink).toBeVisible();
+  await expect(devlogLink).toHaveAttribute('href', 'https://github.com/aribradshaw/1976/blob/main/DEVLOG.md');
+});
+
+test('title receiver fits short desktop and mobile viewports without scrolling or clipping faces', async ({ page }) => {
+  for (const viewport of [
+    { width: 1440, height: 700 },
+    { width: 911, height: 700 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+
+    const fit = await page.evaluate(() => {
+      const cards = [...document.querySelectorAll<HTMLElement>('.candidate-btn')];
+      const images = [...document.querySelectorAll<HTMLImageElement>('.candidate-image')];
+      const lastCardBottom = Math.max(...cards.map(card => card.getBoundingClientRect().bottom));
+      return {
+        horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+        verticalOverflow: document.documentElement.scrollHeight > window.innerHeight + 1,
+        cardsInsideViewport: lastCardBottom <= window.innerHeight + 1,
+        portraitsUseTopFocalPoint: images.every(image => getComputedStyle(image).objectPosition.split(' ')[1] === '0%'),
+      };
+    });
+
+    expect(fit).toEqual({
+      horizontalOverflow: false,
+      verticalOverflow: false,
+      cardsInsideViewport: true,
+      portraitsUseTopFocalPoint: true,
+    });
+  }
 });
 
 test('removes legacy music authorization state and exposes no connection controls', async ({ page }) => {

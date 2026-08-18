@@ -30,12 +30,15 @@ html body h4 {
 
 /* Opening slate and title-screen receiver */
 html body .start-screen {
+  height: 100dvh;
+  min-height: 0;
   background: var(--tv-ink);
   background-image:
     linear-gradient(rgba(244, 236, 216, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(244, 236, 216, 0.025) 1px, transparent 1px);
   background-size: 28px 28px;
-  padding: clamp(1rem, 3vw, 2.5rem);
+  padding: clamp(8px, 2.5vmin, 24px);
+  overflow: hidden;
 }
 
 html body .settings-btn-corner,
@@ -64,6 +67,8 @@ html body .settings-btn-small:hover {
 html body .tv-cabinet {
   width: min(96%, 1080px);
   max-width: 1080px;
+  height: min(92dvh, 760px);
+  max-height: calc(100dvh - 16px);
   padding: 18px;
   border: 5px solid #28180f;
   border-radius: 4px;
@@ -80,6 +85,7 @@ html body .tv-cabinet::before {
 }
 
 html body .tv-screen-area {
+  height: 100%;
   gap: 14px;
   padding: 12px;
   border-radius: 2px;
@@ -88,6 +94,8 @@ html body .tv-screen-area {
 }
 
 html body .tv-screen-bezel {
+  min-width: 0;
+  height: 100%;
   padding: 12px;
   border-radius: 4px;
   background: #cfc3a4;
@@ -100,7 +108,8 @@ html body .tv-screen::after {
 }
 
 html body .tv-screen {
-  min-height: 510px;
+  height: 100%;
+  min-height: 0;
   padding: clamp(1.1rem, 3vw, 2.2rem);
   border: 1px solid #02050a;
   border-radius: 12px / 8px;
@@ -115,6 +124,8 @@ html body .tv-screen::before {
 }
 
 html body .start-content {
+  height: 100%;
+  padding-bottom: 1.7rem;
   text-align: left;
 }
 
@@ -152,6 +163,26 @@ html body .campaign-meta {
   letter-spacing: 0.08em;
 }
 
+html body .start-content .game-version {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin: 0;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  color: var(--tv-paper-muted);
+  font-size: .68rem;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+html body .start-content .game-version:hover,
+html body .start-content .game-version:focus-visible {
+  border-color: var(--tv-amber);
+  background: var(--tv-amber);
+  color: var(--tv-ink);
+}
+
 html body .game-description {
   max-width: 62ch;
   margin: 0.65rem 0 1.6rem;
@@ -182,11 +213,15 @@ html body .candidate-buttons {
 }
 
 html body .candidate-btn {
+  display: grid;
+  grid-template-columns: minmax(102px, 38%) 1fr;
+  grid-template-rows: auto auto 1fr;
   max-width: none;
   min-width: 0;
+  min-height: 190px;
   padding: 0;
   gap: 0;
-  align-items: stretch;
+  align-items: start;
   border: 1px solid var(--tv-rule);
   border-radius: 0;
   background: #111f3a;
@@ -226,14 +261,17 @@ html body .candidate-btn.selected {
 }
 
 html body .candidate-image {
+  grid-column: 1;
+  grid-row: 1 / 4;
   width: 100%;
-  height: clamp(120px, 18vw, 190px);
+  height: 100%;
+  min-height: 190px;
   border: 0;
-  border-bottom: 1px solid var(--tv-rule);
+  border-right: 1px solid var(--tv-rule);
   border-radius: 0;
   box-shadow: none;
   filter: grayscale(16%) contrast(1.04);
-  object-position: center 20%;
+  object-position: center top;
   transition: filter var(--tv-cut);
 }
 
@@ -244,6 +282,8 @@ html body .candidate-btn:hover .candidate-image {
 }
 
 html body .candidate-name {
+  grid-column: 2;
+  grid-row: 1;
   margin: 0;
   padding: 0.75rem 0.85rem 0.1rem;
   color: var(--tv-paper);
@@ -256,12 +296,14 @@ html body .candidate-name {
 
 html body .candidate-party,
 html body .candidate-strategy {
+  grid-column: 2;
   padding-inline: 0.85rem;
   color: var(--tv-paper-muted);
   text-shadow: none;
 }
 
 html body .candidate-party {
+  grid-row: 2;
   font-family: var(--tv-data);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
@@ -269,6 +311,7 @@ html body .candidate-party {
 }
 
 html body .candidate-strategy {
+  grid-row: 3;
   max-width: none;
   padding-bottom: 0.85rem;
   font-size: 0.78rem;
@@ -1475,7 +1518,7 @@ html body .election-night__play-again:hover {
   display: none;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   html body .game-interface {
     overflow-y: auto;
   }
@@ -1508,9 +1551,82 @@ html body .election-night__play-again:hover {
   }
 }
 
+@media (max-height: 820px) and (min-width: 561px) {
+  html body .tv-cabinet {
+    height: calc(100dvh - 16px);
+    padding: 8px;
+  }
+
+  html body .tv-screen-area,
+  html body .tv-screen-bezel {
+    padding: 7px;
+  }
+
+  html body .tv-screen {
+    padding: clamp(.75rem, 2.3vh, 1.25rem);
+  }
+
+  html body .game-title {
+    font-size: clamp(3.4rem, 9vh, 5rem);
+  }
+
+  html body .game-subtitle {
+    margin-top: .35rem;
+  }
+
+  html body .game-description {
+    margin: .45rem 0 .75rem;
+    font-size: .82rem;
+    line-height: 1.3;
+  }
+
+  html body .candidate-selection h2,
+  html body .difficulty-selection h2 {
+    margin-bottom: .45rem;
+    padding-top: .45rem;
+  }
+
+  html body .candidate-btn,
+  html body .candidate-image {
+    min-height: clamp(130px, 24vh, 170px);
+  }
+
+  html body .candidate-name {
+    padding-top: .55rem;
+    font-size: 1.05rem;
+  }
+
+  html body .candidate-strategy {
+    padding-bottom: .55rem;
+  }
+
+  html body .difficulty-btn {
+    min-height: 74px;
+    padding: .55rem;
+  }
+}
+
+@media (max-height: 650px) and (min-width: 561px) {
+  html body .game-description {
+    display: none;
+  }
+
+  html body .candidate-btn,
+  html body .candidate-image {
+    min-height: 125px;
+  }
+
+  html body .candidate-strategy {
+    font-size: .7rem;
+  }
+}
+
 @media (max-width: 560px) {
   html body .start-screen {
-    padding: 52px 0 0;
+    height: 100dvh;
+    min-height: 0;
+    padding: 48px 0 0;
+    overflow: hidden;
   }
 
   html body .tv-cabinet,
@@ -1525,31 +1641,58 @@ html body .election-night__play-again:hover {
   }
 
   html body .tv-screen {
-    min-height: calc(100dvh - 52px);
-    padding: 1.2rem;
+    height: calc(100dvh - 48px);
+    min-height: 0;
+    padding: clamp(.75rem, 3.5vw, 1.2rem);
     border: 0;
     border-radius: 0;
   }
 
   html body .game-title {
-    font-size: 4.6rem;
+    font-size: clamp(3.5rem, 18vw, 4.6rem);
   }
 
   html body .candidate-buttons {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  html body .candidate-btn {
+    grid-template-columns: clamp(92px, 29vw, 112px) 1fr;
+    min-height: clamp(124px, 19vh, 154px);
   }
 
   html body .candidate-image {
-    height: 120px;
+    height: 100%;
+    min-height: clamp(124px, 19vh, 154px);
   }
 
   html body .candidate-name {
-    font-size: .95rem;
+    padding: .6rem .7rem .08rem;
+    font-size: 1rem;
   }
 
   html body .candidate-strategy {
-    display: none;
+    display: block;
+    padding: 0 .7rem .55rem;
+    font-size: .72rem;
+  }
+
+  html body .candidate-party {
+    padding-inline: .7rem;
+  }
+
+  html body .game-description {
+    margin: .45rem 0 .8rem;
+    font-size: .78rem;
+    line-height: 1.28;
+  }
+
+  html body .candidate-selection h2,
+  html body .difficulty-selection h2 {
+    margin-bottom: .45rem;
+    padding-top: .45rem;
   }
 
   html body .game-header {

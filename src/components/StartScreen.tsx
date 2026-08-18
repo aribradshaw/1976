@@ -51,8 +51,16 @@ export default function StartScreen({ onStart, onResume, hasSavedGame = false }:
               <CRTOverlay />
               <div className="start-content">
                 <h1 className="game-title">1976</h1>
-                <p className="game-subtitle">Network Campaign Desk</p>
-                <p className="game-version">v{packageJson.version}</p>
+                <p className="game-subtitle">As Seen on TV!</p>
+                <a
+                  className="game-version"
+                  href="https://github.com/aribradshaw/1976/blob/main/DEVLOG.md"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Open the version ${packageJson.version} development log`}
+                >
+                  v{packageJson.version} · DevLog
+                </a>
                 <p className="game-description">
                   Take control of a presidential campaign in one of the closest elections in U.S. history.
                   Navigate 25 weeks of campaigning across all 50 states to secure 270 electoral votes.

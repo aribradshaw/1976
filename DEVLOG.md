@@ -7,6 +7,17 @@ Production-style releases use the same Arizona-calendar versioning policy as Cam
 - The first live push in a new year advances the major number, sets minor to the Arizona calendar month minus one, and resets patch to `1`.
 - Rebuilds of the same commit do not create another release.
 
+## 2.7.8, August 18, 2026
+
+Responsive title receiver polish
+
+- Restored the full `1976: As Seen on TV!` product name while retaining the network-election visual system as the art direction.
+- Rebuilt candidate choices as responsive broadcast profiles with portrait-aware focal points so faces and names remain intact at every supported width.
+- Made the opening receiver fit short desktop, compact desktop, and mobile viewports without relying on page scrolling.
+- Moved the version to a persistent bottom-left link that opens the full DevLog.
+- Removed decorative television controls before they can crowd or clip the title receiver at compact desktop and tablet widths.
+- Added browser coverage for short-wide, 911px, and 390px viewport edge cases discovered during live deployment verification.
+
 ## 2.7.7, August 18, 2026
 
 Network election desk
