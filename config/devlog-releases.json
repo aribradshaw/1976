@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.7.7",
+    "date": "2026-08-18",
+    "title": "Network election desk",
+    "notes": [
+      "A documented global style guide now defines the game's 1976 network television art direction, typography, palette, motion, geometry, and accessibility rules.",
+      "The title screen remains a purposeful physical receiver while the playable campaign board is now a crisp election control room built around the map and results.",
+      "Shared broadcast and editorial treatments unify campaign resources, action planning, state reports, decisions, recaps, forecasts, settings, and election night.",
+      "The production UI no longer relies on modern gradients, colored glows, pill-heavy cards, decorative hover motion, gameplay blur, or anachronistic web fonts.",
+      "A ninth Chromium journey protects the design tokens, sharp candidate cards, masthead language, wire label, and unfiltered strategy interface."
+    ]
+  },
+  {
     "version": "2.7.6",
     "date": "2026-08-18",
     "title": "First-party audio only",

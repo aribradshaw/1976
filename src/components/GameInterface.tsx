@@ -8,7 +8,6 @@ import ActionPanel from './ActionPanel';
 import StateDetail from './StateDetail';
 import StateInfoPanel from './StateInfoPanel';
 import NewsTicker from './NewsTicker';
-import CRTOverlay from './CRTOverlay';
 import WeeklyEventModal from './WeeklyEventModal';
 import SettingsModal from './SettingsModal';
 import ProjectedVotesModal from './ProjectedVotesModal';
@@ -205,7 +204,6 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
 
   return (
     <div className="game-interface">
-      <CRTOverlay />
       <div className="game-header">
         <div className="header-left">
           <img 
@@ -214,7 +212,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
             className="header-candidate-image"
           />
           <div className="header-title-section">
-            <h1>1976: As Seen on TV!</h1>
+            <h1>Election '76 Campaign Desk</h1>
             <div className="candidate-info">
               Playing as: <strong>{playerCandidate === 'democrat' ? 'Jimmy Carter (D)' : 'Gerald Ford (R)'}</strong>
             </div>

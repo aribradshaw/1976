@@ -7,6 +7,17 @@ Production-style releases use the same Arizona-calendar versioning policy as Cam
 - The first live push in a new year advances the major number, sets minor to the Arizona calendar month minus one, and resets patch to `1`.
 - Rebuilds of the same commit do not create another release.
 
+## 2.7.7, August 18, 2026
+
+Network election desk
+
+- Established a documented 1976 network television style guide with a restrained broadcast palette, typography roles, geometry, motion, modal, responsive, and accessibility rules.
+- Rebuilt the title screen as an election-special opening slate while preserving the physical receiver as purposeful framing.
+- Reframed the campaign board as a sharp election control room with a dominant map, tabular scoreboards, production-rundown action slots, and a network wire.
+- Unified state reports, planning dialogs, historical decisions, weekly recaps, settings, forecasts, and election night under one broadcast and editorial system.
+- Removed the gameplay-wide CRT veil, modern gradients, colored glows, pill-heavy cards, decorative hover motion, and anachronistic web typography.
+- Added browser coverage that protects the design tokens and campaign masthead from visual-system regressions.
+
 ## 2.7.6, August 18, 2026
 
 First-party audio only

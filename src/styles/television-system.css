@@ -1,0 +1,1627 @@
+/*
+ * 1976 Network Election Desk
+ *
+ * This file is intentionally a visual-system layer over legacy component CSS.
+ * Exact component selectors keep the retrofit safe while the game engine and
+ * component boundaries continue to evolve.
+ */
+
+html body {
+  background: var(--tv-ink);
+  color: var(--tv-paper);
+}
+
+html body button,
+html body input,
+html body select {
+  font: inherit;
+}
+
+html body button {
+  transition: color var(--tv-cut), background-color var(--tv-cut), border-color var(--tv-cut);
+}
+
+html body h1,
+html body h2,
+html body h3,
+html body h4 {
+  font-family: var(--tv-display);
+}
+
+/* Opening slate and title-screen receiver */
+html body .start-screen {
+  background: var(--tv-ink);
+  background-image:
+    linear-gradient(rgba(244, 236, 216, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 236, 216, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+
+html body .settings-btn-corner,
+html body .settings-btn-small {
+  border: 1px solid var(--tv-rule);
+  border-radius: 2px;
+  background: var(--tv-navy-deep);
+  color: var(--tv-paper);
+  box-shadow: none;
+  font-family: var(--tv-data);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .settings-btn-corner:hover,
+html body .settings-btn-small:hover {
+  background: var(--tv-amber);
+  color: var(--tv-ink);
+  box-shadow: none;
+  transform: none;
+}
+
+html body .tv-cabinet {
+  width: min(96%, 1080px);
+  max-width: 1080px;
+  padding: 18px;
+  border: 5px solid #28180f;
+  border-radius: 4px;
+  background: var(--tv-walnut);
+  background-image: linear-gradient(90deg, rgba(255,255,255,.035), transparent 18%, rgba(0,0,0,.12) 67%, transparent);
+  box-shadow: 10px 14px 0 rgba(0, 0, 0, 0.42);
+}
+
+html body .tv-cabinet::before {
+  height: 3px;
+  border-radius: 0;
+  background: var(--tv-rule);
+  opacity: 0.6;
+}
+
+html body .tv-screen-area {
+  gap: 14px;
+  padding: 12px;
+  border-radius: 2px;
+  background: #211812;
+  box-shadow: inset 0 0 0 1px #080604;
+}
+
+html body .tv-screen-bezel {
+  padding: 12px;
+  border-radius: 4px;
+  background: #cfc3a4;
+  box-shadow: inset 0 0 0 1px #8e8268;
+}
+
+html body .tv-screen-bezel::before,
+html body .tv-screen::after {
+  display: none;
+}
+
+html body .tv-screen {
+  min-height: 510px;
+  padding: clamp(1.1rem, 3vw, 2.2rem);
+  border: 1px solid #02050a;
+  border-radius: 12px / 8px;
+  background: var(--tv-navy-deep);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.72);
+  animation: none;
+}
+
+html body .tv-screen::before {
+  border-radius: 12px / 8px;
+  box-shadow: inset 0 0 34px rgba(0, 0, 0, 0.42);
+}
+
+html body .start-content {
+  text-align: left;
+}
+
+html body .game-title {
+  margin: 0;
+  color: var(--tv-paper);
+  font-family: var(--tv-display);
+  font-size: clamp(4.5rem, 10vw, 7.2rem);
+  font-stretch: condensed;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  line-height: 0.82;
+  text-shadow: none;
+}
+
+html body .game-subtitle {
+  display: inline-block;
+  margin: 0.65rem 0 0.3rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--tv-amber);
+  color: var(--tv-ink);
+  font-family: var(--tv-data);
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .game-version,
+html body .campaign-meta {
+  color: var(--tv-paper-muted);
+  font-family: var(--tv-data);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+html body .game-description {
+  max-width: 62ch;
+  margin: 0.65rem 0 1.6rem;
+  color: var(--tv-paper-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  text-shadow: none;
+}
+
+html body .candidate-selection h2,
+html body .difficulty-selection h2 {
+  margin-bottom: 0.85rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--tv-rule);
+  color: var(--tv-paper);
+  font-family: var(--tv-display);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-align: left;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .candidate-buttons {
+  align-items: stretch;
+  gap: 10px;
+  justify-content: stretch;
+}
+
+html body .candidate-btn {
+  max-width: none;
+  min-width: 0;
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: #111f3a;
+  box-shadow: none;
+  color: var(--tv-paper);
+  overflow: hidden;
+  text-align: left;
+  transform: none;
+}
+
+html body .candidate-btn::before {
+  display: none;
+}
+
+html body .candidate-btn.democrat,
+html body .candidate-btn.republican {
+  border-color: var(--tv-rule);
+  box-shadow: none;
+}
+
+html body .candidate-btn.democrat {
+  border-top: 5px solid var(--tv-democrat);
+}
+
+html body .candidate-btn.republican {
+  border-top: 5px solid var(--tv-republican);
+}
+
+html body .candidate-btn:hover,
+html body .candidate-btn.democrat:hover,
+html body .candidate-btn.republican:hover,
+html body .candidate-btn.selected {
+  border-color: var(--tv-amber);
+  background: var(--tv-blue);
+  box-shadow: inset 0 -4px 0 var(--tv-amber);
+  transform: none;
+}
+
+html body .candidate-image {
+  width: 100%;
+  height: clamp(120px, 18vw, 190px);
+  border: 0;
+  border-bottom: 1px solid var(--tv-rule);
+  border-radius: 0;
+  box-shadow: none;
+  filter: grayscale(16%) contrast(1.04);
+  object-position: center 20%;
+  transition: filter var(--tv-cut);
+}
+
+html body .candidate-btn:hover .candidate-image {
+  box-shadow: none;
+  filter: grayscale(0) contrast(1.04);
+  transform: none;
+}
+
+html body .candidate-name {
+  margin: 0;
+  padding: 0.75rem 0.85rem 0.1rem;
+  color: var(--tv-paper);
+  font-family: var(--tv-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .candidate-party,
+html body .candidate-strategy {
+  padding-inline: 0.85rem;
+  color: var(--tv-paper-muted);
+  text-shadow: none;
+}
+
+html body .candidate-party {
+  font-family: var(--tv-data);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html body .candidate-strategy {
+  max-width: none;
+  padding-bottom: 0.85rem;
+  font-size: 0.78rem;
+}
+
+html body .resume-campaign-btn,
+html body .start-game-btn,
+html body .difficulty-btn {
+  border-radius: 2px;
+  box-shadow: none;
+  text-shadow: none;
+  transform: none;
+}
+
+html body .resume-campaign-btn {
+  margin: 0 0 0.8rem;
+  border: 1px solid var(--tv-amber);
+  background: transparent;
+  color: var(--tv-paper);
+}
+
+html body .difficulty-buttons {
+  gap: 8px;
+}
+
+html body .difficulty-btn {
+  min-height: 92px;
+  padding: 0.85rem;
+  border: 1px solid var(--tv-rule);
+  border-top: 4px solid var(--tv-blue);
+  background: #111f3a;
+  color: var(--tv-paper);
+}
+
+html body .difficulty-btn:hover,
+html body .difficulty-btn.selected {
+  border-color: var(--tv-amber);
+  background: var(--tv-blue);
+  box-shadow: inset 0 -4px 0 var(--tv-amber);
+  transform: none;
+}
+
+html body .start-game-btn {
+  border: 1px solid var(--tv-paper);
+  background: var(--tv-amber);
+  color: var(--tv-ink);
+  font-family: var(--tv-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html body .start-game-btn:hover:not(:disabled) {
+  background: var(--tv-paper);
+  box-shadow: none;
+  transform: none;
+}
+
+html body .tv-controls {
+  width: 116px;
+  gap: 10px;
+}
+
+html body .tv-control-panel,
+html body .tv-speaker-grille {
+  padding: 10px;
+  border: 1px solid #080604;
+  border-radius: 2px;
+  background: #171513;
+  box-shadow: inset 0 0 0 1px #3b352e;
+}
+
+html body .tv-indicator-light {
+  width: 8px;
+  height: 8px;
+  background: var(--tv-amber);
+  box-shadow: none;
+  animation: none;
+}
+
+html body .tv-knob {
+  background: #817a6d;
+  border-color: #37332d;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 2px 2px 0 #070604;
+}
+
+html body .tv-knob:hover {
+  transform: none;
+}
+
+html body .tv-speaker-grille::before {
+  display: none;
+}
+
+html body .grille-slat {
+  height: 3px;
+  border-radius: 0;
+  background: #443a30;
+  box-shadow: none;
+}
+
+/* Live campaign control room */
+html body .game-interface {
+  padding: 0 0 46px;
+  background: var(--tv-ink);
+  background-image: linear-gradient(rgba(244, 236, 216, 0.025) 1px, transparent 1px);
+  background-size: 100% 32px;
+  filter: none;
+}
+
+html body .game-header {
+  min-height: 76px;
+  margin: 0;
+  padding: 8px 14px;
+  border: 0;
+  border-top: 5px solid var(--tv-amber);
+  border-bottom: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: var(--tv-navy);
+  box-shadow: none;
+}
+
+html body .header-left {
+  gap: 12px;
+}
+
+html body .header-candidate-image {
+  width: 52px;
+  height: 54px;
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  box-shadow: none;
+  filter: grayscale(25%);
+}
+
+html body .header-title-section {
+  gap: 2px;
+}
+
+html body .game-header h1 {
+  color: var(--tv-paper);
+  font-family: var(--tv-display);
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+  letter-spacing: 0.035em;
+  line-height: 1;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .candidate-info {
+  color: var(--tv-paper-muted);
+  font-size: 0.78rem;
+  text-shadow: none;
+}
+
+html body .game-main {
+  gap: 1px;
+  background: var(--tv-rule);
+}
+
+html body .left-panel,
+html body .right-panel {
+  padding: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--tv-navy);
+  box-shadow: none;
+  color: var(--tv-paper);
+}
+
+html body .left-panel {
+  border-right: 1px solid var(--tv-rule);
+}
+
+html body .right-panel {
+  border-left: 1px solid var(--tv-rule);
+}
+
+html body .center-panel {
+  padding: 10px;
+  border: 0;
+  border-radius: 0;
+  background: #17120f;
+  box-shadow: none;
+}
+
+html body .center-panel::before {
+  height: 3px;
+  border-radius: 0;
+  background: var(--tv-amber);
+}
+
+html body .center-panel::after {
+  inset: 7px;
+  border-radius: 3px;
+  background: #bcb092;
+  box-shadow: inset 0 0 0 1px #7b725d;
+}
+
+html body .center-panel > * {
+  margin: 7px;
+}
+
+html body .center-panel .state-map-container {
+  padding: 8px;
+  border-radius: 10px / 7px;
+  background: #101827 !important;
+  box-shadow: inset 0 0 24px rgba(0,0,0,.72);
+  animation: none;
+}
+
+html body .center-panel .state-map-container::before {
+  opacity: 0.09;
+  animation: none;
+}
+
+html body .center-panel .state-map-container::after {
+  box-shadow: inset 0 0 34px rgba(0,0,0,.35);
+  animation: none;
+}
+
+html body .map-view-switcher {
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(244,236,216,.2);
+  gap: 0;
+}
+
+html body .map-view-switcher button {
+  padding: 5px 12px;
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  color: var(--tv-paper-muted);
+  font-family: var(--tv-data);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html body .map-view-switcher button + button {
+  border-left: 0;
+}
+
+html body .map-view-switcher button.active,
+html body .map-view-switcher button:hover,
+html body .map-view-switcher button:focus-visible {
+  background: var(--tv-amber);
+  color: var(--tv-ink);
+}
+
+/* Resource and campaign scoreboards */
+html body .resource-display h3,
+html body .progress-bar-container h3,
+html body .electoral-votes h3,
+html body .action-panel h3,
+html body .state-info-panel h3 {
+  margin: 0 0 6px;
+  color: var(--tv-paper);
+  font-family: var(--tv-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .resource-display {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 3px solid var(--tv-amber);
+  border-bottom: 1px solid var(--tv-rule);
+}
+
+html body .resource-display h3 {
+  grid-column: 1 / -1;
+  padding: 7px 6px 3px;
+}
+
+html body .resource-item {
+  min-width: 0;
+  margin: 0;
+  padding: 6px;
+  border: 0;
+  border-top: 1px solid rgba(183,165,121,.38);
+  border-right: 1px solid rgba(183,165,121,.38);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+}
+
+html body .resource-item:nth-of-type(even) {
+  border-right: 0;
+}
+
+html body .resource-label {
+  margin: 0 0 2px;
+  color: var(--tv-paper-muted);
+  font-family: var(--tv-data);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .resource-value,
+html body .resource-track-value {
+  color: var(--tv-paper);
+  font-family: var(--tv-data);
+  font-variant-numeric: tabular-nums;
+  text-shadow: none;
+}
+
+html body .energy-items {
+  gap: 3px;
+  margin-top: 4px;
+}
+
+html body .energy-item {
+  width: auto;
+  min-width: 10px;
+  max-width: none;
+  height: 9px;
+  min-height: 9px;
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html body .energy-item.active {
+  background: var(--tv-amber);
+  box-shadow: none;
+}
+
+html body .energy-item.depleted {
+  border-color: #536078;
+  background: #26344e;
+  box-shadow: none;
+  opacity: 1;
+}
+
+html body .resource-track,
+html body .campaign-desk-meter {
+  height: 7px;
+  border: 1px solid #566178;
+  border-radius: 0;
+  background: #070d18;
+}
+
+html body .resource-track span,
+html body .resource-track.credibility span,
+html body .campaign-desk-meter span {
+  background: var(--tv-amber);
+}
+
+html body .progress-bar-container {
+  margin: 10px 0;
+}
+
+html body .progress-bar {
+  height: 16px;
+  min-height: 16px;
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+}
+
+html body .progress-fill {
+  border-radius: 0;
+  background: var(--tv-amber);
+  box-shadow: none;
+}
+
+html body .progress-text,
+html body .progress-date {
+  color: var(--tv-paper-muted);
+  font-family: var(--tv-data);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: none;
+}
+
+html body .campaign-desk {
+  margin-top: 10px;
+  padding: 0;
+  border: 1px solid var(--tv-rule);
+  border-top: 4px solid var(--tv-amber);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+}
+
+html body .campaign-desk-heading,
+html body .campaign-desk-targets,
+html body .campaign-desk-route {
+  padding-inline: 8px;
+}
+
+html body .campaign-desk-heading {
+  padding-top: 7px;
+}
+
+html body .campaign-desk-kicker,
+html body .campaign-desk-label {
+  color: var(--tv-amber);
+  font-family: var(--tv-data);
+}
+
+html body .campaign-desk-status {
+  padding: 3px 5px;
+  border: 1px solid var(--tv-danger);
+  border-radius: 0;
+  background: transparent;
+  color: #efb4af;
+  font-family: var(--tv-data);
+}
+
+html body .campaign-desk-status.on-track {
+  border-color: var(--tv-positive);
+  background: transparent;
+  color: #b8d2bd;
+}
+
+html body .campaign-desk-score {
+  gap: 0;
+  border-block: 1px solid rgba(183,165,121,.4);
+}
+
+html body .campaign-desk-score div {
+  padding: 7px 2px;
+  border-right: 1px solid rgba(183,165,121,.4);
+  border-radius: 0;
+  background: transparent;
+}
+
+html body .campaign-desk-score div:last-child {
+  border-right: 0;
+}
+
+html body .campaign-desk-score strong,
+html body .campaign-desk-score span {
+  font-family: var(--tv-data);
+  font-variant-numeric: tabular-nums;
+}
+
+html body .campaign-desk-meter {
+  margin-inline: 8px;
+}
+
+html body .campaign-desk-route {
+  border-left: 0;
+  border-top: 1px solid rgba(183,165,121,.4);
+  background: transparent;
+}
+
+html body .campaign-desk-button {
+  margin: 8px;
+  width: calc(100% - 16px);
+  border-radius: 0;
+  background: var(--tv-blue);
+  color: var(--tv-paper);
+  font-family: var(--tv-data);
+  font-size: 0.68rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+html body .campaign-desk-button:hover,
+html body .campaign-desk-button:focus-visible {
+  background: var(--tv-amber);
+  color: var(--tv-ink);
+}
+
+html body .electoral-votes {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--tv-rule);
+}
+
+html body .electoral-votes .ev-display {
+  gap: 1px;
+  background: var(--tv-rule);
+}
+
+html body .electoral-votes .ev-item {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: var(--tv-data);
+}
+
+html body .electoral-votes .ev-item.democrat {
+  background: var(--tv-democrat);
+}
+
+html body .electoral-votes .ev-item.republican {
+  background: var(--tv-republican);
+}
+
+html body .electoral-votes .ev-item.clickable:hover {
+  filter: brightness(1.12);
+  box-shadow: inset 0 -4px 0 var(--tv-paper);
+  transform: none;
+}
+
+/* Map, legend, and table */
+html body .map-svg {
+  border: 1px solid #566178;
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+}
+
+html body .state-path {
+  transition: filter var(--tv-cut), stroke-width var(--tv-cut);
+}
+
+html body .state-path.selected {
+  stroke: var(--tv-amber);
+  filter: brightness(1.08);
+}
+
+html body .dc-box {
+  border: 2px solid var(--tv-paper);
+  border-radius: 0;
+  box-shadow: 3px 3px 0 rgba(0,0,0,.45);
+}
+
+html body .dc-box:hover {
+  filter: brightness(1.1);
+  transform: none;
+}
+
+html body .dc-box.selected {
+  outline: 3px solid var(--tv-amber);
+  outline-offset: 2px;
+  filter: none;
+}
+
+html body .map-legend {
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+}
+
+html body .legend-group-title {
+  color: var(--tv-paper-muted);
+  font-family: var(--tv-data);
+  letter-spacing: .04em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .legend-color {
+  width: 16px;
+  height: 12px;
+  border: 1px solid var(--tv-paper-muted);
+  border-radius: 0;
+  transition: none;
+}
+
+html body .legend-color:hover {
+  transform: none;
+}
+
+html body .legend-color:hover::after {
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: var(--tv-paper);
+  box-shadow: var(--tv-shadow-hard);
+  color: var(--tv-ink);
+  font-family: var(--tv-data);
+}
+
+html body .legend-color:hover::before {
+  border-top-color: var(--tv-paper);
+}
+
+html body .map-note {
+  color: var(--tv-paper-muted);
+  font-family: var(--tv-data);
+  font-size: 0.68rem;
+  font-style: normal;
+  text-shadow: none;
+}
+
+html body .state-table-wrap {
+  border: 1px solid #566178;
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+}
+
+html body .state-table {
+  font-family: var(--tv-data);
+  font-variant-numeric: tabular-nums;
+}
+
+html body .state-table caption,
+html body .state-table thead {
+  background: var(--tv-navy);
+  color: var(--tv-amber);
+  font-family: var(--tv-display);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+html body .state-table button {
+  border-radius: 0;
+  font-family: var(--tv-data);
+}
+
+/* Campaign planning rundown */
+html body .action-buttons {
+  gap: 5px;
+}
+
+html body .action-btn,
+html body .quick-action-btn {
+  padding: 8px;
+  border: 1px solid #66738a;
+  border-left: 4px solid var(--tv-blue);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+  color: var(--tv-paper);
+  text-shadow: none;
+  transform: none;
+}
+
+html body .action-btn:hover:not(:disabled),
+html body .quick-action-btn:hover {
+  border-color: var(--tv-amber);
+  border-left-color: var(--tv-amber);
+  background: #203b66;
+  box-shadow: none;
+  transform: none;
+}
+
+html body .action-name,
+html body .slot-title,
+html body .activity-name,
+html body .event-name {
+  color: var(--tv-paper);
+  font-family: var(--tv-display);
+  text-shadow: none;
+}
+
+html body .action-desc,
+html body .action-cost,
+html body .slot-state,
+html body .activity-details,
+html body .event-details {
+  color: var(--tv-paper-muted);
+  font-family: var(--tv-data);
+  text-shadow: none;
+}
+
+html body .action-selection,
+html body .action-preview,
+html body .fundraiser-confirmation,
+html body .no-state-selected {
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+}
+
+html body .state-select {
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: var(--tv-paper);
+  color: var(--tv-ink);
+}
+
+html body .execute-btn,
+html body .confirm-state-btn,
+html body .fundraiser-accept-btn,
+html body .action-on-state-btn,
+html body .end-turn-btn {
+  border: 1px solid var(--tv-paper);
+  border-radius: 2px;
+  background: var(--tv-amber);
+  box-shadow: none;
+  color: var(--tv-ink);
+  font-family: var(--tv-display);
+  letter-spacing: .06em;
+  text-shadow: none;
+  text-transform: uppercase;
+  transform: none;
+}
+
+html body .execute-btn:hover:not(:disabled),
+html body .confirm-state-btn:hover,
+html body .fundraiser-accept-btn:hover,
+html body .action-on-state-btn:hover,
+html body .end-turn-btn:hover:not(:disabled) {
+  background: var(--tv-paper);
+  box-shadow: none;
+  transform: none;
+}
+
+html body .cancel-btn,
+html body .fundraiser-deny-btn {
+  border: 1px solid var(--tv-rule);
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--tv-paper-muted);
+  transform: none;
+}
+
+html body .cancel-btn:hover,
+html body .fundraiser-deny-btn:hover {
+  border-color: var(--tv-paper);
+  background: rgba(244,236,216,.08);
+  box-shadow: none;
+  transform: none;
+}
+
+html body .end-turn-btn.highlighted {
+  background: var(--tv-amber);
+  box-shadow: none;
+  animation: none;
+}
+
+html body .action-slots-section {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--tv-rule);
+}
+
+html body .action-slots-grid {
+  gap: 3px;
+}
+
+html body .action-slot {
+  min-height: 44px;
+  padding: 5px 7px;
+  border: 1px solid #566178;
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+}
+
+html body .action-slot.empty-slot {
+  border-style: solid;
+  color: #8e9ab0;
+  opacity: 1;
+}
+
+html body .action-slot.filled-slot {
+  border-left: 4px solid var(--tv-amber);
+  background: #20334f;
+}
+
+html body .action-slot.filled-slot:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+html body .slot-day {
+  color: var(--tv-amber);
+  font-family: var(--tv-data);
+  letter-spacing: .08em;
+}
+
+html body .slot-remove-btn {
+  border: 1px solid #7d899d;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--tv-paper-muted);
+}
+
+html body .slot-remove-btn:hover {
+  border-color: var(--tv-danger);
+  background: var(--tv-danger);
+  box-shadow: none;
+  transform: none;
+}
+
+html body .hq-level-btn {
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+}
+
+html body .hq-level-btn:hover,
+html body .hq-level-btn.selected {
+  border-color: var(--tv-amber);
+  background: var(--tv-blue);
+  box-shadow: inset 0 -3px 0 var(--tv-amber);
+  transform: none;
+}
+
+/* State report */
+html body .state-info-panel {
+  background: transparent;
+  color: var(--tv-paper);
+}
+
+html body .state-info-header {
+  padding-bottom: 7px;
+  border-bottom: 4px solid var(--tv-amber);
+}
+
+html body .state-info-header h2,
+html body .state-detail-modal h2 {
+  color: var(--tv-paper);
+  font-family: var(--tv-display);
+  letter-spacing: .04em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .close-state-info-btn,
+html body .close-btn,
+html body .settings-close-btn,
+html body .projected-votes-close-btn {
+  border: 1px solid var(--tv-rule);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--tv-paper);
+  transform: none;
+}
+
+html body .close-state-info-btn:hover,
+html body .close-btn:hover,
+html body .settings-close-btn:hover,
+html body .projected-votes-close-btn:hover {
+  background: var(--tv-amber);
+  box-shadow: none;
+  color: var(--tv-ink);
+  transform: none;
+}
+
+html body .state-info-panel .info-section,
+html body .state-detail-modal .info-section {
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(183,165,121,.45);
+  border-radius: 0;
+  background: transparent;
+}
+
+html body .state-info-panel .voting-profile-content,
+html body .state-info-panel .voter-stats,
+html body .state-info-panel .momentum-display,
+html body .state-detail-modal .polling-display,
+html body .state-detail-modal .voter-stats,
+html body .state-detail-modal .demographics,
+html body .state-detail-modal .costs {
+  gap: 1px;
+  background: rgba(183,165,121,.35);
+}
+
+html body .state-info-panel .ev-display,
+html body .state-info-panel .stat-item,
+html body .state-info-panel .momentum-item,
+html body .state-detail-modal .polling-item,
+html body .state-detail-modal .stat-item,
+html body .state-detail-modal .demo-item,
+html body .state-detail-modal .cost-item {
+  border: 0;
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+}
+
+html body .state-info-panel .ev-count,
+html body .state-detail-modal .ev-count {
+  color: var(--tv-amber);
+  font-family: var(--tv-data);
+  font-variant-numeric: tabular-nums;
+  text-shadow: none;
+}
+
+html body .polling-pie-chart {
+  filter: saturate(.82);
+}
+
+html body .activity-item,
+html body .event-item {
+  border: 0;
+  border-left: 3px solid var(--tv-blue);
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+}
+
+html body .event-item.opponent-event {
+  border-left-color: var(--tv-republican);
+  background: #261b28;
+}
+
+/* Unified broadcast and editorial dialog system */
+html body .settings-modal-overlay,
+html body .topic-selector-overlay,
+html body .weekly-event-overlay,
+html body .projected-votes-modal-overlay,
+html body .state-detail-overlay,
+html body .historical-event-overlay,
+html body .weekly-recap-overlay,
+html body .tip-popup-overlay {
+  background: rgba(4, 9, 18, 0.82);
+  backdrop-filter: none;
+}
+
+html body .settings-modal,
+html body .topic-selector-modal,
+html body .weekly-event-modal,
+html body .projected-votes-modal,
+html body .state-detail-modal,
+html body .tip-popup {
+  border: 1px solid var(--tv-rule);
+  border-top: 6px solid var(--tv-amber);
+  border-radius: 0;
+  background: var(--tv-navy);
+  box-shadow: var(--tv-shadow-hard);
+  color: var(--tv-paper);
+}
+
+html body .settings-modal-header,
+html body .projected-votes-modal-header {
+  border-bottom: 1px solid var(--tv-rule);
+}
+
+html body .settings-modal-header h2,
+html body .projected-votes-modal-header h2,
+html body .topic-selector-modal h3,
+html body .weekly-event-modal h2 {
+  color: var(--tv-paper);
+  font-family: var(--tv-display);
+  letter-spacing: .04em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .settings-section,
+html body .settings-item,
+html body .event-topic,
+html body .estimated-effects-bar,
+html body .projected-votes-summary,
+html body .projected-votes-list-header,
+html body .projected-votes-item,
+html body .effect-item {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html body .settings-section {
+  border-top: 1px solid rgba(183,165,121,.45);
+}
+
+html body .settings-item,
+html body .event-topic,
+html body .estimated-effects-bar,
+html body .projected-votes-summary,
+html body .effect-item {
+  border: 1px solid rgba(183,165,121,.45);
+  background: var(--tv-navy-deep);
+}
+
+html body .settings-section h3,
+html body .weekly-event-kicker,
+html body .effects-header {
+  color: var(--tv-amber);
+  font-family: var(--tv-data);
+  letter-spacing: .08em;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+html body .settings-switch {
+  border: 1px solid var(--tv-rule);
+  background: #323e52;
+  box-shadow: none;
+}
+
+html body .settings-toggle input:checked + .settings-switch {
+  background: var(--tv-positive);
+}
+
+html body .topic-button,
+html body .position-btn {
+  border: 1px solid #68758b;
+  border-radius: 0;
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+  color: var(--tv-paper);
+  transform: none;
+}
+
+html body .topic-button:hover:not(:disabled),
+html body .topic-button.selected,
+html body .position-btn:hover,
+html body .position-btn.selected {
+  border-color: var(--tv-amber);
+  background: var(--tv-blue);
+  box-shadow: inset 0 -3px 0 var(--tv-amber);
+  color: var(--tv-paper);
+  transform: none;
+}
+
+html body .topic-button.position-locked {
+  border-color: var(--tv-amber);
+  box-shadow: none;
+}
+
+html body .position-badge,
+html body .already-used-badge {
+  border-radius: 0;
+  font-family: var(--tv-data);
+}
+
+html body .confirm-btn,
+html body .tip-dismiss-btn {
+  border: 1px solid var(--tv-paper);
+  border-radius: 2px;
+  background: var(--tv-amber);
+  box-shadow: none;
+  color: var(--tv-ink);
+  font-family: var(--tv-display);
+  letter-spacing: .06em;
+  text-shadow: none;
+  text-transform: uppercase;
+  transform: none;
+}
+
+html body .confirm-btn:hover:not(:disabled),
+html body .tip-dismiss-btn:hover {
+  background: var(--tv-paper);
+  box-shadow: none;
+  transform: none;
+}
+
+html body .weekly-event-warning,
+html body .projected-votes-route {
+  border-left-color: var(--tv-amber);
+  border-radius: 0;
+  background: rgba(196,146,45,.12);
+}
+
+html body .projected-votes-list-header {
+  border: 0;
+  border-bottom: 2px solid var(--tv-rule);
+  background: var(--tv-navy-deep);
+  font-family: var(--tv-data);
+  text-shadow: none;
+}
+
+html body .projected-votes-item {
+  border: 0;
+  border-bottom: 1px solid rgba(183,165,121,.32);
+  background: transparent;
+  font-family: var(--tv-data);
+}
+
+html body .projected-votes-item:hover,
+html body .projected-votes-item.won,
+html body .projected-votes-item.tie {
+  border-color: var(--tv-amber);
+  background: rgba(196,146,45,.1);
+  box-shadow: none;
+}
+
+html body .historical-event-card,
+html body .weekly-recap-card {
+  border: 1px solid var(--tv-rule);
+  border-top: 7px solid var(--tv-amber);
+  border-radius: 0;
+  background: var(--tv-paper);
+  box-shadow: var(--tv-shadow-hard);
+  color: var(--tv-ink);
+  font-family: var(--tv-editorial);
+}
+
+html body .historical-event-card h2,
+html body .weekly-recap-card h2 {
+  color: var(--tv-ink);
+  font-family: var(--tv-editorial);
+  text-shadow: none;
+}
+
+html body .historical-event-card header,
+html body .historical-event-card footer,
+html body .weekly-recap-movers {
+  border-color: var(--tv-rule);
+}
+
+html body .historical-event-card header > span,
+html body .historical-event-card header > strong,
+html body .weekly-recap-edition {
+  color: #6a5a3e;
+  font-family: var(--tv-data);
+}
+
+html body .historical-event-choices button {
+  border: 1px solid var(--tv-rule);
+  border-left: 5px solid var(--tv-blue);
+  border-radius: 0;
+  background: #eee3c9;
+  box-shadow: none;
+  color: var(--tv-ink);
+  transform: none;
+}
+
+html body .historical-event-choices button:hover,
+html body .historical-event-choices button:focus-visible,
+html body .historical-event-choices button.selected {
+  border-color: var(--tv-amber);
+  border-left-color: var(--tv-amber);
+  background: #e3d3ae;
+  box-shadow: none;
+  transform: none;
+}
+
+html body .historical-event-card footer button,
+html body .weekly-recap-card button {
+  border: 1px solid var(--tv-ink);
+  border-radius: 0;
+  background: var(--tv-ink);
+  color: var(--tv-paper);
+  font-family: var(--tv-data);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+html body .weekly-recap-scoreboard {
+  gap: 1px;
+  background: var(--tv-rule);
+}
+
+html body .weekly-recap-scoreboard div {
+  border-radius: 0;
+  background: #eee3c9;
+}
+
+/* Network wire */
+html body .news-ticker {
+  height: 46px;
+  padding: 0;
+  gap: 0;
+  border: 0;
+  border-top: 2px solid var(--tv-amber);
+  background: var(--tv-navy-deep);
+  box-shadow: none;
+  color: var(--tv-paper);
+}
+
+html body .news-ticker-label {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 0;
+  background: var(--tv-amber);
+  color: var(--tv-ink);
+  font-family: var(--tv-data);
+  font-size: 0.72rem;
+  letter-spacing: .1em;
+  text-shadow: none;
+}
+
+html body .news-ticker-content {
+  height: 100%;
+  min-height: 0;
+  padding-inline: 14px;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+html body .news-ticker-item {
+  font-family: var(--tv-data);
+  font-size: .75rem;
+  font-weight: 400;
+  letter-spacing: .035em;
+}
+
+html body .news-ticker-separator {
+  color: var(--tv-amber);
+}
+
+/* Election night is the editorial sign-off of the same system. */
+html body .election-night {
+  --ink: var(--tv-ink);
+  --paper: var(--tv-paper);
+  --muted: #685f50;
+  --dem: var(--tv-democrat);
+  --rep: var(--tv-republican);
+  border-radius: 0;
+  box-shadow: var(--tv-shadow-hard);
+}
+
+html body .election-night__play-again:hover {
+  background: var(--tv-blue);
+  transform: none;
+}
+
+/* CRT preference now affects only media texture, never the strategy data. */
+:root[data-crt-effects='false'] .crt-overlay,
+:root[data-crt-effects='false'] .center-panel .state-map-container::before,
+:root[data-crt-effects='false'] .center-panel .state-map-container::after {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  html body .game-interface {
+    overflow-y: auto;
+  }
+
+  html body .game-main {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  html body .left-panel,
+  html body .center-panel,
+  html body .right-panel {
+    border: 0;
+    border-bottom: 1px solid var(--tv-rule);
+    overflow: visible;
+  }
+
+  html body .center-panel {
+    min-height: 52vh;
+    order: -1;
+  }
+
+  html body .tv-controls {
+    display: none;
+  }
+
+  html body .tv-cabinet {
+    width: min(100%, 760px);
+  }
+}
+
+@media (max-width: 560px) {
+  html body .start-screen {
+    padding: 52px 0 0;
+  }
+
+  html body .tv-cabinet,
+  html body .tv-screen-area,
+  html body .tv-screen-bezel {
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html body .tv-screen {
+    min-height: calc(100dvh - 52px);
+    padding: 1.2rem;
+    border: 0;
+    border-radius: 0;
+  }
+
+  html body .game-title {
+    font-size: 4.6rem;
+  }
+
+  html body .candidate-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html body .candidate-image {
+    height: 120px;
+  }
+
+  html body .candidate-name {
+    font-size: .95rem;
+  }
+
+  html body .candidate-strategy {
+    display: none;
+  }
+
+  html body .game-header {
+    min-height: 62px;
+    padding: 6px 8px;
+  }
+
+  html body .header-candidate-image {
+    width: 42px;
+    height: 44px;
+  }
+
+  html body .game-header h1 {
+    font-size: 1rem;
+  }
+
+  html body .candidate-info {
+    font-size: .67rem;
+  }
+
+  html body .campaign-meta {
+    display: none;
+  }
+
+  html body .settings-btn-small {
+    padding: 10px;
+    min-height: 44px;
+  }
+
+  html body .center-panel {
+    min-height: 46vh;
+    padding: 4px;
+  }
+
+  html body .center-panel::after {
+    inset: 3px;
+  }
+
+  html body .center-panel > * {
+    margin: 3px;
+  }
+
+  html body .left-panel,
+  html body .right-panel {
+    padding: 10px;
+  }
+
+  html body .news-ticker {
+    height: 42px;
+  }
+
+  html body .news-ticker-label {
+    padding-inline: 10px;
+  }
+
+  html body .news-ticker-item {
+    font-size: .68rem;
+  }
+
+  html body .topic-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+:root[data-reduced-motion='true'] .news-ticker-scroll {
+  animation: none;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .news-ticker-scroll {
+    animation: none;
+    transform: none;
+  }
+}

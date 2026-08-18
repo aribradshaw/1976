@@ -51,7 +51,7 @@ export default function StartScreen({ onStart, onResume, hasSavedGame = false }:
               <CRTOverlay />
               <div className="start-content">
                 <h1 className="game-title">1976</h1>
-                <p className="game-subtitle">As Seen on TV!</p>
+                <p className="game-subtitle">Network Campaign Desk</p>
                 <p className="game-version">v{packageJson.version}</p>
                 <p className="game-description">
                   Take control of a presidential campaign in one of the closest elections in U.S. history.

@@ -1,28 +1,43 @@
+:root {
+  --tv-ink: #101827;
+  --tv-navy: #17294c;
+  --tv-navy-deep: #0d1930;
+  --tv-blue: #28517d;
+  --tv-paper: #f4ecd8;
+  --tv-paper-muted: #d8cbaa;
+  --tv-rule: #b7a579;
+  --tv-amber: #c4922d;
+  --tv-democrat: #27639a;
+  --tv-republican: #a63e3c;
+  --tv-positive: #496c57;
+  --tv-warning: #b87526;
+  --tv-danger: #983838;
+  --tv-walnut: #4a2f1e;
+  --tv-display: 'Arial Narrow', 'Franklin Gothic Medium', 'Helvetica Neue', Arial, sans-serif;
+  --tv-body: Arial, Helvetica, sans-serif;
+  --tv-data: 'Courier New', Courier, monospace;
+  --tv-editorial: Georgia, 'Times New Roman', serif;
+  --tv-shadow-hard: 5px 5px 0 rgba(8, 13, 24, 0.48);
+  --tv-cut: 150ms linear;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--tv-body);
 }
 
 body {
-  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--tv-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* CRT TV warm red-orange background */
-  background: #c85a3a;
-  background: linear-gradient(135deg, #c85a3a 0%, #b84a2a 100%);
+  background: var(--tv-ink);
   height: 100vh;
   overflow: hidden;
   color: #f5f5dc;
-  /* CRT effects */
-  filter: contrast(1.05) brightness(0.95);
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  filter: none;
+  image-rendering: auto;
 }
 
 #root {
@@ -31,8 +46,7 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: var(--tv-data);
 }
 
 :root[data-crt-effects='false'] body {
@@ -52,7 +66,7 @@ code {
 }
 
 :focus-visible {
-  outline: 3px solid #fbbf24;
+  outline: 3px solid var(--tv-amber);
   outline-offset: 3px;
 }
 

@@ -65,11 +65,12 @@ npm run build
 npm run test:e2e
 ```
 
-Version 2.7.6 passes 31 deterministic and unit tests plus eight Chromium journeys. Browser coverage includes setup, removal of legacy music authorization state, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, a 390px mobile campaign, and a complete 25-week game through election night. The complete dependency tree audits cleanly.
+Version 2.7.7 passes 31 deterministic and unit tests plus nine Chromium journeys. Browser coverage includes setup, the 1976 network television design system, removal of legacy music authorization state, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, a 390px mobile campaign, and a complete 25-week game through election night. The complete dependency tree audits cleanly.
 
 ## Architecture
 
 - `src/components/` contains the campaign interface and accessible presentation layers.
+- `src/styles/television-system.css` applies the shared 1976 network election-desk visual system.
 - `src/game/simulation/` contains seeded random, canonical action quotes, forecasts, and historical-event resolution.
 - `src/game/strategy/` contains deterministic Road to 270 planning.
 - `src/scenarios/` contains typed scenario definitions, validation, registry, and the editable 1976 example.
@@ -77,6 +78,8 @@ Version 2.7.6 passes 31 deterministic and unit tests plus eight Chromium journey
 - `src/game/GameEngine.ts` remains the campaign orchestration facade while pure systems continue moving behind tested boundaries.
 
 Read [the architecture boundary](docs/architecture.md) before changing campaign orchestration.
+
+Interface work should also follow the [network television style guide](docs/TELEVISION_STYLE_GUIDE.md), including its palette, typography, motion, responsive, and accessibility rules.
 
 ## Build a scenario or mod
 
@@ -103,7 +106,7 @@ npm run lint          # zero-warning lint gate
 - Extract additional week-resolution phases from `GameEngine` into pure simulation modules
 - Add advisor-led first-week onboarding
 - Expand historical scenarios and community-authored event decks
-- Complete a redistributable audio replacement pass and choose a code license
+- Complete a redistributable audio replacement pass
 
 ## Historical sources and asset rights
 

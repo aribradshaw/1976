@@ -37,6 +37,33 @@ test('opens at the 1976 title screen and starts a selected candidate and difficu
   await expect(page.getByText('Week 1 of 25')).toBeVisible();
 });
 
+test('applies the network election-desk visual system to setup and gameplay', async ({ page }) => {
+  await page.goto('/');
+
+  const titleStyles = await page.locator('.candidate-btn').first().evaluate((element) => {
+    const root = getComputedStyle(document.documentElement);
+    const card = getComputedStyle(element);
+    return {
+      navy: root.getPropertyValue('--tv-navy').trim(),
+      amber: root.getPropertyValue('--tv-amber').trim(),
+      radius: card.borderRadius,
+      shadow: card.boxShadow,
+    };
+  });
+  expect(titleStyles).toEqual({
+    navy: '#17294c',
+    amber: '#c4922d',
+    radius: '0px',
+    shadow: 'none',
+  });
+
+  await startCampaign(page);
+  await expect(page.getByRole('heading', { name: "Election '76 Campaign Desk" })).toBeVisible();
+  const interfaceFilter = await page.locator('.game-interface').evaluate((element) => getComputedStyle(element).filter);
+  expect(interfaceFilter).toBe('none');
+  await expect(page.locator('.news-ticker-label')).toHaveText('WIRE');
+});
+
 test('removes legacy music authorization state and exposes no connection controls', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('spotify_token', 'legacy-token');

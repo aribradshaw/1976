@@ -128,7 +128,7 @@ export default function NewsTicker({ currentWeek, gameEngine, gameState }: NewsT
 
   return (
     <div className="news-ticker">
-      <div className="news-ticker-label">📰 NEWS</div>
+      <div className="news-ticker-label">WIRE</div>
       <div className="news-ticker-content">
         <div className="news-ticker-scroll">
           {scrollingHeadlines.map((headline, index) => (
