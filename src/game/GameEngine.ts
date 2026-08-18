@@ -225,8 +225,6 @@ export class GameEngine {
     this.gameState.resources.credibility = Math.max(0, Math.min(100, this.gameState.resources.credibility + resolved.effects.credibility + insolvencyPenalty));
 
     const targets = this.getEventTargetStates(event);
-    const coalitionImpact = Object.values(resolved.effects.coalition).reduce((sum, value) => sum + (value ?? 0), 0);
-    const relationshipDelta = coalitionImpact / Math.max(6, Object.keys(resolved.effects.coalition).length * 3);
 
     targets.forEach(state => {
       const currentMomentum = this.gameState.stateMomentum.get(state) ?? 0;
@@ -235,12 +233,12 @@ export class GameEngine {
       const relationships = this.gameState.microgroupRelationships.get(state);
       if (!relationships) return;
       const updated = { ...relationships };
-      const coalitionTargets: Array<keyof MicrogroupRelationships> = [
-        'lean_dem', 'swingable_dem', 'lean_rep', 'swingable_rep',
-        'lean_dem_indie', 'swingable_indie', 'lean_rep_indie',
-      ];
-      coalitionTargets.forEach(group => {
-        updated[group] = Math.max(1, Math.min(10, updated[group] + relationshipDelta));
+      Object.entries(resolved.effects.coalition).forEach(([coalition, rawDelta]) => {
+        const delta = (rawDelta ?? 0) / 3;
+        const coalitionTargets = COALITION_MICROGROUPS[coalition] ?? ['swingable_indie'];
+        coalitionTargets.forEach(group => {
+          updated[group] = Math.max(1, Math.min(10, updated[group] + delta));
+        });
       });
       this.gameState.microgroupRelationships.set(state, updated);
     });
@@ -3356,6 +3354,19 @@ export class GameEngine {
     return '#808080';
   }
 }
+
+const COALITION_MICROGROUPS: Record<string, readonly (keyof MicrogroupRelationships)[]> = {
+  independents: ['lean_dem_indie', 'swingable_indie', 'lean_rep_indie'],
+  labor: ['lean_dem', 'swingable_dem', 'lean_dem_indie'],
+  southern: ['swingable_dem', 'swingable_rep', 'swingable_indie'],
+  farm: ['swingable_rep', 'swingable_indie', 'lean_rep_indie'],
+  urban: ['lean_dem', 'swingable_dem', 'lean_dem_indie'],
+  suburban: ['swingable_dem', 'swingable_rep', 'swingable_indie'],
+  women: ['lean_dem_indie', 'swingable_indie', 'lean_rep_indie'],
+  youth: ['swingable_dem', 'swingable_indie'],
+  veterans: ['lean_rep', 'swingable_rep', 'lean_rep_indie'],
+  conservatives: ['hardcore_rep', 'lean_rep', 'hardcore_rep_indie'],
+};
 
 const EVENT_REGIONS: Record<string, readonly string[]> = {
   AL: ['South'], AK: ['West Coast'], AZ: ['West Coast'], AR: ['South'], CA: ['West Coast'],

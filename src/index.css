@@ -35,3 +35,24 @@ code {
     monospace;
 }
 
+:root[data-crt-effects='false'] body {
+  filter: none;
+  image-rendering: auto;
+}
+
+/* Runtime preference set by preferences.ts. This deliberately covers every
+   component so the app does not need an accessibility provider or App change. */
+:root[data-reduced-motion='true'] *,
+:root[data-reduced-motion='true'] *::before,
+:root[data-reduced-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+}
+
+:focus-visible {
+  outline: 3px solid #fbbf24;
+  outline-offset: 3px;
+}
+

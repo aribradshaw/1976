@@ -7,6 +7,19 @@ Production-style releases use the same Arizona-calendar versioning policy as Cam
 - The first live push in a new year advances the major number, sets minor to the Arizona calendar month minus one, and resets patch to `1`.
 - Rebuilds of the same commit do not create another release.
 
+## 2.7.4, August 18, 2026
+
+Accessible strategy board and full-campaign quality gate
+
+- Added a keyboard-operable state table ordered by race competitiveness as an alternative to the color map.
+- Added persisted Reduce Motion and CRT Effects settings, system reduced-motion defaults, global animation control, visible focus, and an accessible focus-trapped settings dialog.
+- Rebuilt tablet and mobile layout behavior so the map, campaign desk, state table, and action planner remain usable without page overflow.
+- Made electoral forecast controls semantic buttons and improved keyboard navigation throughout setup and strategy views.
+- Made historical coalition choices affect distinct voter groups rather than collapsing their tradeoffs into one generic national adjustment.
+- Added Playwright Chromium infrastructure and a GitHub Actions quality workflow.
+- Added 7 browser journeys covering setup, the complete weekly loop, autosave/resume, keyboard control, persisted accessibility settings, a 390px mobile campaign, and all 25 weeks through a fully called 538-EV election night.
+- Expanded deterministic and unit coverage to 26 tests, with the full local quality gate now covering 33 automated checks.
+
 ## 2.7.3, August 18, 2026
 
 Campaign continuity and election night

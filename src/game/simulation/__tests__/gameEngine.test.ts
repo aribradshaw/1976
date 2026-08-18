@@ -108,4 +108,15 @@ describe('GameEngine weekly resolution', () => {
     expect(restored.getGameState().resources.funds).toBe(0);
     expect(restored.getGameState().historicalEvents).toHaveLength(1);
   });
+
+  it('applies distinct historical coalition tradeoffs to distinct voter groups', () => {
+    const reform = new GameEngine('democrat', 'medium', 'coalition-tradeoffs');
+    const competence = new GameEngine('democrat', 'medium', 'coalition-tradeoffs');
+    reform.applyHistoricalEventChoice(EVENTS_1976[0], 'clean-government');
+    competence.applyHistoricalEventChoice(EVENTS_1976[0], 'competence-first');
+
+    expect(reform.getGameState().microgroupRelationships.get('OH')).not.toEqual(
+      competence.getGameState().microgroupRelationships.get('OH'),
+    );
+  });
 });

@@ -1,16 +1,15 @@
 # 1976: Election Simulation Game
 
-> Version 2.7.3, campaign continuity and election night
+> Version 2.7.4, accessible strategy board and full-campaign quality gate
 
-## What changed in 2.7.3
+## What changed in 2.7.4
 
-- Campaigns automatically save in the browser and can be resumed from the title screen.
-- Saves preserve the exact random stream alongside the campaign board, resources, decisions, and calendar, so resumed weeks replay correctly.
-- Election night now resolves every state from its live win probability through a seeded model and awards all 538 electoral votes.
-- A live election desk reveals calls in batches, tracks the race to 270, supports reduced motion, and announces the final result.
-- The start screen explains candidate strengths and fair difficulty behavior without forcing a Spotify setup prompt before play.
-- End-game analytics stay in memory unless explicitly exported instead of automatically downloading a large file.
-- The deterministic test suite now contains 25 tests, including save validation, exact RNG continuation, insolvency safety, and complete election-night replay.
+- Players can switch from the electoral map to a keyboard-operable state table ordered by the closest live races.
+- Tablet and mobile layouts now prioritize the strategy board and keep campaign resources and actions usable without page overflow.
+- Reduced Motion and CRT Visual Effects settings persist locally, follow the system motion preference by default, and apply across the full game.
+- Historical event coalitions now affect distinct voter groups, preserving the strategic meaning of visible tradeoffs.
+- Playwright and GitHub Actions now verify setup, weekly decisions, recaps, autosave/resume, keyboard use, settings persistence, 390px mobile play, and a full 25-week campaign.
+- The quality gate contains 26 deterministic/unit tests and 7 Chromium browser journeys, including a complete 538-EV election night.
 
 A turn-based strategy game simulating the 1976 U.S. Presidential Election between Gerald Ford and Jimmy Carter. Campaign across all 50 states, manage resources, build momentum, and compete for 270 electoral votes in this historically-accurate political strategy game.
 
@@ -38,6 +37,8 @@ A turn-based strategy game simulating the 1976 U.S. Presidential Election betwee
 - **Weekly Recap**: See cash flow, electoral movement, and the states most affected by each resolution
 - **Autosave and Resume**: Continue a browser campaign from the exact week and simulation state where you left it
 - **Election Night**: Watch all 538 EV resolve through seeded state calls on an accessible live results desk
+- **Accessible State Board**: Switch between the electoral map and a keyboard-friendly table of every live race
+- **Player Preferences**: Persist reduced motion and optional CRT effects across sessions
 - **Microgroup Relationships**: Build relationships with 11 different voter microgroups in each state
 - **Momentum Competition**: Momentum differential drives poll changes - compete with AI opponent for momentum advantage
 - **Topic Positions**: Lock positions on 20 different topics (Watergate, Economy, Energy, etc.)

@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.7.4",
+    "date": "2026-08-18",
+    "title": "Accessible strategy board and full-campaign quality gate",
+    "notes": [
+      "A keyboard-operable state table and responsive layout make the campaign board usable beyond the color map and desktop viewport.",
+      "Reduced motion and CRT visual effects are persisted, system-aware settings with global behavior and accessible dialog controls.",
+      "Seven Playwright journeys cover setup, weekly resolution, autosave, accessibility, mobile play, and a complete 25-week campaign through all 538 EV.",
+      "GitHub Actions now gates releases on version verification, lint, 26 unit tests, production build, and browser tests."
+    ]
+  },
+  {
     "version": "2.7.3",
     "date": "2026-08-18",
     "title": "Campaign continuity and election night",

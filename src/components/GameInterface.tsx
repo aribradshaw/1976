@@ -17,6 +17,7 @@ import CampaignDesk from './CampaignDesk';
 import WeeklyRecapModal, { WeekRecap } from './WeeklyRecapModal';
 import HistoricalEventModal from './HistoricalEventModal';
 import ElectionNight from './ElectionNight';
+import StateTable from './StateTable';
 import { FaDemocrat, FaRepublican } from 'react-icons/fa';
 import { TopicId, TOPICS } from '../data/topics';
 import { buildElectoralForecast } from '../game/simulation/forecast';
@@ -45,6 +46,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
   const [showProjectedVotes, setShowProjectedVotes] = useState<'democrat' | 'republican' | null>(null);
   const [weekRecap, setWeekRecap] = useState<WeekRecap | null>(null);
   const [showHistoricalEvent, setShowHistoricalEvent] = useState(false);
+  const [mapView, setMapView] = useState<'map' | 'table'>('map');
   const resolutionBaseline = useRef(gameState);
 
   useEffect(() => {
@@ -272,8 +274,9 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
           <div className="electoral-votes">
             <h3>Expected Electoral Votes</h3>
             <div className="ev-display">
-              <div 
+              <button
                 className="ev-item democrat clickable"
+                aria-label="Open Democratic electoral forecast"
                 onClick={() => {
                   playClickSound(); // Play random click sound
                   setShowProjectedVotes('democrat');
@@ -281,9 +284,10 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
               >
                 <FaDemocrat className="party-icon" />
                 <span className="ev-value">{Math.round(liveForecast.expectedElectoralVotes.democrat)}</span>
-              </div>
-              <div 
+              </button>
+              <button
                 className="ev-item republican clickable"
+                aria-label="Open Republican electoral forecast"
                 onClick={() => {
                   playClickSound(); // Play random click sound
                   setShowProjectedVotes('republican');
@@ -291,7 +295,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
               >
                 <FaRepublican className="party-icon" />
                 <span className="ev-value">{Math.round(liveForecast.expectedElectoralVotes.republican)}</span>
-              </div>
+              </button>
             </div>
             {expandedEvParty === 'democrat' && (() => {
               const statesWon = gameEngine.getStatesWonByParty();
@@ -335,27 +339,32 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
         </div>
 
         <div className="center-panel">
-          <StateMap 
-            gameEngine={gameEngine}
-            onStateClick={(abbrev) => {
-              // Single click toggles selection
-              handleStateClick(abbrev);
-            }}
-            onStateDoubleClick={(abbrev) => {
-              // Double-click shows details
-              handleStateDoubleClick(abbrev);
-            }}
-            onMapClick={() => {
-              // Clicking the map background deselects
-              if (selectedState !== null) {
-                playStateDeselectSound(); // Play deselect sound only if a state was selected
-              }
-              setSelectedState(null);
-              setShowStateDetail(false);
-              setShowActionPanel(false);
-            }}
-            selectedState={selectedState}
-          />
+          <div className="map-workspace">
+            <div className="map-view-switcher" aria-label="State board view">
+              <button className={mapView === 'map' ? 'active' : ''} aria-pressed={mapView === 'map'} onClick={() => setMapView('map')}>Map</button>
+              <button className={mapView === 'table' ? 'active' : ''} aria-pressed={mapView === 'table'} onClick={() => setMapView('table')}>State table</button>
+            </div>
+            {mapView === 'map' ? (
+              <StateMap
+                gameEngine={gameEngine}
+                onStateClick={handleStateClick}
+                onStateDoubleClick={handleStateDoubleClick}
+                onMapClick={() => {
+                  if (selectedState !== null) playStateDeselectSound();
+                  setSelectedState(null);
+                  setShowStateDetail(false);
+                  setShowActionPanel(false);
+                }}
+                selectedState={selectedState}
+              />
+            ) : (
+              <StateTable
+                states={gameEngine.getAllStates()}
+                gameState={gameState}
+                onSelect={handleStateClick}
+              />
+            )}
+          </div>
         </div>
 
         <div className="right-panel">

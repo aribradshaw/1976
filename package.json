@@ -1,6 +1,6 @@
 {
   "name": "1976-election-sim",
-  "version": "2.7.3",
+  "version": "2.7.4",
   "description": "Turn-based strategy game simulating the 1976 U.S. Presidential Election",
   "type": "module",
   "scripts": {
@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
     "release:verify": "node scripts/verify-devlog-release.mjs",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
@@ -18,6 +20,7 @@
     "react-icons": "^5.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@typescript-eslint/eslint-plugin": "^6.14.0",

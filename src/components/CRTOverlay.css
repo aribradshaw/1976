@@ -72,3 +72,8 @@
   pointer-events: none;
 }
 
+:root[data-reduced-motion='true'] .crt-overlay,
+:root[data-crt-effects='false'] .crt-overlay {
+  display: none;
+}
+

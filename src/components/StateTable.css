@@ -1,0 +1,46 @@
+.state-table-wrap {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  border-radius: 8px;
+  background: #111827;
+  color: #f9f2dd;
+}
+
+.state-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(0.72rem, 1vw, 0.9rem);
+}
+
+.state-table caption {
+  padding: 0.75rem;
+  color: #f2cf78;
+  font-weight: 800;
+  text-align: left;
+}
+
+.state-table thead { position: sticky; top: 0; z-index: 2; background: #1a2a5a; }
+.state-table th,
+.state-table td { padding: 0.65rem; border-bottom: 1px solid rgba(245, 245, 220, 0.18); text-align: right; }
+.state-table th:first-child { text-align: left; }
+.state-table tbody tr { content-visibility: auto; contain-intrinsic-size: 42px; }
+.state-table tbody tr:hover { background: rgba(242, 207, 120, 0.08); }
+.state-table th span { color: rgba(245, 245, 220, 0.6); font-size: 0.7em; }
+.state-table button {
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #f2cf78;
+  border-radius: 4px;
+  background: transparent;
+  color: #fff8dc;
+  cursor: pointer;
+}
+.state-table button:hover,
+.state-table button:focus-visible { background: #f2cf78; color: #111827; }
+
+@media (max-width: 600px) {
+  .state-table th,
+  .state-table td { padding: 0.5rem 0.35rem; }
+  .state-table th:nth-child(3), .state-table td:nth-child(3),
+  .state-table th:nth-child(4), .state-table td:nth-child(4) { display: none; }
+}
