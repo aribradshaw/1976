@@ -68,4 +68,44 @@ describe('GameEngine weekly resolution', () => {
     expect(first.applyHistoricalEventChoice(event, event.choices[1].id)).toBeNull();
     expect(first.getGameState().historicalEvents).toHaveLength(1);
   });
+
+  it('resolves all 538 electoral votes reproducibly on election night', () => {
+    const first = new GameEngine('democrat', 'easy', 'election-night-replay');
+    const second = new GameEngine('democrat', 'easy', 'election-night-replay');
+
+    for (let week = 0; week < 25; week += 1) {
+      first.endTurn();
+      second.endTurn();
+    }
+
+    const firstState = first.getGameState();
+    const secondState = second.getGameState();
+    expect(firstState.finalResults.size).toBe(51);
+    expect(firstState.electoralVotes.democrat + firstState.electoralVotes.republican).toBe(538);
+    expect(Array.from(firstState.finalResults.entries())).toEqual(Array.from(secondState.finalResults.entries()));
+    expect(firstState.electoralVotes).toEqual(secondState.electoralVotes);
+  });
+
+  it('saves, restores, and continues the same deterministic campaign', () => {
+    const original = new GameEngine('republican', 'medium', 'campaign-save');
+    original.applyHistoricalEventChoice(EVENTS_1976[0], EVENTS_1976[0].choices[1].id);
+    original.endTurn();
+    const restored = GameEngine.restoreCampaign(original.serializeCampaign());
+
+    expect(restored.getGameState()).toEqual(original.getGameState());
+    original.endTurn();
+    restored.endTurn();
+    expect(restored.getGameState()).toEqual(original.getGameState());
+  });
+
+  it('never soft-locks a cash-poor campaign on a required historical decision', () => {
+    const engine = new GameEngine('democrat', 'medium', 'insolvent-campaign');
+    const save = JSON.parse(engine.serializeCampaign()) as { state: { resources: { funds: number } } };
+    save.state.resources.funds = 0;
+    const restored = GameEngine.restoreCampaign(JSON.stringify(save));
+
+    expect(restored.applyHistoricalEventChoice(EVENTS_1976[0], EVENTS_1976[0].choices[0].id)).not.toBeNull();
+    expect(restored.getGameState().resources.funds).toBe(0);
+    expect(restored.getGameState().historicalEvents).toHaveLength(1);
+  });
 });

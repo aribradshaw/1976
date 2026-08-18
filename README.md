@@ -1,16 +1,16 @@
 # 1976: Election Simulation Game
 
-> Version 2.7.2, historical campaign decisions and the road to 270
+> Version 2.7.3, campaign continuity and election night
 
-## What changed in 2.7.2
+## What changed in 2.7.3
 
-- Every week now includes a sourced 1976 campaign decision with visible costs, coalition effects, and tradeoffs.
-- The timeline includes the conventions and all four historical debate set pieces.
-- A live campaign desk shows expected EV, likely EV, battleground win probabilities, must-holds, best flips, and paths to 270.
-- Forecasts now show uncertainty and poll confidence instead of presenting a single precise projection as certain.
-- Candidate energy and campaign credibility are live resources that decisions can build or spend.
-- Newspaper-style recaps explain what changed after each week and identify the states that moved most.
-- The deterministic simulation suite now has 18 tests covering events, debate timing, action planning, forecasts, and strategy paths.
+- Campaigns automatically save in the browser and can be resumed from the title screen.
+- Saves preserve the exact random stream alongside the campaign board, resources, decisions, and calendar, so resumed weeks replay correctly.
+- Election night now resolves every state from its live win probability through a seeded model and awards all 538 electoral votes.
+- A live election desk reveals calls in batches, tracks the race to 270, supports reduced motion, and announces the final result.
+- The start screen explains candidate strengths and fair difficulty behavior without forcing a Spotify setup prompt before play.
+- End-game analytics stay in memory unless explicitly exported instead of automatically downloading a large file.
+- The deterministic test suite now contains 25 tests, including save validation, exact RNG continuation, insolvency safety, and complete election-night replay.
 
 A turn-based strategy game simulating the 1976 U.S. Presidential Election between Gerald Ford and Jimmy Carter. Campaign across all 50 states, manage resources, build momentum, and compete for 270 electoral votes in this historically-accurate political strategy game.
 
@@ -36,6 +36,8 @@ A turn-based strategy game simulating the 1976 U.S. Presidential Election betwee
 - **Historical Decisions**: Every week presents a sourced 1976 campaign choice with visible strategic tradeoffs
 - **Road to 270**: Track expected EV, likely EV, battlegrounds, must-holds, and routes to victory
 - **Weekly Recap**: See cash flow, electoral movement, and the states most affected by each resolution
+- **Autosave and Resume**: Continue a browser campaign from the exact week and simulation state where you left it
+- **Election Night**: Watch all 538 EV resolve through seeded state calls on an accessible live results desk
 - **Microgroup Relationships**: Build relationships with 11 different voter microgroups in each state
 - **Momentum Competition**: Momentum differential drives poll changes - compete with AI opponent for momentum advantage
 - **Topic Positions**: Lock positions on 20 different topics (Watergate, Economy, Energy, etc.)

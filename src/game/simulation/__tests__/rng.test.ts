@@ -20,4 +20,16 @@ describe('SeededRng', () => {
       expect(rng.nextInt(-3, 7)).toBeLessThanOrEqual(7);
     }
   });
+
+  it('continues exactly from a saved snapshot', () => {
+    const rng = new SeededRng('save-game');
+    rng.next();
+    rng.next();
+    const snapshot = rng.snapshot();
+    const expected = Array.from({ length: 8 }, () => rng.next());
+    const restored = new SeededRng(snapshot.seed);
+    restored.restore(snapshot);
+
+    expect(Array.from({ length: 8 }, () => restored.next())).toEqual(expected);
+  });
 });

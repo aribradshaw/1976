@@ -12,6 +12,11 @@ export interface RandomSource {
   fork(namespace: string): SeededRng;
 }
 
+export interface RngSnapshot {
+  seed: number;
+  state: number;
+}
+
 export class SeededRng implements RandomSource {
   private state: number;
   readonly seed: number;
@@ -58,6 +63,17 @@ export class SeededRng implements RandomSource {
   /** Creates an independent deterministic stream for a named sub-system. */
   fork(namespace: string): SeededRng {
     return new SeededRng(`${this.seed}:${namespace}`);
+  }
+
+  snapshot(): RngSnapshot {
+    return { seed: this.seed, state: this.state };
+  }
+
+  restore(snapshot: RngSnapshot): void {
+    if (!Number.isFinite(snapshot.state) || snapshot.seed !== this.seed) {
+      throw new RangeError('Cannot restore an incompatible RNG snapshot.');
+    }
+    this.state = snapshot.state;
   }
 }
 

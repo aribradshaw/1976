@@ -1,24 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Candidate } from '../types/game';
 import CRTOverlay from './CRTOverlay';
 import SpotifyPlayer from './SpotifyPlayer';
 import SettingsModal from './SettingsModal';
-import SpotifyConnectionModal from './SpotifyConnectionModal';
 import { playClickSound, playEndTurnSound } from '../utils/sounds';
-import { isSpotifyConnected } from '../utils/spotify';
 import packageJson from '../../package.json';
 import './StartScreen.css';
 
 interface StartScreenProps {
   onStart: (candidate: Candidate, difficulty: 'easy' | 'medium' | 'hard') => void;
+  onResume?: () => void;
+  hasSavedGame?: boolean;
 }
 
-export default function StartScreen({ onStart }: StartScreenProps) {
+export default function StartScreen({ onStart, onResume, hasSavedGame = false }: StartScreenProps) {
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [showSpotifyModal, setShowSpotifyModal] = useState(false);
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   
   const handleCandidateSelect = (candidate: Candidate) => {
     playClickSound(); // Play click sound
@@ -32,55 +30,8 @@ export default function StartScreen({ onStart }: StartScreenProps) {
     }
   };
 
-  const handleSpotifyModalConnect = () => {
-    // Mark that user has interacted
-    setHasUserInteracted(true);
-    localStorage.setItem('spotify_modal_shown', 'true');
-    setShowSpotifyModal(false);
-    // connectSpotify() will redirect, so we don't need to do anything else
-  };
-
-  const handleSpotifyModalSkip = () => {
-    // Mark that user has interacted
-    setHasUserInteracted(true);
-    localStorage.setItem('spotify_modal_shown', 'true');
-    setShowSpotifyModal(false);
-    // TV static will start automatically via useEffect
-  };
-
-  // Check Spotify connection status and show modal if needed
-  useEffect(() => {
-    const checkConnection = () => {
-      const connected = isSpotifyConnected();
-      
-      // Show modal on first load if not connected and user hasn't interacted yet
-      if (!connected && !hasUserInteracted && !showSpotifyModal) {
-        // Check if we've shown the modal before (stored in localStorage)
-        const hasShownModal = localStorage.getItem('spotify_modal_shown') === 'true';
-        if (!hasShownModal) {
-          setShowSpotifyModal(true);
-        } else {
-          // If modal was shown before, user has interacted, so start static
-          setHasUserInteracted(true);
-        }
-      }
-    };
-    
-    // Check immediately
-    checkConnection();
-    // Check every second to detect when Spotify connects
-    const interval = setInterval(checkConnection, 1000);
-    
-    return () => clearInterval(interval);
-  }, [hasUserInteracted, showSpotifyModal]);
-
   return (
     <div className="start-screen">
-      <SpotifyConnectionModal
-        isOpen={showSpotifyModal}
-        onConnect={handleSpotifyModalConnect}
-        onSkip={handleSpotifyModalSkip}
-      />
       <div className="spotify-corner">
         <SpotifyPlayer currentWeek={1} />
       </div>
@@ -88,7 +39,7 @@ export default function StartScreen({ onStart }: StartScreenProps) {
         playClickSound(); // Play click sound
         setShowSettings(true);
       }}>
-        ⚙️ Settings
+        Settings
       </button>
       <SettingsModal 
         isOpen={showSettings} 
@@ -113,6 +64,11 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                 {!selectedCandidate ? (
                   <div className="candidate-selection">
                     <h2>Choose Your Candidate</h2>
+                    {hasSavedGame && onResume ? (
+                      <button className="resume-campaign-btn" onClick={onResume}>
+                        Resume saved campaign
+                      </button>
+                    ) : null}
                     <div className="candidate-buttons">
                       <button 
                         className="candidate-btn democrat"
@@ -125,6 +81,7 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                         />
                         <div className="candidate-name">Jimmy Carter</div>
                         <div className="candidate-party">Democrat</div>
+                        <p className="candidate-strategy">Outsider trust, Southern reach, and persuasion upside.</p>
                       </button>
                       <button 
                         className="candidate-btn republican"
@@ -137,6 +94,7 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                         />
                         <div className="candidate-name">Gerald Ford</div>
                         <div className="candidate-party">Republican</div>
+                        <p className="candidate-strategy">Incumbency, governing credibility, and organizational strength.</p>
                       </button>
                     </div>
                   </div>
@@ -151,7 +109,8 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                           setSelectedDifficulty('easy');
                         }}
                       >
-                        Easy
+                        <strong>Easy</strong>
+                        <span>More forgiving opponent planning</span>
                       </button>
                       <button
                         className={`difficulty-btn ${selectedDifficulty === 'medium' ? 'selected' : ''}`}
@@ -160,7 +119,8 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                           setSelectedDifficulty('medium');
                         }}
                       >
-                        Medium
+                        <strong>Medium</strong>
+                        <span>Fair budgets and strategic counterplay</span>
                       </button>
                       <button
                         className={`difficulty-btn ${selectedDifficulty === 'hard' ? 'selected' : ''}`}
@@ -169,7 +129,8 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                           setSelectedDifficulty('hard');
                         }}
                       >
-                        Hard
+                        <strong>Hard</strong>
+                        <span>Sharper targeting with no hidden bonus actions</span>
                       </button>
                     </div>
                     <button

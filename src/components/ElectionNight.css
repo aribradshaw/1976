@@ -1,0 +1,122 @@
+.election-night {
+  --ink: #111827;
+  --paper: #f8f1df;
+  --muted: #6b7280;
+  --dem: #1966b3;
+  --rep: #b23437;
+  box-sizing: border-box;
+  min-height: 100%;
+  width: min(100%, 920px);
+  margin: 0 auto;
+  padding: clamp(1.25rem, 4vw, 3.5rem);
+  color: var(--ink);
+  background:
+    linear-gradient(90deg, transparent 0 49.8%, rgba(17, 24, 39, 0.05) 49.8% 50.2%, transparent 50.2%),
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.72), transparent 55%),
+    var(--paper);
+  border: 1px solid rgba(17, 24, 39, 0.2);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.election-night__masthead {
+  padding-bottom: 1.4rem;
+  border-bottom: 4px double var(--ink);
+  text-align: center;
+}
+
+.election-night__eyebrow,
+.election-night__outcome-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.election-night h1,
+.election-night h2,
+.election-night p {
+  margin-top: 0;
+}
+
+.election-night h1 {
+  margin: 0.35rem 0;
+  font-size: clamp(2.3rem, 8vw, 4.8rem);
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+}
+
+.election-night__status {
+  min-height: 1.3em;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.election-night__scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: clamp(0.5rem, 3vw, 2rem);
+  align-items: end;
+  padding: clamp(1.4rem, 4vw, 2.5rem) 0;
+}
+
+.election-night__party {
+  display: grid;
+  gap: 0.1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.election-night__party--republican { text-align: right; }
+.election-night__party-label { font-size: 0.9rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.election-night__party strong { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(3.75rem, 12vw, 7rem); letter-spacing: -0.09em; line-height: 0.78; }
+.election-night__party span:last-child { color: var(--muted); font-size: 0.75rem; }
+.election-night__party--democrat { color: var(--dem); }
+.election-night__party--republican { color: var(--rep); }
+
+.election-night__threshold { display: grid; justify-items: center; gap: 0.15rem; color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.election-night__threshold b { font-size: 1.5rem; line-height: 1; }
+.election-night__threshold span { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; }
+.election-night__threshold-line { height: 68px; width: 1px; background: rgba(17, 24, 39, 0.35); }
+.election-night__threshold-line span { display: block; height: 1px; width: 17px; margin-left: -8px; margin-top: 33px; background: var(--ink); }
+
+.election-night__progress { margin-bottom: 1.5rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.election-night__progress-label { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 0.45rem; color: var(--muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+.election-night progress { width: 100%; height: 0.75rem; accent-color: var(--ink); }
+
+.election-night__callboard { min-height: 230px; border-top: 1px solid rgba(17, 24, 39, 0.3); border-bottom: 1px solid rgba(17, 24, 39, 0.3); padding: 1rem 0; }
+.election-night__callboard-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.election-night__callboard h2 { margin-bottom: 0.7rem; font-size: 1.25rem; }
+.election-night__live-dot { display: inline-flex; align-items: center; gap: 0.35rem; color: #a91d24; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.election-night__live-dot::before { content: ''; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: currentColor; animation: election-night-pulse 1.2s ease-in-out infinite; }
+.election-night__calls { display: grid; gap: 0.45rem; margin: 0; padding: 0; list-style: none; }
+.election-night__call { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0.7rem; border-left: 5px solid currentColor; background: rgba(17, 24, 39, 0.06); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: clamp(0.75rem, 2.5vw, 0.9rem); animation: election-night-call-in 380ms ease-out both; }
+.election-night__call--democrat { color: var(--dem); }
+.election-night__call--republican { color: var(--rep); }
+.election-night__state { color: var(--ink); font-weight: 800; }
+.election-night__waiting { margin: 2.8rem 0 0; color: var(--muted); font-style: italic; text-align: center; }
+
+.election-night__outcome { min-height: 7rem; padding: 1.5rem 0 0; text-align: center; }
+.election-night__outcome h2 { margin: 0.25rem 0 0.45rem; font-size: clamp(1.55rem, 5vw, 2.5rem); letter-spacing: -0.04em; }
+.election-night__outcome p { margin-bottom: 1rem; color: var(--muted); }
+.election-night__play-again { padding: 0.8rem 1.15rem; color: var(--paper); background: var(--ink); border: 2px solid var(--ink); border-radius: 0; cursor: pointer; font: 800 0.85rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; transition: transform 160ms ease, background 160ms ease; }
+.election-night__play-again:hover { background: #374151; transform: translateY(-2px); }
+.election-night__play-again:focus-visible { outline: 4px solid #d97706; outline-offset: 4px; }
+
+@keyframes election-night-call-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes election-night-pulse { 50% { opacity: 0.35; transform: scale(0.75); } }
+
+@media (max-width: 520px) {
+  .election-night { padding: 1.25rem; }
+  .election-night__scoreboard { gap: 0.75rem; }
+  .election-night__threshold-line { height: 45px; }
+  .election-night__threshold-line span { margin-top: 22px; }
+  .election-night__call { align-items: flex-start; flex-direction: column; gap: 0.15rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .election-night *, .election-night *::before, .election-night *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}

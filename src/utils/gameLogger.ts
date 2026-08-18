@@ -100,6 +100,7 @@ class GameLogger {
   private difficulty: 'easy' | 'medium' | 'hard' = 'medium';
   private playerCandidate: 'democrat' | 'republican' = 'democrat';
   private enabled: boolean = true;
+  private lastCompletedGame: GameLog | null = null;
 
   startGame(difficulty: 'easy' | 'medium' | 'hard', playerCandidate: 'democrat' | 'republican'): void {
     this.gameId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -198,8 +199,7 @@ class GameLogger {
       },
     };
 
-    // Export and save to file
-    this.exportToFile(gameLog);
+    this.lastCompletedGame = gameLog;
     
     console.log(`[Game Logger] Game ended - Player won: ${playerWon}, Player EVs: ${playerElectoralVotes}, Opponent EVs: ${opponentElectoralVotes}`);
   }
@@ -217,6 +217,12 @@ class GameLogger {
     URL.revokeObjectURL(url);
     
     console.log(`[Game Logger] Exported game log to ${a.download}`);
+  }
+
+  exportLastCompletedGame(): boolean {
+    if (!this.lastCompletedGame) return false;
+    this.exportToFile(this.lastCompletedGame);
+    return true;
   }
 
   getLogs(): ActionLogEntry[] {

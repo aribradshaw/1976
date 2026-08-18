@@ -24,20 +24,19 @@ export default function HistoricalEventModal({ event, funds, onChoose }: Histori
 
         <div className="historical-event-choices">
           {event.choices.map(choice => {
-            const affordable = funds + choice.effects.funds >= 0;
+            const depletesTreasury = funds + choice.effects.funds < 0;
             return (
               <button
                 key={choice.id}
                 className={selected === choice.id ? 'selected' : ''}
                 aria-pressed={selected === choice.id}
-                disabled={!affordable}
                 onClick={() => setSelected(choice.id)}
               >
                 <strong>{choice.label}</strong>
                 <span>{choice.summary}</span>
                 <em>{choice.tradeoff}</em>
                 <small>{formatEffects(choice)}</small>
-                {!affordable && <b>Insufficient funds</b>}
+                {depletesTreasury && <b>Treasury falls to $0 and credibility takes a hit</b>}
               </button>
             );
           })}

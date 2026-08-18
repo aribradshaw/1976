@@ -145,6 +145,7 @@ export interface GameState {
     week: number;
     publicReaction: 'muted' | 'as_expected' | 'strong';
   }>;
+  finalResults: Map<string, 'democrat' | 'republican'>;
   gameStatus: 'playing' | 'won' | 'lost' | 'paused';
   difficulty: 'easy' | 'medium' | 'hard';
 }

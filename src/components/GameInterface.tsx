@@ -16,11 +16,13 @@ import ProjectedVotesModal from './ProjectedVotesModal';
 import CampaignDesk from './CampaignDesk';
 import WeeklyRecapModal, { WeekRecap } from './WeeklyRecapModal';
 import HistoricalEventModal from './HistoricalEventModal';
+import ElectionNight from './ElectionNight';
 import { FaDemocrat, FaRepublican } from 'react-icons/fa';
 import { TopicId, TOPICS } from '../data/topics';
 import { buildElectoralForecast } from '../game/simulation/forecast';
 import { EVENTS_1976 } from '../data/events1976';
 import { getEventForWeek } from '../game/simulation/events';
+import { CAMPAIGN_SAVE_KEY } from '../game/persistence';
 import { playClickSound, playStateSelectSound, playStateDeselectSound } from '../utils/sounds';
 import { isSpotifyConnected, searchTrack, playTrack } from '../utils/spotify';
 import './GameInterface.css';
@@ -49,6 +51,12 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
     // Update game state when it changes
     setGameState(gameEngine.getGameState());
   }, [gameEngine]);
+
+  useEffect(() => {
+    if (gameState.gameStatus === 'playing') {
+      localStorage.setItem(CAMPAIGN_SAVE_KEY, gameEngine.serializeCampaign());
+    }
+  }, [gameEngine, gameState]);
 
   // Play "Rock'n Me" by Steve Miller Band when game ends (it was #1 the week of the election)
   useEffect(() => {
@@ -206,38 +214,12 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
   if (gameState.gameStatus === 'won' || gameState.gameStatus === 'lost') {
     return (
       <div className="game-interface end-screen">
-        <CRTOverlay />
-        <div className="end-content">
-          <h1>{gameState.gameStatus === 'won' ? 'Victory!' : 'Defeat'}</h1>
-          <p>
-            {gameState.gameStatus === 'won' 
-              ? 'Congratulations! You won the election!'
-              : 'You lost the election. Better luck next time!'}
-          </p>
-          <div className="final-results">
-            <div className="result-item">
-              <span>Democratic Electoral Votes:</span>
-              <span className="result-value">{gameState.electoralVotes.democrat}</span>
-            </div>
-            <div className="result-item">
-              <span>Republican Electoral Votes:</span>
-              <span className="result-value">{gameState.electoralVotes.republican}</span>
-            </div>
-          </div>
-          <button className="reset-btn" onClick={onReset}>
-            Play Again
-          </button>
-        </div>
-        <div className="final-map-container">
-          <h2 className="final-map-title">Final Results Map</h2>
-          <StateMap 
-            gameEngine={gameEngine}
-            onStateClick={() => {}}
-            onStateDoubleClick={() => {}}
-            onMapClick={() => {}}
-            selectedState={null}
-          />
-        </div>
+        <ElectionNight
+          gameState={gameState}
+          states={gameEngine.getAllStates()}
+          playerCandidate={playerCandidate}
+          onPlayAgain={onReset}
+        />
       </div>
     );
   }
@@ -259,6 +241,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
             <div className="candidate-info">
               Playing as: <strong>{playerCandidate === 'democrat' ? 'Jimmy Carter (D)' : 'Gerald Ford (R)'}</strong>
             </div>
+            <div className="campaign-meta">Autosaved · Seed {gameState.simulationSeed}</div>
           </div>
         </div>
         <button className="settings-btn-small" onClick={() => {

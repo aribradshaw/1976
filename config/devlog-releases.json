@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.7.3",
+    "date": "2026-08-18",
+    "title": "Campaign continuity and election night",
+    "notes": [
+      "Campaigns autosave locally and resume with exact deterministic simulation continuity.",
+      "Election night now resolves all 538 EV from live state probabilities and reveals calls through an accessible election desk.",
+      "The title screen no longer interrupts first-time play with a Spotify prompt and now explains candidate and difficulty asymmetry.",
+      "The 25-test suite covers save validation, RNG restoration, insolvency safety, full election resolution, and deterministic final results."
+    ]
+  },
+  {
     "version": "2.7.2",
     "date": "2026-08-18",
     "title": "Historical campaign decisions and the road to 270",

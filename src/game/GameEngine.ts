@@ -8,6 +8,8 @@ import { calculateDetailedDemographics } from '../utils/demographics';
 import { SeededRng } from './simulation/rng';
 import { CampaignEventDefinition } from '../data/events1976';
 import { resolveCampaignEvent, ResolvedCampaignEvent } from './simulation/events';
+import { forecastState } from './simulation/forecast';
+import { decodeCampaign, encodeCampaign } from './persistence';
 
 export class GameEngine {
   private gameState: GameState;
@@ -30,6 +32,22 @@ export class GameEngine {
     
     // Start game logging
     gameLogger.startGame(difficulty, playerCandidate);
+  }
+
+  static restoreCampaign(serialized: string): GameEngine {
+    const decoded = decodeCampaign(serialized);
+    const engine = new GameEngine(
+      decoded.gameState.playerCandidate,
+      decoded.gameState.difficulty,
+      decoded.rng.seed,
+    );
+    engine.gameState = decoded.gameState;
+    engine.rng.restore(decoded.rng);
+    return engine;
+  }
+
+  serializeCampaign(): string {
+    return encodeCampaign(this.gameState, this.rng.snapshot());
   }
 
   // Calculate the Tuesday for a given week (25 weeks before Nov 2, 1976)
@@ -145,6 +163,7 @@ export class GameEngine {
       topicPositions: new Map<string, 'for' | 'against'>(),
       opponentTopicPositions: new Map<string, 'for' | 'against'>(),
       historicalEvents: [],
+      finalResults: new Map<string, 'democrat' | 'republican'>(),
       gameStatus: 'playing',
       difficulty,
     };
@@ -190,6 +209,7 @@ export class GameEngine {
       stateMomentum: new Map(this.gameState.stateMomentum),
       opponentStateMomentum: new Map(this.gameState.opponentStateMomentum),
       historicalEvents: [...this.gameState.historicalEvents],
+      finalResults: new Map(this.gameState.finalResults),
     };
   }
 
@@ -199,11 +219,10 @@ export class GameEngine {
 
     const resolved = resolveCampaignEvent(event, choiceId, this.rng.fork(`event:${event.id}`));
     const nextFunds = this.gameState.resources.funds + resolved.effects.funds;
-    if (nextFunds < 0) return null;
-
-    this.gameState.resources.funds = nextFunds;
+    this.gameState.resources.funds = Math.max(0, nextFunds);
     this.gameState.resources.energy = Math.max(0, Math.min(100, this.gameState.resources.energy + resolved.effects.energy));
-    this.gameState.resources.credibility = Math.max(0, Math.min(100, this.gameState.resources.credibility + resolved.effects.credibility));
+    const insolvencyPenalty = nextFunds < 0 ? -2 : 0;
+    this.gameState.resources.credibility = Math.max(0, Math.min(100, this.gameState.resources.credibility + resolved.effects.credibility + insolvencyPenalty));
 
     const targets = this.getEventTargetStates(event);
     const coalitionImpact = Object.values(resolved.effects.coalition).reduce((sum, value) => sum + (value ?? 0), 0);
@@ -3202,31 +3221,21 @@ export class GameEngine {
   private calculateFinalElectoralVotes(): void {
     let demVotes = 0;
     let repVotes = 0;
+    const electionRng = this.rng.fork('election-night');
+    const nationalEnvironment = (electionRng.next() - 0.5) * 0.08;
+    this.gameState.finalResults.clear();
 
-    this.gameState.polling.forEach((polling, abbrev) => {
-      const state = this.states.get(abbrev);
-      if (!state) return;
-
-      const demSupport = polling.democraticSupport;
-      const repSupport = polling.republicanSupport;
-      
-      // Resolve every state - assign to whoever has more support
-      // For ties, assign based on undecided split or historical lean
-      if (demSupport > repSupport) {
-        demVotes += state.electoralVotes;
-      } else if (repSupport > demSupport) {
-        repVotes += state.electoralVotes;
-      } else {
-        // Tie - assign based on historical lean or default to Democrat
-        // In 1976, most states leaned one way or the other
-        const historicalLean = state.historicalData.previousElectionResults;
-        if (historicalLean.dem > historicalLean.rep) {
-          demVotes += state.electoralVotes;
-        } else {
-          repVotes += state.electoralVotes;
-        }
-      }
-    });
+    Array.from(this.states.values())
+      .sort((left, right) => left.abbreviation.localeCompare(right.abbreviation))
+      .forEach(state => {
+        const polling = this.gameState.polling.get(state.abbreviation);
+        const forecast = forecastState(state, polling);
+        const democraticProbability = Math.max(0.01, Math.min(0.99, forecast.democraticWinProbability + nationalEnvironment));
+        const winner = electionRng.next() < democraticProbability ? 'democrat' : 'republican';
+        this.gameState.finalResults.set(state.abbreviation, winner);
+        if (winner === 'democrat') demVotes += state.electoralVotes;
+        else repVotes += state.electoralVotes;
+      });
 
     this.gameState.electoralVotes = {
       democrat: demVotes,
@@ -3279,12 +3288,10 @@ export class GameEngine {
     let undecidedPct: number;
     
     if (isGameOver) {
-      // Use final polling results (not historical, but actual game results)
-      const polling = this.gameState.polling.get(abbreviation);
-      if (!polling) return '#808080';
-      demSupport = polling.democraticSupport;
-      repSupport = polling.republicanSupport;
-      undecidedPct = 100 - demSupport - repSupport;
+      const winner = this.gameState.finalResults.get(abbreviation);
+      if (winner === 'democrat') return '#1e3a8a';
+      if (winner === 'republican') return '#991b1b';
+      return '#808080';
     } else {
       // Use current polling data
       const polling = this.gameState.polling.get(abbreviation);
@@ -3297,17 +3304,6 @@ export class GameEngine {
     
     const margin = demSupport - repSupport;
     const absMargin = Math.abs(margin);
-    
-    // For final results, show only solid red or blue (no purple/gray)
-    if (isGameOver) {
-      if (demSupport > repSupport) {
-        return '#1e3a8a'; // Solid blue for Dem win
-      } else if (repSupport > demSupport) {
-        return '#991b1b'; // Solid red for Rep win
-      } else {
-        return '#808080'; // Grey for tie (shouldn't happen)
-      }
-    }
     
     // For in-game, use the normal color logic
     // Check if undecideds have plurality (undecided > dem AND undecided > rep)
