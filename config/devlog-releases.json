@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.7.11",
+    "date": "2026-08-18",
+    "title": "Readable decisions and the election-night desk",
+    "notes": [
+      "Campaign day labels, historical decision effects, and source links now meet WCAG AA contrast on both dark broadcast panels and warm editorial paper.",
+      "Election night now uses a contained two-column desktop spread that keeps the scoreboard, outcome, and latest state calls inside the results desk.",
+      "A native public DevLog now carries the full release history, playable return path, GitHub star prompt, and contributor entry point without leaving the game.",
+      "Automated contrast coverage now audits setup, campaign planning, state reports, forecasts, decisions, interviews, recaps, election night, and the DevLog at desktop and mobile sizes.",
+      "The first official trailer capture workflow now produces a paced 50-second launch cut from deterministic gameplay footage."
+    ]
+  },
+  {
     "version": "2.7.10",
     "date": "2026-08-18",
     "title": "Mobile campaign tour and state drill-in",

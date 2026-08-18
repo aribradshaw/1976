@@ -90,7 +90,23 @@ test('applies the network election-desk visual system to setup and gameplay', as
   expect(hasReceiverOverflow).toBe(false);
   const devlogLink = page.getByRole('link', { name: /development log/i });
   await expect(devlogLink).toBeVisible();
-  await expect(devlogLink).toHaveAttribute('href', 'https://github.com/aribradshaw/1976/blob/main/DEVLOG.md');
+  await expect(devlogLink).toHaveAttribute('href', '#/devlog');
+});
+
+test('opens a native public DevLog with playable and contributor paths', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: /development log/i }).click();
+
+  await expect(page).toHaveURL(/#\/devlog$/);
+  await expect(page.getByRole('heading', { name: 'Building the race for 270' })).toBeVisible();
+  await expect(page.getByText('Now broadcasting')).toBeVisible();
+  await expect(page.getByRole('link', { name: /Star 1976 on GitHub/i })).toHaveAttribute('href', 'https://github.com/aribradshaw/1976');
+  await expect(page.getByRole('link', { name: /Build a scenario/i })).toHaveAttribute('href', /docs\/SCENARIOS\.md$/);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole('link', { name: /Star 1976 on GitHub/i })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
+  await page.getByRole('link', { name: /Play the game/i }).click();
+  await expect(page.getByRole('heading', { name: 'Choose Your Candidate' })).toBeVisible();
 });
 
 test('title receiver fits short desktop and mobile viewports without scrolling or clipping faces', async ({ page }) => {

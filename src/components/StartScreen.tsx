@@ -54,9 +54,7 @@ export default function StartScreen({ onStart, onResume, hasSavedGame = false }:
                 <p className="game-subtitle">As Seen on TV!</p>
                 <a
                   className="game-version"
-                  href="https://github.com/aribradshaw/1976/blob/main/DEVLOG.md"
-                  target="_blank"
-                  rel="noreferrer"
+                  href="#/devlog"
                   aria-label={`Open the version ${packageJson.version} development log`}
                 >
                   v{packageJson.version} · DevLog

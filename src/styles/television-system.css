@@ -1101,7 +1101,7 @@ html body .action-slot.filled-slot:hover {
 }
 
 html body .slot-day {
-  color: var(--tv-amber);
+  color: var(--tv-amber-bright);
   font-family: var(--tv-data);
   letter-spacing: .08em;
 }
@@ -1460,6 +1460,17 @@ html body .historical-event-choices button.selected {
   transform: none;
 }
 
+html body .historical-event-choices small,
+html body .historical-event-card footer a {
+  color: var(--tv-amber-ink);
+}
+
+html body .historical-event-card footer a {
+  font-weight: 700;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 html body .historical-event-card footer button,
 html body .weekly-recap-card button {
   border: 1px solid var(--tv-ink);
@@ -1564,6 +1575,77 @@ html body .app-loading {
 html body .election-night__play-again:hover {
   background: var(--tv-blue);
   transform: none;
+}
+
+@media (min-width: 801px) and (min-height: 620px) {
+  html body .game-interface.end-screen {
+    padding: 16px;
+    overflow: hidden;
+  }
+
+  html body .end-screen .election-night {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 32px;
+    width: min(100%, 1120px);
+    height: calc(100dvh - 32px);
+    min-height: 0;
+    flex: 0 0 auto;
+    padding: 24px 30px;
+    overflow: hidden;
+  }
+
+  html body .election-night__masthead {
+    grid-column: 1;
+    grid-row: 1;
+    padding-bottom: 14px;
+  }
+
+  html body .election-night h1 {
+    font-size: clamp(3rem, 6vw, 4.5rem);
+  }
+
+  html body .election-night__scoreboard {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 22px 0;
+  }
+
+  html body .election-night__party strong {
+    font-size: clamp(3.5rem, 7vw, 5.5rem);
+  }
+
+  html body .election-night__progress {
+    grid-column: 1;
+    grid-row: 3;
+    margin-bottom: 12px;
+  }
+
+  html body .election-night__callboard {
+    grid-column: 2;
+    grid-row: 1 / 5;
+    min-height: 0;
+    padding: 10px 0 10px 28px;
+    border-top: 0;
+    border-bottom: 0;
+    border-left: 1px solid rgba(17, 24, 39, 0.3);
+  }
+
+  html body .election-night__call {
+    padding: 9px 11px;
+  }
+
+  html body .election-night__outcome {
+    grid-column: 1;
+    grid-row: 4;
+    min-height: 0;
+    padding-top: 12px;
+  }
+
+  html body .election-night__outcome h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+  }
 }
 
 /* CRT preference now affects only media texture, never the strategy data. */

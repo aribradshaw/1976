@@ -1,6 +1,6 @@
 {
   "name": "1976-election-sim",
-  "version": "2.7.10",
+  "version": "2.7.11",
   "description": "A playable historical strategy game about the Carter-Ford 1976 presidential campaign",
   "type": "module",
   "engines": {
@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
+    "trailer:capture": "node scripts/capture-trailer.mjs",
     "release:verify": "node scripts/verify-devlog-release.mjs",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
@@ -25,6 +26,7 @@
     "react-icons": "^5.5.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.62.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
