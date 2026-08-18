@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.7.5",
+    "date": "2026-08-18",
+    "title": "Flagship launch and contributor foundation",
+    "notes": [
+      "The opening board now follows the certified 1976 state-winner map instead of arbitrary randomized starting support.",
+      "A typed, validated scenario registry and documented historical example give contributors a stable content boundary outside GameEngine.",
+      "The title screen, campaign engine, and strategy interface now load in separate production chunks for a faster playable homepage.",
+      "GitHub Pages deployment, launch screenshots, contributor guidance, issue templates, dependency upgrades, and repository cleanup make the project ready for public collaboration.",
+      "The quality gate now covers 31 deterministic and unit tests plus seven Chromium journeys, including a complete 25-week campaign."
+    ]
+  },
+  {
     "version": "2.7.4",
     "date": "2026-08-18",
     "title": "Accessible strategy board and full-campaign quality gate",

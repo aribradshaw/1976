@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { TOPICS, TopicId, Microgroup, TOPIC_RATINGS } from '../data/topics';
-import { GameEngine } from '../game/GameEngine';
+import type { GameEngine } from '../game/GameEngine';
 import { GameState, CampaignAction, Candidate } from '../types/game';
 import { calculateTopicRelationshipChange } from '../game/relationshipCalculator';
 import { calculateDetailedDemographics } from '../utils/demographics';

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameEngine } from '../../GameEngine';
 import { EVENTS_1976 } from '../../../data/events1976';
+import { buildElectoralForecast } from '../forecast';
 
 describe('GameEngine weekly resolution', () => {
   beforeEach(() => {
@@ -9,6 +10,17 @@ describe('GameEngine weekly resolution', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('opens the historical scenario on the certified 1976 state-winner map', () => {
+    const engine = new GameEngine('democrat', 'medium', 'historical-opening');
+    const gameState = engine.getGameState();
+    const forecast = buildElectoralForecast(engine.getAllStates(), gameState.polling);
+
+    expect(forecast.likelyElectoralVotes).toEqual({ democrat: 297, republican: 241 });
+    gameState.polling.forEach(poll => {
+      expect(poll.democraticSupport + poll.republicanSupport).toBeCloseTo(70, 8);
+    });
   });
 
   it('does not apply a planned action before the week resolves', () => {

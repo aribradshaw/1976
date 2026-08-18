@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { GameEngine } from '../game/GameEngine';
+import type { GameEngine } from '../game/GameEngine';
 import { GameState, CampaignAction, Candidate } from '../types/game';
 import { TopicId } from '../data/topics';
 import TopicSelector from './TopicSelector';

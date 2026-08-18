@@ -1,4 +1,4 @@
-import { GameEngine } from '../game/GameEngine';
+import type { GameEngine } from '../game/GameEngine';
 import './StateMap.css';
 import statePathsData from '../data/state_paths.json';
 

@@ -1,5 +1,5 @@
 import { FaDemocrat, FaRepublican } from 'react-icons/fa';
-import { GameEngine } from '../game/GameEngine';
+import type { GameEngine } from '../game/GameEngine';
 import { buildElectoralForecast, ForecastBand } from '../game/simulation/forecast';
 import { buildRoadTo270 } from '../game/strategy/roadTo270';
 import { GameState } from '../types/game';

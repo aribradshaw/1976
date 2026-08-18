@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getRandomHeadlinesForWeek } from '../data/newsHeadlines';
-import { GameEngine } from '../game/GameEngine';
+import type { GameEngine } from '../game/GameEngine';
 import { GameState, CampaignEvent } from '../types/game';
 import { TOPICS } from '../data/topics';
 import './NewsTicker.css';

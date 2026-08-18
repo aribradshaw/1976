@@ -7,6 +7,18 @@ Production-style releases use the same Arizona-calendar versioning policy as Cam
 - The first live push in a new year advances the major number, sets minor to the Arizona calendar month minus one, and resets patch to `1`.
 - Rebuilds of the same commit do not create another release.
 
+## 2.7.5, August 18, 2026
+
+Flagship launch and contributor foundation
+
+- Replaced arbitrary randomized opening support with a calibrated board that preserves the certified 1976 state-winner map and models uncertainty separately.
+- Added a typed, validated scenario registry and a documented historical scenario example so new content can be reviewed without editing the core engine.
+- Split the title screen, campaign engine, and full strategy interface into on-demand production chunks, eliminating the oversized-bundle warning and reducing initial JavaScript.
+- Added GitHub Pages deployment, launch screenshots, a rebuilt project presentation, contributor guidance, architecture and scenario documentation, and focused issue templates.
+- Removed generated debug output and local development traces from source control, expanded ignore rules, upgraded the build and test toolchain, and brought the complete dependency audit to zero known advisories.
+- Added a conservative asset-rights inventory and deferred a blanket code license until the bundled audio can be replaced or its redistribution rights verified.
+- Expanded automated coverage to 31 deterministic and unit tests plus seven Chromium browser journeys.
+
 ## 2.7.4, August 18, 2026
 
 Accessible strategy board and full-campaign quality gate

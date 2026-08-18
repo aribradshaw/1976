@@ -1,4 +1,4 @@
-import { GameEngine } from '../game/GameEngine';
+import type { GameEngine } from '../game/GameEngine';
 import { calculateDetailedDemographics } from '../utils/demographics';
 import { FaDemocrat, FaRepublican, FaDollarSign, FaAdversal } from 'react-icons/fa';
 import { RiHqFill } from 'react-icons/ri';

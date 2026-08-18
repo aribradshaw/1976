@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { GameEngine } from '../game/GameEngine';
+import type { GameEngine } from '../game/GameEngine';
 import { Candidate, CampaignAction } from '../types/game';
 import StateMap from './StateMap';
 import ProgressBar from './ProgressBar';

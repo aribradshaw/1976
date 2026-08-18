@@ -1,8 +1,11 @@
 {
   "name": "1976-election-sim",
-  "version": "2.7.4",
-  "description": "Turn-based strategy game simulating the 1976 U.S. Presidential Election",
+  "version": "2.7.5",
+  "description": "A playable historical strategy game about the Carter-Ford 1976 presidential campaign",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -23,14 +26,14 @@
     "@playwright/test": "^1.62.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "eslint": "^8.55.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "@vitejs/plugin-react": "^6.0.5",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.24",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8",
-    "vitest": "^2.1.9"
+    "vite": "^8.2.1",
+    "vitest": "^4.1.11"
   }
 }

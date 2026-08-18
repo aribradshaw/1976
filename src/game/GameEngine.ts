@@ -73,34 +73,19 @@ export class GameEngine {
   private initializeGame(playerCandidate: Candidate, difficulty: 'easy' | 'medium' | 'hard'): GameState {
     const polling = new Map<string, PollingData>();
     
-    // Initialize polling for all states based on historical data
-    // Ensure at least 30% of Americans overall are undecided
+    // Historical scenario baseline: preserve each state's certified 1976 lean,
+    // compress the final margin for a competitive May start, and leave 30% of
+    // voters undecided. Uncertainty belongs in the margin of error, not in a
+    // hidden random alteration of the central estimate.
     this.states.forEach((state, abbrev) => {
-      const baseDem = state.demographics.democraticBase;
-      const baseRep = state.demographics.republicanBase;
       const marginOfError = this.getRandomMarginOfError();
-      
-      // Start with base percentages, but ensure total doesn't exceed 70%
-      // This leaves at least 30% undecided in each state (and overall)
-      let demSupport = Math.max(0, Math.min(100, baseDem + (this.rng.next() - 0.5) * 10));
-      let repSupport = Math.max(0, Math.min(100, baseRep + (this.rng.next() - 0.5) * 10));
-      
-      // Ensure at least 30% undecided (dem + rep <= 70%)
-      const totalDecided = demSupport + repSupport;
-      if (totalDecided > 70) {
-        // Scale down proportionally to ensure 30% undecided minimum
-        const scaleFactor = 70 / totalDecided;
-        demSupport = demSupport * scaleFactor;
-        repSupport = repSupport * scaleFactor;
-      }
-      
-      // Final normalization: ensure dem + rep <= 100% (undecided = 100% - dem - rep)
-      const finalTotal = demSupport + repSupport;
-      if (finalTotal > 100) {
-        const finalScale = 100 / finalTotal;
-        demSupport = demSupport * finalScale;
-        repSupport = repSupport * finalScale;
-      }
+      const historical = state.historicalData.previousElectionResults;
+      const majorPartyTotal = Math.max(1, historical.dem + historical.rep);
+      const historicalDemocraticShare = (historical.dem / majorPartyTotal) * 100;
+      const compressedDemocraticShare = 50 + (historicalDemocraticShare - 50) * 0.65;
+      const decidedShare = 70;
+      const demSupport = decidedShare * (compressedDemocraticShare / 100);
+      const repSupport = decidedShare - demSupport;
       
       // Initialize turnout rate based on historical data, capped between 40% and 95%
       const initialTurnoutRate = Math.max(40, Math.min(95, state.historicalData.turnoutRate));

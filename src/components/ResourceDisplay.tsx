@@ -1,4 +1,4 @@
-import { GameEngine } from '../game/GameEngine';
+import type { GameEngine } from '../game/GameEngine';
 import './ResourceDisplay.css';
 
 interface ResourceDisplayProps {

@@ -1,207 +1,114 @@
-# 1976: Election Simulation Game
+<div align="center">
 
-> Version 2.7.4, accessible strategy board and full-campaign quality gate
+# 1976: As Seen on TV!
 
-## What changed in 2.7.4
+### Carter. Ford. Twenty-five weeks. One road to 270.
 
-- Players can switch from the electoral map to a keyboard-operable state table ordered by the closest live races.
-- Tablet and mobile layouts now prioritize the strategy board and keep campaign resources and actions usable without page overflow.
-- Reduced Motion and CRT Visual Effects settings persist locally, follow the system motion preference by default, and apply across the full game.
-- Historical event coalitions now affect distinct voter groups, preserving the strategic meaning of visible tradeoffs.
-- Playwright and GitHub Actions now verify setup, weekly decisions, recaps, autosave/resume, keyboard use, settings persistence, 390px mobile play, and a full 25-week campaign.
-- The quality gate contains 26 deterministic/unit tests and 7 Chromium browser journeys, including a complete 538-EV election night.
+[![Quality](https://github.com/aribradshaw/1976/actions/workflows/quality.yml/badge.svg)](https://github.com/aribradshaw/1976/actions/workflows/quality.yml)
+[![Latest release](https://img.shields.io/github/v/release/aribradshaw/1976?display_name=tag)](https://github.com/aribradshaw/1976/releases/latest)
+[![Play in browser](https://img.shields.io/badge/PLAY_NOW-FFD166?style=for-the-badge&labelColor=1A2A5A)](https://aribradshaw.github.io/1976/)
 
-A turn-based strategy game simulating the 1976 U.S. Presidential Election between Gerald Ford and Jimmy Carter. Campaign across all 50 states, manage resources, build momentum, and compete for 270 electoral votes in this historically-accurate political strategy game.
+**[Play the current release](https://aribradshaw.github.io/1976/)**
 
-## Features
+</div>
 
-### Core Gameplay
-- **50 States**: Each state has unique demographics, electoral votes, historical data, and campaign costs
-- **25-Week Campaign**: Navigate a full campaign season from May to November 1976
-- **Dynamic Polling System**: Real-time polling with 3-10% margin of error for strategic uncertainty
-- **Momentum System**: Build momentum in states to convert undecided voters and sway swingable voters
-- **Resource Management**: Manage funds, energy, actions per turn, and fundraising potential
+![The 1976 campaign strategy board with the electoral map, resources, Road to 270 forecast, and weekly action planner](docs/screenshots/strategy-board.png)
 
-### Campaign Actions
-- **Campaign Headquarters (HQ)**: Build and upgrade HQs (Levels 1-5) in states for weekly momentum boosts and turnout increases
-- **Launch Ads**: Run TV/radio ad campaigns with three sizes:
-  - **Small**: $300K, +2 momentum
-  - **Medium**: $600K, +6 momentum
-  - **Large**: $1M, +10 momentum
-- **Rallies**: Hold campaign rallies with 3 topics to boost relationships and momentum (+2 momentum)
-- **Large Donor Fundraisers**: Raise funds from wealthy donors (amount varies by state)
+1976 is a deterministic, browser-based election strategy game about the close Carter-Ford campaign. Choose a candidate, manage a finite campaign, navigate sourced historical decisions, build a route to 270, and watch every electoral vote resolve on election night.
 
-### Strategic Systems
-- **Historical Decisions**: Every week presents a sourced 1976 campaign choice with visible strategic tradeoffs
-- **Road to 270**: Track expected EV, likely EV, battlegrounds, must-holds, and routes to victory
-- **Weekly Recap**: See cash flow, electoral movement, and the states most affected by each resolution
-- **Autosave and Resume**: Continue a browser campaign from the exact week and simulation state where you left it
-- **Election Night**: Watch all 538 EV resolve through seeded state calls on an accessible live results desk
-- **Accessible State Board**: Switch between the electoral map and a keyboard-friendly table of every live race
-- **Player Preferences**: Persist reduced motion and optional CRT effects across sessions
-- **Microgroup Relationships**: Build relationships with 11 different voter microgroups in each state
-- **Momentum Competition**: Momentum differential drives poll changes - compete with AI opponent for momentum advantage
-- **Topic Positions**: Lock positions on 20 different topics (Watergate, Economy, Energy, etc.)
-- **AI Opponent**: Three difficulty levels (Easy, Medium, Hard) with strategic AI that competes for momentum and electoral votes
+The design combines the clarity of an electoral map game with the tradeoffs of a campaign-management game. Money, candidate time, credibility, field organization, ads, rallies, voter coalitions, polling uncertainty, and an opponent working under the same action ceiling all compete for attention.
 
-### Visual & Audio
-- **CRT TV Aesthetic**: Retro 1976 television interface with scanlines and flicker effects
-- **Dynamic State Colors**: States colored by polling data (red/blue/purple shades)
-- **News Ticker**: Weekly headlines and opponent action updates
-- **Sound Effects**: Immersive audio feedback for actions and state selection
-- **Spotify Integration**: Optional 1976-era music playlist integration
+## The campaign loop
 
-## Getting Started
+1. Read the weekly briefing and historical decision.
+2. Spend up to six actions across the states that matter to your route.
+3. Commit the plan and resolve both campaigns together.
+4. Read the newspaper recap, inspect what moved, and revise your path.
+5. Survive 25 weeks and win 270 of 538 electoral votes.
 
-### Prerequisites
+![A sourced historical decision card with visible costs, coalition effects, and strategic tradeoffs](docs/screenshots/historical-decision.png)
 
-- Node.js 18+ and npm
+## What is playable
 
-### Installation
+- Carter and Ford campaigns with distinct strengths
+- Easy, medium, and hard opponents using the shared action economy
+- 25 sourced weekly decisions, including three presidential debates and the vice-presidential debate
+- Probability-based state forecasts, expected EV, race ratings, poll confidence, must-holds, best flips, and Road to 270 paths
+- Headquarters, advertising, rallies, fundraising, voter coalitions, momentum, turnout, energy, credibility, and cash flow
+- Truthful plan-then-resolve weekly actions with undo before commitment
+- Deterministic seeds, autosave and exact resume, and seeded 538-EV election night
+- Electoral map and keyboard-operable state table
+- Responsive desktop and mobile layouts, reduced motion, optional CRT effects, semantic dialogs, and visible focus
 
-1. Clone the repository:
+## Run locally
+
+Requires Node.js 20.19 or newer, or Node.js 22.12 or newer.
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/aribradshaw/1976.git
 cd 1976
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start development server:
-```bash
+npm ci
 npm run dev
 ```
 
-4. Build for production:
+The local game opens at `http://127.0.0.1:5173`.
+
+## Quality gate
+
 ```bash
+npm run release:verify
+npm run lint
+npm test
 npm run build
+npm run test:e2e
 ```
 
-The built files will be in the `dist` directory, ready for deployment.
+Version 2.7.5 passes 31 deterministic and unit tests plus seven Chromium journeys. Browser coverage includes setup, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, a 390px mobile campaign, and a complete 25-week game through election night. The complete dependency tree audits cleanly.
 
-## Deployment
+## Architecture
 
-### Deploying to a Web Server
+- `src/components/` contains the campaign interface and accessible presentation layers.
+- `src/game/simulation/` contains seeded random, canonical action quotes, forecasts, and historical-event resolution.
+- `src/game/strategy/` contains deterministic Road to 270 planning.
+- `src/scenarios/` contains typed scenario definitions, validation, registry, and the editable 1976 example.
+- `src/data/` contains historical events, issues, state data, and voter-group inputs.
+- `src/game/GameEngine.ts` remains the campaign orchestration facade while pure systems continue moving behind tested boundaries.
 
-1. Build the project: `npm run build`
-2. Upload all files from the `dist` folder to your web server's public directory
-3. Ensure your server is configured to serve `index.html` for all routes (for React Router compatibility)
-4. For subdirectory deployments (e.g., `/1976/`), the app automatically handles base URL configuration
+Read [the architecture boundary](docs/architecture.md) before changing campaign orchestration.
 
-### Build Output
+## Build a scenario or mod
 
-The `dist` folder contains:
-- `index.html` - Main HTML file
-- `assets/` - JavaScript and CSS bundles
-- `audio/` - Sound effect files
-- All static assets (images, etc.)
+Scenario contributors do not need to learn the full engine. Start with [`HISTORICAL_1976_SCENARIO`](src/scenarios/historical1976.ts), keep state overrides sparse, add sources and contributor notes, register the scenario, and validate it against the state catalog.
 
-## Gameplay
+The [scenario and mod guide](docs/scenarios.md) documents the schema, source requirements, tests, and current engine-integration boundary. Scenario selection in the player interface is the next planned integration step.
 
-### Starting a Game
+## Contribute
 
-1. **Choose Your Candidate**: Select either Jimmy Carter (Democrat) or Gerald Ford (Republican)
-2. **Select Difficulty**: Choose Easy (random AI), Medium (strategic AI), or Hard (aggressive strategic AI)
-3. **Begin Campaign**: Start with $5M in funds and 6 actions per week
+Bug fixes, historical review, accessibility improvements, tests, balance work, and well-sourced scenario proposals are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), then choose a focused item from the [issue backlog](https://github.com/aribradshaw/1976/issues).
 
-### Weekly Turn Structure
+Useful commands:
 
-1. **Plan Actions**: Select states and actions for the week
-2. **Execute Actions**: Build HQs, launch ads, hold rallies, or fundraise
-3. **End Turn**: Process opponent actions, update polling, and advance to next week
-4. **Weekly Event**: Respond to a major news event (if topics remain unlocked)
-
-### Campaign Strategy
-
-- **Momentum is Key**: Momentum differential drives poll changes each week
-  - Higher momentum converts more undecided voters to your side
-  - Large momentum advantages can convert swingable voters from opponent's side
-  - Momentum compounds over time - build early advantages
-- **HQ Strategy**: Build HQs in key states for weekly momentum boosts
-  - Higher level HQs provide more momentum per week
-  - HQs also boost voter turnout
-- **Ad Campaigns**: Use large campaigns strategically in high-value states
-  - Large campaigns provide major momentum boosts
-  - Best used when close to winning big states or when you need to leapfrog opponent
-- **State Targeting**: Focus on swing states and states where you can gain momentum advantage
-  - Big states (10+ electoral votes) are high value
-  - States where you're close to winning are prime targets
-  - Compete for momentum in states where opponent has advantage
-
-### Win Condition
-
-First candidate to reach **270 electoral votes** wins the election. Electoral votes are projected based on current polling data.
-
-## Technical Details
-
-### Technology Stack
-- **Framework**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **State Management**: GameEngine class with React state hooks
-- **Styling**: CSS with retro CRT TV aesthetic
-- **Icons**: React Icons
-
-### Key Systems
-- **GameEngine**: Core game logic, AI opponent, polling calculations, momentum system
-- **Relationship Calculator**: Calculates voter microgroup relationship changes based on topic positions
-- **Demographics System**: Detailed voter breakdowns (hardcore, likely, swingable) for each state
-- **Polling System**: Dynamic polling updates based on relationships, momentum, and weekly events
-
-### Project Structure
-
-```
-src/
-├── components/      # React UI components
-│   ├── GameInterface.tsx    # Main game interface
-│   ├── StateMap.tsx          # Interactive electoral map
-│   ├── ActionPanel.tsx       # Campaign action selection
-│   ├── StateInfoPanel.tsx    # State detail view
-│   └── ...
-├── game/           # Game engine and logic
-│   ├── GameEngine.ts         # Core game engine
-│   └── relationshipCalculator.ts
-├── states/         # Individual state data files (50 states + DC)
-├── data/           # Game data
-│   ├── topics.ts             # 20 campaign topics
-│   ├── weeklySongs.ts        # 1976 Billboard songs
-│   └── newsHeadlines.ts      # Historical headlines
-├── types/          # TypeScript type definitions
-├── utils/          # Utility functions
-│   ├── demographics.ts       # Demographics calculations
-│   ├── sounds.ts             # Sound effect management
-│   └── spotify.ts            # Spotify integration
-├── App.tsx         # Main app component
-└── main.tsx        # Entry point
+```bash
+npm test              # deterministic and unit suite
+npm run test:e2e      # Chromium gameplay journeys
+npm run build         # type-check and production build
+npm run lint          # zero-warning lint gate
 ```
 
-## Development
+## Roadmap
 
-### Available Scripts
+- Integrate scenario selection and portable scenario import/export
+- Extract additional week-resolution phases from `GameEngine` into pure simulation modules
+- Add advisor-led first-week onboarding
+- Expand historical scenarios and community-authored event decks
+- Complete a redistributable audio replacement pass and choose a code license
 
-- `npm run dev` - Start development server (http://localhost:5173)
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint
-- `npm test` - Run deterministic simulation and data-integrity tests
-- `npm run test:watch` - Run tests in watch mode while developing
+## Historical sources and asset rights
 
-### Key Design Decisions
+The simulation separates documented historical context from modeled gameplay effects. Core election and debate material is sourced from the [National Archives 1976 Electoral College results](https://www.archives.gov/electoral-college/1976) and the [American Presidency Project debate archive](https://www.presidency.ucsb.edu/documents/presidential-campaign-debate-1). Individual historical decisions include their own source links in `src/data/events1976.ts`.
 
-- **Momentum-Driven Polling**: Momentum is the primary driver of poll changes, making it critical for winning states
-- **Permanent Topic Positions**: Once you choose a position on a topic, it's locked for the entire campaign
-- **Separate Player/Opponent HQs**: Each candidate can have their own HQ in each state, tracked separately
-- **Strategic AI**: Medium and Hard difficulties use sophisticated AI that competes for momentum and targets high-value states
-- **Historical Accuracy**: State demographics, electoral votes, and historical data based on 1976 election
+The Carter and Ford portraits are verified United States federal government works in the public domain. Some bundled audio lacks sufficient redistribution provenance, so this release does not apply a blanket open-source license. See the [asset rights inventory](docs/ASSET_RIGHTS.md) for the current status and contribution rules.
 
-## License
+## Release history
 
-This project is open source and available for educational purposes.
-
-## Credits
-
-- Historical data based on the 1976 U.S. Presidential Election
-- State demographics from 1976 census and election data
-- Music integration via Spotify API
+The project follows its Arizona-calendar release policy: each live push advances the patch, a new month advances the minor, and a new year advances the major. See [DEVLOG.md](DEVLOG.md) and [GitHub Releases](https://github.com/aribradshaw/1976/releases).
