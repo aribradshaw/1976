@@ -19,4 +19,6 @@ Until provenance is documented or the sounds are replaced with clearly redistrib
 
 ## Project license status
 
-No blanket open-source license is applied in this release. The code-license decision is intentionally deferred until the media boundary is resolved and the repository owner selects terms. Contributions remain subject to the repository's contribution process and applicable copyright law.
+Original source code and documentation are licensed under the [MIT License](../LICENSE). That license does not grant rights to the bundled audio or any other third-party media.
+
+Epic Stock Media's [licensing page](https://epicstockmedia.com/licensing/) says standard licenses prohibit making raw sound effects available to third parties and may require a Custom Application License when users control playback in a web app. The [Epic Stock Media EULA](https://epicstockmedia.com/wp-content/uploads/2018/01/ESM-EULA.pdf) also prohibits redistribution of the content as a standalone product or embedded in a sound-effects library. Until purchase records and the applicable application license are verified, the audio must remain separately identified and must not be represented as MIT-licensed. A future audio replacement pass can remove this boundary.

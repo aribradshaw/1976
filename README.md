@@ -16,6 +16,8 @@
 
 1976 is a deterministic, browser-based election strategy game about the close Carter-Ford campaign. Choose a candidate, manage a finite campaign, navigate sourced historical decisions, build a route to 270, and watch every electoral vote resolve on election night.
 
+If you play a campaign and want more historical scenarios, [star the repository](https://github.com/aribradshaw/1976) and [tell us which election to simulate next](https://github.com/aribradshaw/1976/issues/new).
+
 The design combines the clarity of an electoral map game with the tradeoffs of a campaign-management game. Money, candidate time, credibility, field organization, ads, rallies, voter coalitions, polling uncertainty, and an opponent working under the same action ceiling all compete for attention.
 
 ## The campaign loop
@@ -107,7 +109,7 @@ npm run lint          # zero-warning lint gate
 
 The simulation separates documented historical context from modeled gameplay effects. Core election and debate material is sourced from the [National Archives 1976 Electoral College results](https://www.archives.gov/electoral-college/1976) and the [American Presidency Project debate archive](https://www.presidency.ucsb.edu/documents/presidential-campaign-debate-1). Individual historical decisions include their own source links in `src/data/events1976.ts`.
 
-The Carter and Ford portraits are verified United States federal government works in the public domain. Some bundled audio lacks sufficient redistribution provenance, so this release does not apply a blanket open-source license. See the [asset rights inventory](docs/ASSET_RIGHTS.md) for the current status and contribution rules.
+The original source code and documentation in this repository are licensed under the [MIT License](LICENSE). The Carter and Ford portraits are verified United States federal government works in the public domain. Bundled audio remains excluded from the code license because its redistribution terms are separate; see the [asset rights inventory](docs/ASSET_RIGHTS.md) for the current status and contribution rules.
 
 ## Release history
 
