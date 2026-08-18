@@ -39,13 +39,28 @@ test('opens at the 1976 title screen and starts a selected candidate and difficu
 
 test('applies the network election-desk visual system to setup and gameplay', async ({ page }) => {
   await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(async () => {
+    await Promise.all([
+      document.fonts.load('16px "Source Sans 3 Variable"'),
+      document.fonts.load('16px "Source Serif 4 Variable"'),
+    ]);
+  });
 
   const titleStyles = await page.locator('.candidate-btn').first().evaluate((element) => {
     const root = getComputedStyle(document.documentElement);
     const card = getComputedStyle(element);
+    const interfaceSelectors = ['.game-title', '.game-subtitle', '.game-description', '.candidate-name', '.candidate-party', '.candidate-strategy', '.game-version', '.settings-btn-corner'];
+    const interfaceFamilies = [...new Set(interfaceSelectors.map(selector => {
+      const target = document.querySelector(selector);
+      return target ? getComputedStyle(target).fontFamily.split(',')[0].replaceAll('"', '') : '';
+    }).filter(Boolean))];
     return {
       navy: root.getPropertyValue('--tv-navy').trim(),
       amber: root.getPropertyValue('--tv-amber').trim(),
+      spacing: [1, 2, 3, 4, 5, 6].map(step => root.getPropertyValue(`--tv-space-${step}`).trim()),
+      interfaceFamilies,
+      fontsLoaded: document.fonts.check('16px "Source Sans 3 Variable"') && document.fonts.check('16px "Source Serif 4 Variable"'),
       radius: card.borderRadius,
       shadow: card.boxShadow,
     };
@@ -53,6 +68,9 @@ test('applies the network election-desk visual system to setup and gameplay', as
   expect(titleStyles).toEqual({
     navy: '#17294c',
     amber: '#c4922d',
+    spacing: ['4px', '8px', '12px', '16px', '24px', '32px'],
+    interfaceFamilies: ['Source Sans 3 Variable'],
+    fontsLoaded: true,
     radius: '0px',
     shadow: 'none',
   });
@@ -132,6 +150,12 @@ test('resolves an end-week historical decision, interview, and recap', async ({ 
   const historicalDialog = page.getByRole('dialog');
   await expect(historicalDialog).toBeVisible();
   await expect(historicalDialog.getByRole('button', { name: 'Commit to this decision' })).toBeDisabled();
+  const dialogFamilies = await historicalDialog.evaluate((dialog) => ({
+    headline: getComputedStyle(dialog.querySelector('h2')!).fontFamily,
+    choice: getComputedStyle(dialog.querySelector('.historical-event-choices button')!).fontFamily,
+  }));
+  expect(dialogFamilies.headline).toContain('Source Serif 4 Variable');
+  expect(dialogFamilies.choice).toContain('Source Sans 3 Variable');
 
   await historicalDialog.locator('.historical-event-choices button').first().click();
   await historicalDialog.getByRole('button', { name: 'Commit to this decision' }).click();

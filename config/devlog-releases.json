@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.7.9",
+    "date": "2026-08-18",
+    "title": "Two-family broadcast typography",
+    "notes": [
+      "Source Sans 3 now handles every interface, control, label, table, and data surface while Source Serif 4 is reserved for historical storytelling.",
+      "Tabular numerals replace the separate monospace treatment, keeping scoreboards aligned without adding a third visual voice.",
+      "A shared 4, 8, 12, 16, 24, 32, and 48 pixel spacing rhythm now governs the title slate, campaign board, action planner, scoreboards, and dialogs.",
+      "Candidate-card typography, line height, padding, and image proportions were rebalanced for cleaner scanning.",
+      "Browser coverage now verifies both bundled fonts, the spacing tokens, and the correct family on interface and editorial surfaces."
+    ]
+  },
+  {
     "version": "2.7.8",
     "date": "2026-08-18",
     "title": "Responsive title receiver polish",

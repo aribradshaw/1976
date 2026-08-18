@@ -42,12 +42,23 @@ Signal amber indicates selection, timing, and primary action. Democratic blue an
 
 ## Typography
 
-- **Display and chyron:** Arial Narrow, Franklin Gothic Medium, or a condensed system sans. Use uppercase with modest tracking for labels and mastheads.
-- **Body and controls:** Arial or Helvetica. Prefer short, direct labels.
-- **Data:** Courier New or Courier with tabular numerals. Use for dates, seed numbers, money, percentages, action days, and electoral votes.
-- **Editorial:** Georgia or Times New Roman. Use only for historical reports, recaps, and election-night headlines.
+- **Source Sans 3:** the only interface family. Use it for titles, chyrons, body copy, controls, labels, tables, dates, money, percentages, action days, and electoral votes. Use weight, size, case, and tabular-number features to create hierarchy instead of introducing another face.
+- **Source Serif 4:** the only editorial family. Use it for historical-decision headlines, weekly recap headlines, long historical context, and election-night storytelling.
 
-Do not use Montserrat, futuristic display faces, handwriting, or novelty distressed fonts.
+No monospace, system UI, condensed substitute, or third display face is allowed. Do not use Montserrat, futuristic display faces, handwriting, or novelty distressed fonts.
+
+## Spacing rhythm
+
+Use only the shared `4, 8, 12, 16, 24, 32, 48` pixel scale.
+
+- Related label and value: 4px.
+- Text lines or compact controls: 8px.
+- Rows and card internals: 12px.
+- Standard component padding: 16px.
+- Space between content groups: 24px.
+- Major section separation: 32px or 48px.
+
+Internal spacing must always be smaller than the space between groups. Avoid one-off values unless they are required for a physical border or a responsive calculation.
 
 ## Geometry and depth
 
@@ -63,7 +74,7 @@ Do not use Montserrat, futuristic display faces, handwriting, or novelty distres
 
 ### Masthead
 
-A flat navy strip with a thin amber top rule. Candidate portrait, title, week, and settings sit on one broadcast plane. The title uses the display face; seed and autosave status use the data face.
+A flat navy strip with a thin amber top rule. Candidate portrait, title, week, and settings sit on one broadcast plane. Source Sans 3 weight and tabular-number features create hierarchy without changing families.
 
 ### Scoreboards and resources
 

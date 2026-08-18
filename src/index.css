@@ -13,10 +13,19 @@
   --tv-warning: #b87526;
   --tv-danger: #983838;
   --tv-walnut: #4a2f1e;
-  --tv-display: 'Arial Narrow', 'Franklin Gothic Medium', 'Helvetica Neue', Arial, sans-serif;
-  --tv-body: Arial, Helvetica, sans-serif;
-  --tv-data: 'Courier New', Courier, monospace;
-  --tv-editorial: Georgia, 'Times New Roman', serif;
+  --tv-sans: 'Source Sans 3 Variable', sans-serif;
+  --tv-serif: 'Source Serif 4 Variable', serif;
+  --tv-display: var(--tv-sans);
+  --tv-body: var(--tv-sans);
+  --tv-data: var(--tv-sans);
+  --tv-editorial: var(--tv-serif);
+  --tv-space-1: 4px;
+  --tv-space-2: 8px;
+  --tv-space-3: 12px;
+  --tv-space-4: 16px;
+  --tv-space-5: 24px;
+  --tv-space-6: 32px;
+  --tv-space-7: 48px;
   --tv-shadow-hard: 5px 5px 0 rgba(8, 13, 24, 0.48);
   --tv-cut: 150ms linear;
 }
@@ -47,6 +56,7 @@ body {
 
 code {
   font-family: var(--tv-data);
+  font-variant-numeric: tabular-nums;
 }
 
 :root[data-crt-effects='false'] body {

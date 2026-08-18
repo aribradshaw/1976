@@ -7,6 +7,16 @@ Production-style releases use the same Arizona-calendar versioning policy as Cam
 - The first live push in a new year advances the major number, sets minor to the Arizona calendar month minus one, and resets patch to `1`.
 - Rebuilds of the same commit do not create another release.
 
+## 2.7.9, August 18, 2026
+
+Two-family broadcast typography
+
+- Replaced the competing display, body, monospace, and editorial stacks with exactly two bundled families: Source Sans 3 for the interface and Source Serif 4 for historical storytelling.
+- Replaced monospace data styling with Source Sans 3 tabular numerals so scoreboards stay aligned without introducing a third visual voice.
+- Established and applied a shared 4, 8, 12, 16, 24, 32, and 48 pixel spacing rhythm across the title slate, campaign board, action planner, scoreboards, and dialogs.
+- Rebalanced candidate-card text size, line height, padding, and image proportions for clearer names and less cramped campaign summaries.
+- Documented the typeface licenses and added browser assertions that reject a third interface family or missing spacing tokens.
+
 ## 2.7.8, August 18, 2026
 
 Responsive title receiver polish
