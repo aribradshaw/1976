@@ -63,7 +63,7 @@ npm run build
 npm run test:e2e
 ```
 
-Version 2.7.5 passes 31 deterministic and unit tests plus seven Chromium journeys. Browser coverage includes setup, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, a 390px mobile campaign, and a complete 25-week game through election night. The complete dependency tree audits cleanly.
+Version 2.7.6 passes 31 deterministic and unit tests plus eight Chromium journeys. Browser coverage includes setup, removal of legacy music authorization state, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, a 390px mobile campaign, and a complete 25-week game through election night. The complete dependency tree audits cleanly.
 
 ## Architecture
 

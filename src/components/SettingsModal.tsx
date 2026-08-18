@@ -1,5 +1,4 @@
 import { KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
-import SpotifyPlayer from './SpotifyPlayer';
 import { playClickSound, getSoundVolume, setSoundVolume } from '../utils/sounds';
 import { GameState } from '../types/game';
 import {
@@ -112,7 +111,7 @@ export default function SettingsModal({ isOpen, onClose, gameState }: SettingsMo
           </button>
         </div>
         <div className="settings-modal-content">
-          <p className="settings-intro" id="settings-modal-description">Adjust audio, visual effects, and connected music controls.</p>
+          <p className="settings-intro" id="settings-modal-description">Adjust sound effects, accessibility, and visual presentation.</p>
           {gameState && (
             <div className="settings-section">
               <h3>Game Settings</h3>
@@ -173,12 +172,6 @@ export default function SettingsModal({ isOpen, onClose, gameState }: SettingsMo
               />
               <span className="settings-switch" aria-hidden="true" />
             </label>
-          </div>
-
-          <div className="settings-section">
-            <h3>Spotify Integration</h3>
-            <p className="settings-description">Connect your Spotify account to automatically play the #1 Billboard song from each week during gameplay.</p>
-            <SpotifyPlayer currentWeek={gameState?.currentWeek || 1} disableAutoPlay={true} />
           </div>
         </div>
       </div>

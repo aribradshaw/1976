@@ -10,7 +10,6 @@ import StateInfoPanel from './StateInfoPanel';
 import NewsTicker from './NewsTicker';
 import CRTOverlay from './CRTOverlay';
 import WeeklyEventModal from './WeeklyEventModal';
-import SpotifyPlayer from './SpotifyPlayer';
 import SettingsModal from './SettingsModal';
 import ProjectedVotesModal from './ProjectedVotesModal';
 import CampaignDesk from './CampaignDesk';
@@ -25,7 +24,6 @@ import { EVENTS_1976 } from '../data/events1976';
 import { getEventForWeek } from '../game/simulation/events';
 import { CAMPAIGN_SAVE_KEY } from '../game/persistence';
 import { playClickSound, playStateSelectSound, playStateDeselectSound } from '../utils/sounds';
-import { isSpotifyConnected, searchTrack, playTrack } from '../utils/spotify';
 import './GameInterface.css';
 
 interface GameInterfaceProps {
@@ -59,29 +57,6 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
       localStorage.setItem(CAMPAIGN_SAVE_KEY, gameEngine.serializeCampaign());
     }
   }, [gameEngine, gameState]);
-
-  // Play "Rock'n Me" by Steve Miller Band when game ends (it was #1 the week of the election)
-  useEffect(() => {
-    if (gameState.gameStatus === 'won' || gameState.gameStatus === 'lost') {
-      const playElectionSong = async () => {
-        if (!isSpotifyConnected()) return;
-        
-        try {
-          // Search for "Rock'n Me" by Steve Miller Band
-          const trackId = await searchTrack('Steve Miller Band', "Rock'n Me");
-          if (trackId) {
-            await playTrack(trackId);
-          }
-        } catch (error) {
-          console.error('Error playing election song:', error);
-        }
-      };
-      
-      // Play after a short delay to ensure game state is fully updated
-      const timeout = setTimeout(playElectionSong, 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [gameState.gameStatus]);
 
   const handleAction = (action: CampaignAction) => {
     const success = gameEngine.executeAction(action);
@@ -270,7 +245,6 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
             states={gameEngine.getAllStates()}
             onOpenForecast={() => setShowProjectedVotes(gameState.playerCandidate)}
           />
-          <SpotifyPlayer currentWeek={gameState.currentWeek} />
           <div className="electoral-votes">
             <h3>Expected Electoral Votes</h3>
             <div className="ev-display">

@@ -7,6 +7,15 @@ Production-style releases use the same Arizona-calendar versioning policy as Cam
 - The first live push in a new year advances the major number, sets minor to the Arizona calendar month minus one, and resets patch to `1`.
 - Rebuilds of the same commit do not create another release.
 
+## 2.7.6, August 18, 2026
+
+First-party audio only
+
+- Removed the third-party music account connection from the title screen, campaign board, and settings.
+- Deleted the OAuth implementation, playback API calls, weekly streaming-track IDs, connection components, and election-night autoplay behavior.
+- Added a one-time browser migration that removes any legacy authorization token, state, and verifier left by earlier releases.
+- Added an eighth Playwright journey verifying that no connection controls remain and legacy authorization data is cleared.
+
 ## 2.7.5, August 18, 2026
 
 Flagship launch and contributor foundation

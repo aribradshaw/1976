@@ -31,9 +31,31 @@ test('opens at the 1976 title screen and starts a selected candidate and difficu
   await expect(page).toHaveTitle(/1976/i);
   await expect(page.getByRole('heading', { name: '1976' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Choose Your Candidate' })).toBeVisible();
+  await expect(page.getByText(/Spotify/i)).toHaveCount(0);
 
   await startCampaign(page, 'Hard');
   await expect(page.getByText('Week 1 of 25')).toBeVisible();
+});
+
+test('removes legacy music authorization state and exposes no connection controls', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('spotify_token', 'legacy-token');
+    localStorage.setItem('spotify_auth_state', 'legacy-state');
+    localStorage.setItem('spotify_code_verifier', 'legacy-verifier');
+  });
+  await page.goto('/');
+
+  await expect.poll(() => page.evaluate(() => ({
+    token: localStorage.getItem('spotify_token'),
+    state: localStorage.getItem('spotify_auth_state'),
+    verifier: localStorage.getItem('spotify_code_verifier'),
+  }))).toEqual({ token: null, state: null, verifier: null });
+  await expect(page.getByText(/Spotify/i)).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Settings' }).click();
+  const settings = page.getByRole('dialog', { name: 'Settings' });
+  await expect(settings.getByText(/Spotify/i)).toHaveCount(0);
+  await expect(settings.getByText('Sound Effects Volume:')).toBeVisible();
 });
 
 test('resolves an end-week historical decision, interview, and recap', async ({ page }) => {

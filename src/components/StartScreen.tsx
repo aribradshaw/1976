@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Candidate } from '../types/game';
 import CRTOverlay from './CRTOverlay';
-import SpotifyPlayer from './SpotifyPlayer';
 import SettingsModal from './SettingsModal';
 import { playClickSound, playEndTurnSound } from '../utils/sounds';
 import packageJson from '../../package.json';
@@ -32,9 +31,6 @@ export default function StartScreen({ onStart, onResume, hasSavedGame = false }:
 
   return (
     <div className="start-screen">
-      <div className="spotify-corner">
-        <SpotifyPlayer currentWeek={1} />
-      </div>
       <button className="settings-btn-corner" onClick={() => {
         playClickSound(); // Play click sound
         setShowSettings(true);

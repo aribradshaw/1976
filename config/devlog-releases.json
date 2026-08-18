@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.7.6",
+    "date": "2026-08-18",
+    "title": "First-party audio only",
+    "notes": [
+      "Removed the third-party music account connection, OAuth flow, playback API calls, settings controls, title-screen card, and election-night autoplay behavior.",
+      "Returning players now have any legacy music authorization token, state, and verifier removed from local browser storage.",
+      "Deleted the unused weekly streaming-track data and integration-specific interface styles from the production source.",
+      "Added browser coverage proving that no connection controls remain and legacy authorization state is cleared."
+    ]
+  },
+  {
     "version": "2.7.5",
     "date": "2026-08-18",
     "title": "Flagship launch and contributor foundation",

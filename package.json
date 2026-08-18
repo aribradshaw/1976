@@ -1,6 +1,6 @@
 {
   "name": "1976-election-sim",
-  "version": "2.7.5",
+  "version": "2.7.6",
   "description": "A playable historical strategy game about the Carter-Ford 1976 presidential campaign",
   "type": "module",
   "engines": {

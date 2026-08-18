@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import type { GameEngine } from './game/GameEngine';
 import { Candidate } from './types/game';
 import StartScreen from './components/StartScreen';
@@ -6,11 +6,16 @@ import './App.css';
 import { CAMPAIGN_SAVE_KEY } from './game/persistence';
 
 const GameInterface = lazy(() => import('./components/GameInterface'));
+const REMOVED_MUSIC_STORAGE_KEYS = ['spotify_token', 'spotify_auth_state', 'spotify_code_verifier'] as const;
 
 function App() {
   const [gameEngine, setGameEngine] = useState<GameEngine | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [hasSavedGame, setHasSavedGame] = useState(() => localStorage.getItem(CAMPAIGN_SAVE_KEY) !== null);
+
+  useEffect(() => {
+    REMOVED_MUSIC_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+  }, []);
 
   const startGame = async (candidate: Candidate, difficulty: 'easy' | 'medium' | 'hard') => {
     localStorage.removeItem(CAMPAIGN_SAVE_KEY);

@@ -10,14 +10,6 @@
   overflow: hidden;
 }
 
-.spotify-corner {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1000;
-  max-width: 280px;
-}
-
 .settings-btn-corner {
   position: fixed;
   top: 1rem;
@@ -626,7 +618,6 @@
     padding: 1.1rem;
   }
 
-  .spotify-corner { top: 0.5rem; right: 0.5rem; max-width: 190px; }
   .settings-btn-corner { top: 0.5rem; left: 0.5rem; padding: 0.55rem 0.8rem; }
   .candidate-buttons { gap: 0.7rem; }
   .candidate-btn { min-width: 140px; padding: 0.9rem; }
