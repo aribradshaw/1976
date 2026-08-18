@@ -1,4 +1,5 @@
 // Comprehensive game logger to track all actions and their effects for AI analysis
+import type { GameState } from '../types/game';
 
 export interface ActionLogEntry {
   week: number;
@@ -141,9 +142,44 @@ class GameLogger {
     });
   }
 
-  snapshotGameState(week: number, gameState: any): void {
-    // This will be called from GameEngine with the full game state
-    // We'll implement this when we integrate with GameEngine
+  snapshotGameState(week: number, gameState: GameState): void {
+    const playerParty = gameState.playerCandidate;
+    const opponentParty = playerParty === 'democrat' ? 'republican' : 'democrat';
+    const stateData: GameStateSnapshot['stateData'] = {};
+
+    gameState.polling.forEach((polling, stateAbbrev) => {
+      const activities = gameState.campaignActivities.get(stateAbbrev) ?? [];
+      const relationships = gameState.microgroupRelationships.get(stateAbbrev);
+      stateData[stateAbbrev] = {
+        polling: {
+          demSupport: polling.democraticSupport,
+          repSupport: polling.republicanSupport,
+          turnout: polling.turnoutRate,
+        },
+        momentum: {
+          player: gameState.stateMomentum.get(stateAbbrev) ?? 0,
+          opponent: gameState.opponentStateMomentum.get(stateAbbrev) ?? 0,
+        },
+        relationships: relationships ? { ...relationships } : {},
+        activities: {
+          player: activities
+            .filter(activity => activity.actor !== 'opponent')
+            .map(activity => ({ type: activity.type, level: activity.hqLevel, topic: activity.adTopic })),
+          opponent: activities
+            .filter(activity => activity.actor === 'opponent')
+            .map(activity => ({ type: activity.type, level: activity.hqLevel, topic: activity.adTopic })),
+        },
+      };
+    });
+
+    this.snapshots.push({
+      week,
+      playerElectoralVotes: gameState.electoralVotes[playerParty],
+      opponentElectoralVotes: gameState.electoralVotes[opponentParty],
+      playerFunds: gameState.resources.funds,
+      opponentFunds: 0,
+      stateData,
+    });
   }
 
   endGame(playerWon: boolean, playerElectoralVotes: number, opponentElectoralVotes: number): void {

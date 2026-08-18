@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getRandomHeadlinesForWeek } from '../data/newsHeadlines';
 import { GameEngine } from '../game/GameEngine';
 import { GameState, CampaignEvent } from '../types/game';
@@ -15,39 +15,6 @@ export default function NewsTicker({ currentWeek, gameEngine, gameState }: NewsT
   const [headlines, setHeadlines] = useState<string[]>([]);
   const [lastProcessedWeek, setLastProcessedWeek] = useState<number>(0);
 
-  useEffect(() => {
-    // Only update headlines when the week changes, not when gameState changes
-    if (currentWeek === lastProcessedWeek) {
-      return; // Already processed this week
-    }
-    
-    // Get headlines for current week
-    const weekHeadlines = getRandomHeadlinesForWeek(currentWeek, 5);
-    
-    // Add opponent actions from last week if available
-    if (gameEngine && gameState && currentWeek > 1) {
-      const lastWeek = currentWeek - 1;
-      
-      // First, add opponent's weekly interview if available
-      const opponentInterview = gameEngine.getOpponentInterviewForWeek(lastWeek);
-      if (opponentInterview) {
-        const interviewHeadline = formatOpponentInterview(opponentInterview, gameState.playerCandidate);
-        weekHeadlines.push(interviewHeadline);
-      }
-      
-      // Then add other opponent actions
-      const opponentEvents = gameEngine.getOpponentEventsForWeek(lastWeek);
-      if (opponentEvents.length > 0) {
-        // Format opponent actions into a headline
-        const opponentHeadline = formatOpponentActions(opponentEvents, gameState.playerCandidate);
-        weekHeadlines.push(opponentHeadline);
-      }
-    }
-    
-    setHeadlines(weekHeadlines);
-    setLastProcessedWeek(currentWeek);
-  }, [currentWeek, gameEngine, gameState, lastProcessedWeek]);
-  
   /**
    * Format opponent's weekly interview into a news ticker headline with impact
    */
@@ -80,7 +47,7 @@ export default function NewsTicker({ currentWeek, gameEngine, gameState }: NewsT
   /**
    * Format opponent actions into a news ticker headline
    */
-  function formatOpponentActions(events: CampaignEvent[], playerCandidate: 'democrat' | 'republican'): string {
+  const formatOpponentActions = useCallback((events: CampaignEvent[], playerCandidate: 'democrat' | 'republican'): string => {
     // Limit to 6 actions (or all if less than 6)
     const actionsToShow = events.slice(0, 6);
     
@@ -104,17 +71,19 @@ export default function NewsTicker({ currentWeek, gameEngine, gameState }: NewsT
           } else {
             return `HQ L${event.hqLevel} in ${stateName}`;
           }
-        case 'launch_ads':
+        case 'launch_ads': {
           const topic = TOPICS.find(t => t.id === event.adTopic);
           const topicName = topic ? topic.name : event.adTopic;
           const size = event.campaignSize ? ` (${event.campaignSize})` : '';
           return `Ads: ${topicName}${size} in ${stateName}`;
-        case 'rally':
+        }
+        case 'rally': {
           const topics = event.rallyTopics?.map(topicId => {
             const t = TOPICS.find(t => t.id === topicId);
             return t ? t.name : topicId;
           }).join(', ') || '';
           return `Rally: ${topics} in ${stateName}`;
+        }
         case 'large_donor_fundraiser':
           return `Fundraiser in ${stateName}`;
         default:
@@ -125,7 +94,30 @@ export default function NewsTicker({ currentWeek, gameEngine, gameState }: NewsT
     // Join with commas, but keep it concise
     const actionsList = actionDescriptions.join(', ');
     return `${opponentName}: ${actionsList}`;
-  }
+  }, [gameEngine]);
+
+  useEffect(() => {
+    if (currentWeek === lastProcessedWeek) {
+      return;
+    }
+
+    const weekHeadlines = getRandomHeadlinesForWeek(currentWeek, 5);
+    if (gameEngine && gameState && currentWeek > 1) {
+      const lastWeek = currentWeek - 1;
+      const opponentInterview = gameEngine.getOpponentInterviewForWeek(lastWeek);
+      if (opponentInterview) {
+        weekHeadlines.push(formatOpponentInterview(opponentInterview, gameState.playerCandidate));
+      }
+
+      const opponentEvents = gameEngine.getOpponentEventsForWeek(lastWeek);
+      if (opponentEvents.length > 0) {
+        weekHeadlines.push(formatOpponentActions(opponentEvents, gameState.playerCandidate));
+      }
+    }
+
+    setHeadlines(weekHeadlines);
+    setLastProcessedWeek(currentWeek);
+  }, [currentWeek, formatOpponentActions, gameEngine, gameState, lastProcessedWeek]);
 
   if (headlines.length === 0) {
     return null;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { getSongForWeek } from '../data/weeklySongs';
 import { 
   isSpotifyConnected, 
@@ -43,13 +43,53 @@ export default function SpotifyPlayer({ currentWeek, disableAutoPlay = false }: 
     checkCallback();
   }, []);
 
+  const handlePlayWeekSong = useCallback(async () => {
+    if (!connected) return;
+
+    const song = getSongForWeek(currentWeek);
+    if (!song) return;
+
+    try {
+      let trackId: string | undefined = song.spotifyId;
+      if (!trackId) {
+        const foundTrackId = await searchTrack(song.artist, song.track);
+        trackId = foundTrackId || undefined;
+      }
+
+      if (!trackId) {
+        console.warn(`Could not find "${song.track}" by ${song.artist} on Spotify.`);
+        return;
+      }
+
+      const currentlyPlayingId = await getCurrentlyPlayingTrackId();
+      if (currentlyPlayingId === trackId) {
+        setCurrentSong(`${song.artist} - ${song.track}`);
+        const state = await getPlaybackState();
+        setIsPlaying(state?.isPlaying || false);
+        return;
+      }
+
+      setIsPlaying(true);
+      const success = await playTrack(trackId);
+      if (success) {
+        setCurrentSong(`${song.artist} - ${song.track}`);
+      } else {
+        setIsPlaying(false);
+        console.warn('Failed to play track automatically. Make sure Spotify is open on a device.');
+      }
+    } catch (error) {
+      console.error('Error playing song:', error);
+      setIsPlaying(false);
+    }
+  }, [connected, currentWeek]);
+
   useEffect(() => {
     if (!disableAutoPlay && connected && currentWeek && currentWeek !== lastPlayedWeek) {
       // When week changes and Spotify is connected, automatically play the new week's song
       handlePlayWeekSong();
       setLastPlayedWeek(currentWeek);
     }
-  }, [currentWeek, connected, lastPlayedWeek, disableAutoPlay]);
+  }, [currentWeek, connected, lastPlayedWeek, disableAutoPlay, handlePlayWeekSong]);
 
   // Poll for playback state to keep UI in sync
   useEffect(() => {
@@ -83,53 +123,6 @@ export default function SpotifyPlayer({ currentWeek, disableAutoPlay = false }: 
     setIsPlaying(false);
     setCurrentSong(null);
     setLastPlayedWeek(null);
-  };
-
-  const handlePlayWeekSong = async () => {
-    if (!connected) return;
-
-    const song = getSongForWeek(currentWeek);
-    if (!song) return;
-
-    try {
-      // If we have a spotifyId, use it directly
-      let trackId: string | undefined = song.spotifyId;
-      
-      // Otherwise, search for the track
-      if (!trackId) {
-        const foundTrackId = await searchTrack(song.artist, song.track);
-        trackId = foundTrackId || undefined;
-      }
-
-      if (!trackId) {
-        console.warn(`Could not find "${song.track}" by ${song.artist} on Spotify.`);
-        return;
-      }
-
-      // Check if this track is already playing
-      const currentlyPlayingId = await getCurrentlyPlayingTrackId();
-      if (currentlyPlayingId === trackId) {
-        // Same song is already playing, don't restart it
-        setCurrentSong(`${song.artist} - ${song.track}`);
-        const state = await getPlaybackState();
-        setIsPlaying(state?.isPlaying || false);
-        return;
-      }
-
-      // Different song, play it
-      setIsPlaying(true);
-      const success = await playTrack(trackId);
-      if (success) {
-        setCurrentSong(`${song.artist} - ${song.track}`);
-      } else {
-        setIsPlaying(false);
-        // Don't show alert for automatic playback failures
-        console.warn('Failed to play track automatically. Make sure Spotify is open on a device.');
-      }
-    } catch (error) {
-      console.error('Error playing song:', error);
-      setIsPlaying(false);
-    }
   };
 
   const handlePlayPause = async () => {

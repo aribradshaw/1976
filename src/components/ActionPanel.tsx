@@ -43,12 +43,22 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
   const [showFundraiserConfirmation, setShowFundraiserConfirmation] = useState(false);
   const [fundraisingAmount, setFundraisingAmount] = useState<number>(0);
   const [selectedTopics, setSelectedTopics] = useState<TopicId[]>([]);
-  const [hqLevel, setHqLevel] = useState<number>(1);
   const executedPreSelectedAction = useRef<string | null>(null);
+  const onActionRef = useRef(onAction);
+  const onStateSelectRef = useRef(onStateSelect);
+  const actionHelpersRef = useRef<{
+    isActionTypeScheduledForState: (actionType: CampaignAction['type'], stateAbbrev: string) => boolean;
+    createAction: (
+      type: CampaignAction['type'],
+      targetState: string,
+      adTopic?: TopicId,
+      rallyTopics?: TopicId[],
+      hqLevel?: number,
+      campaignSize?: 'small' | 'medium' | 'large',
+    ) => CampaignAction | null;
+  } | null>(null);
   
   const currentSelectedState = selectedState || localSelectedState;
-  const states = gameEngine.getAllStates();
-  
   // Check if an action type has already been scheduled for a state this week
   const isActionTypeScheduledForState = (actionType: CampaignAction['type'], stateAbbrev: string): boolean => {
     return gameState.actionsThisWeek.some(
@@ -66,10 +76,23 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
   }, [selectedState]);
 
   useEffect(() => {
+    onActionRef.current = onAction;
+  }, [onAction]);
+
+  useEffect(() => {
+    onStateSelectRef.current = onStateSelect;
+  }, [onStateSelect]);
+
+  useEffect(() => {
+    const actionHelpers = actionHelpersRef.current;
+    if (!actionHelpers) {
+      return;
+    }
+
     // Only execute if preSelectedActionType is set and we haven't already executed it
     if (preSelectedActionType && currentSelectedState && executedPreSelectedAction.current !== `${preSelectedActionType}-${currentSelectedState}`) {
       // Check if this action type is already scheduled for this state
-      if (isActionTypeScheduledForState(preSelectedActionType, currentSelectedState)) {
+      if (actionHelpers.isActionTypeScheduledForState(preSelectedActionType, currentSelectedState)) {
         // Already scheduled, don't execute
         setSelectedActionType(null);
         return;
@@ -98,20 +121,20 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
         if (currentLevel >= 5) {
           setSelectedActionType(null);
           // Close the panel if at max level
-          onStateSelect?.(null);
+          onStateSelectRef.current?.(null);
           return;
         }
         
         // Auto-execute with next level
-        const action = createAction(preSelectedActionType, currentSelectedState, undefined, undefined, nextLevel);
+        const action = actionHelpers.createAction(preSelectedActionType, currentSelectedState, undefined, undefined, nextLevel);
         if (action && gameState.resources.funds >= action.cost) {
-          onAction(action);
+          onActionRef.current(action);
           // Immediately clear all local state
           setSelectedActionType(null);
           setLocalSelectedState('');
           setShowTopicSelector(false);
           setSelectedTopics([]);
-          onStateSelect?.(null);
+          onStateSelectRef.current?.(null);
         }
       } else if (preSelectedActionType === 'launch_ads' || preSelectedActionType === 'rally') {
         // Show topic selector
@@ -124,9 +147,9 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
     if (!preSelectedActionType) {
       executedPreSelectedAction.current = null;
     }
-  }, [preSelectedActionType, currentSelectedState]);
+  }, [currentSelectedState, gameEngine, gameState.resources.funds, preSelectedActionType]);
 
-  const getActionCost = (type: CampaignAction['type'], targetState?: string): number => {
+  const getActionCost = (type: CampaignAction['type'], targetState?: string, targetHqLevel = 1): number => {
     const state = targetState ? gameEngine.getStateData(targetState) : null;
     const costMultiplier = state ? state.campaignModifiers.mediaMarketCost : 1.0;
     
@@ -139,7 +162,7 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
     
     // HQ cost increases with level
     if (type === 'campaign_hq') {
-      return baseCosts[type] * hqLevel * costMultiplier;
+      return baseCosts[type] * targetHqLevel * costMultiplier;
     }
     
     return baseCosts[type] * costMultiplier;
@@ -206,7 +229,7 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
     } else if (type === 'launch_ads' && campaignSize) {
       cost = calculateAdCost(targetState, campaignSize);
     } else {
-      cost = getActionCost(type, targetState);
+      cost = getActionCost(type, targetState, hqLevel);
     }
     
     const state = gameEngine.getStateData(targetState);
@@ -235,7 +258,13 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
       rallyTopics,
       hqLevel,
       campaignSize, // Include campaign size for ads
+      fundraisingAmount: type === 'large_donor_fundraiser' ? fundraisingAmount : undefined,
     };
+  };
+
+  actionHelpersRef.current = {
+    isActionTypeScheduledForState,
+    createAction,
   };
 
   const handleActionClick = (actionType: CampaignAction['type']) => {
@@ -339,22 +368,9 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
     }
   };
 
-  const handleHQConfirm = () => {
-    if (!selectedActionType || !currentSelectedState) return;
-    
-    const action = createAction(selectedActionType, currentSelectedState, undefined, undefined, hqLevel);
-    if (action && gameState.resources.funds >= action.cost) {
-      onAction(action);
-      setSelectedActionType(null);
-      setHqLevel(1);
-      setLocalSelectedState('');
-      onStateSelect?.(null);
-    }
-  };
-
   const maxActions = 6;
   const queuedActionsCount = gameState.actionsThisWeek.length;
-  const canEndTurn = gameState.resources.actionsRemaining === 0 || queuedActionsCount >= maxActions;
+  const canEndTurn = true;
   const allSlotsFilled = queuedActionsCount >= maxActions;
   
   const dayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -590,12 +606,12 @@ export default function ActionPanel({ gameEngine, gameState, onAction, onEndTurn
             onEndTurn();
           }}
           disabled={!canEndTurn}
-          title={!canEndTurn ? `Queue ${maxActions - queuedActionsCount} more action${maxActions - queuedActionsCount !== 1 ? 's' : ''} to end the week` : ''}
+          title={queuedActionsCount === 0 ? 'End the week without scheduling an action' : `Resolve ${queuedActionsCount} planned action${queuedActionsCount === 1 ? '' : 's'}`}
         >
           End Week
         </button>
-        {!canEndTurn && !allSlotsFilled && (
-          <p className="end-turn-note">Queue {maxActions - queuedActionsCount} more action{maxActions - queuedActionsCount !== 1 ? 's' : ''} to end the week</p>
+        {!allSlotsFilled && (
+          <p className="end-turn-note">You may end early. Unused days preserve flexibility, but create no campaign impact.</p>
         )}
         {allSlotsFilled && (
           <p className="end-turn-note highlighted-note">All action slots filled! Ready to end the week.</p>

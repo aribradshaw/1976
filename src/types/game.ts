@@ -111,6 +111,7 @@ export interface MicrogroupRelationships {
 }
 
 export interface GameState {
+  simulationSeed: number;
   currentWeek: number;
   totalWeeks: number;
   currentDate: Date;  // Current Tuesday date
@@ -155,6 +156,8 @@ export interface CampaignAction {
   hqLevel?: number;
   // Campaign size for ads
   campaignSize?: 'small' | 'medium' | 'large';
+  // Locked when the player confirms a fundraiser so the quoted amount is the payout.
+  fundraisingAmount?: number;
 }
 
 export type Candidate = 'democrat' | 'republican';

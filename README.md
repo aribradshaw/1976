@@ -1,5 +1,18 @@
 # 1976: Election Simulation Game
 
+> Version 2.7.1, campaign simulation foundation
+
+## What changed in 2.7.1
+
+- Weekly actions are now real plans. Their campaign effects resolve only when the week ends, so removing a plan cannot leave behind money, momentum, voter relationships, offices, or event history.
+- Players may end a week with unused campaign days instead of being forced to fill all six slots.
+- Weekly interviews now resolve before that week's polling and opponent response, including in the final week.
+- The AI obeys the same six-action ceiling as the player and no longer receives invisible catch-up actions or passive hard-mode momentum.
+- Every campaign now has a replayable simulation seed. Core engine randomness uses the seeded stream instead of `Math.random()`.
+- Added a canonical action quote layer and probability-based electoral forecast foundation for the upcoming strategy UI.
+- Corrected Maine from 2 to 4 electoral votes, restoring the national total to 538.
+- Added Vitest coverage for deterministic replay, action queue purity, action legality, electoral-vote integrity, and hundreds of randomized forecast boards.
+
 A turn-based strategy game simulating the 1976 U.S. Presidential Election between Gerald Ford and Jimmy Carter. Campaign across all 50 states, manage resources, build momentum, and compete for 270 electoral votes in this historically-accurate political strategy game.
 
 ## Features
@@ -168,6 +181,8 @@ src/
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint
+- `npm test` - Run deterministic simulation and data-integrity tests
+- `npm run test:watch` - Run tests in watch mode while developing
 
 ### Key Design Decisions
 

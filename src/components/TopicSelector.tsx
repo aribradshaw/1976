@@ -454,7 +454,7 @@ export default function TopicSelector({
       return result;
     }
     return null;
-  }, [calculateEstimatedEffects, actionType, selectedTopics, localGameState]);
+  }, [calculateEstimatedEffects, actionType, selectedTopics]);
   
   const estimatedEffectsLarge = useMemo(() => {
     if (actionType === 'launch_ads') {
@@ -463,7 +463,7 @@ export default function TopicSelector({
       return result;
     }
     return null;
-  }, [calculateEstimatedEffects, actionType, selectedTopics, localGameState]);
+  }, [calculateEstimatedEffects, actionType, selectedTopics]);
 
   return (
     <div className="topic-selector-overlay">

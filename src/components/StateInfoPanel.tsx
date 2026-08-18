@@ -1,6 +1,5 @@
 import { GameEngine } from '../game/GameEngine';
-import { GameState, CampaignAction, CampaignEvent } from '../types/game';
-import { calculateDetailedDemographics } from '../utils/demographics';
+import { GameState, CampaignAction } from '../types/game';
 import { FaDemocrat, FaRepublican, FaDollarSign, FaAdversal } from 'react-icons/fa';
 import { RiHqFill } from 'react-icons/ri';
 import { TbPodium } from 'react-icons/tb';
@@ -122,9 +121,6 @@ export default function StateInfoPanel({
   const repActual = polling.republicanSupport;
   const undecidedActual = Math.max(0, 100 - demActual - repActual); // Calculate undecided
   const margin = demActual - repActual;
-  
-  // Calculate detailed demographics
-  const detailedDemos = state.detailedDemographics || calculateDetailedDemographics(state);
   
   // Get campaign activities
   const activities = gameEngine.getStateActivities(stateAbbreviation);

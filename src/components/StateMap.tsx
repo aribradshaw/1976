@@ -8,7 +8,6 @@ interface StateMapProps {
   onStateDoubleClick?: (abbreviation: string) => void;
   onMapClick?: () => void;
   selectedState?: string | null;
-  isFinalResults?: boolean;
 }
 
 interface StatePathData {
@@ -22,7 +21,7 @@ interface StatePathData {
 
 const statePaths = statePathsData as StatePathData;
 
-export default function StateMap({ gameEngine, onStateClick, onStateDoubleClick, onMapClick, selectedState, isFinalResults = false }: StateMapProps) {
+export default function StateMap({ gameEngine, onStateClick, onStateDoubleClick, onMapClick, selectedState }: StateMapProps) {
   const states = gameEngine.getAllStates();
 
   return (

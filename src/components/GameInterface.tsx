@@ -14,7 +14,7 @@ import SpotifyPlayer from './SpotifyPlayer';
 import SettingsModal from './SettingsModal';
 import ProjectedVotesModal from './ProjectedVotesModal';
 import { FaDemocrat, FaRepublican } from 'react-icons/fa';
-import { TopicId } from '../data/topics';
+import { TopicId, TOPICS } from '../data/topics';
 import { playClickSound, playStateSelectSound, playStateDeselectSound } from '../utils/sounds';
 import { isSpotifyConnected, searchTrack, playTrack } from '../utils/spotify';
 import './GameInterface.css';
@@ -23,15 +23,14 @@ interface GameInterfaceProps {
   gameEngine: GameEngine;
   playerCandidate: Candidate;
   onReset: () => void;
-  onSettings?: () => void;
 }
 
-export default function GameInterface({ gameEngine, playerCandidate, onReset, onSettings }: GameInterfaceProps) {
+export default function GameInterface({ gameEngine, playerCandidate, onReset }: GameInterfaceProps) {
   const [gameState, setGameState] = useState(gameEngine.getGameState());
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [showStateDetail, setShowStateDetail] = useState(false);
   const [showActionPanel, setShowActionPanel] = useState(false);
-  const [expandedEvParty, setExpandedEvParty] = useState<'democrat' | 'republican' | null>(null);
+  const [expandedEvParty] = useState<'democrat' | 'republican' | null>(null);
   const [preSelectedActionType, setPreSelectedActionType] = useState<CampaignAction['type'] | null>(null);
   const [showWeeklyEvent, setShowWeeklyEvent] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -79,19 +78,27 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
     }
   };
 
-  const handleEndTurn = () => {
-    // Process the turn, then show weekly interview modal
+  const resolveWeek = () => {
     gameEngine.endTurn();
     setGameState(gameEngine.getGameState());
-    setShowWeeklyEvent(true);
+    setShowWeeklyEvent(false);
+  };
+
+  const handleEndTurn = () => {
+    // The interview is part of this week's plan and must affect the same polling
+    // window as the opponent's response. If every issue is already locked, skip it.
+    if (gameState.topicPositions.size < TOPICS.length) {
+      setShowWeeklyEvent(true);
+      return;
+    }
+    resolveWeek();
   };
 
   const handleWeeklyEventAnswer = (topicId: TopicId, position: 'for' | 'against') => {
     // Apply the weekly interview effects (this also locks the position globally)
     // Weekly interviews have national impact on all subgroups in all states
     gameEngine.applyWeeklyEvent(topicId, position);
-    setGameState(gameEngine.getGameState());
-    setShowWeeklyEvent(false);
+    resolveWeek();
   };
 
   const handleStateClick = (abbreviation: string) => {
@@ -157,7 +164,6 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
             onStateDoubleClick={() => {}}
             onMapClick={() => {}}
             selectedState={null}
-            isFinalResults={true}
           />
         </div>
       </div>
@@ -200,7 +206,6 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
             currentWeek={gameState.currentWeek} 
             totalWeeks={gameState.totalWeeks}
             currentDate={gameState.currentDate}
-            electionDate={gameState.electionDate}
           />
           <div className="electoral-votes">
             <h3>Electoral Votes</h3>
@@ -381,11 +386,9 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset, on
       
       {showWeeklyEvent && (
         <WeeklyEventModal
-          gameEngine={gameEngine}
           gameState={gameState}
-          playerCandidate={playerCandidate}
           onAnswer={handleWeeklyEventAnswer}
-          onClose={() => setShowWeeklyEvent(false)}
+          onClose={resolveWeek}
         />
       )}
       

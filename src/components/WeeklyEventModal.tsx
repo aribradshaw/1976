@@ -1,21 +1,16 @@
 import { useState, useEffect } from 'react';
-import { GameEngine } from '../game/GameEngine';
-import { GameState, Candidate } from '../types/game';
+import { GameState } from '../types/game';
 import { TopicId, TOPICS } from '../data/topics';
 import './WeeklyEventModal.css';
 
 interface WeeklyEventModalProps {
-  gameEngine: GameEngine;
   gameState: GameState;
-  playerCandidate: Candidate;
   onAnswer: (topicId: TopicId, position: 'for' | 'against') => void;
   onClose?: () => void;
 }
 
 export default function WeeklyEventModal({ 
-  gameEngine, 
   gameState, 
-  playerCandidate,
   onAnswer,
   onClose
 }: WeeklyEventModalProps) {
@@ -56,7 +51,7 @@ export default function WeeklyEventModal({
     if (lockedTopics.length === 0 && showTip) {
       // First weekly event - tip will be shown
     }
-  }, [gameState.currentWeek, gameState.topicPositions, showTip]);
+  }, [gameState.currentWeek, gameState.topicPositions, onClose, showTip]);
 
   if (!randomTopic) {
     return (

@@ -5,12 +5,19 @@ import { initializeRelationships, applyTopicRelationshipChanges, calculateTopicR
 import { TopicId, Microgroup, TOPIC_RATINGS, TOPICS } from '../data/topics';
 import { gameLogger } from '../utils/gameLogger';
 import { calculateDetailedDemographics } from '../utils/demographics';
+import { SeededRng } from './simulation/rng';
 
 export class GameEngine {
   private gameState: GameState;
   private states: Map<string, StateData>;
+  private rng: SeededRng;
 
-  constructor(playerCandidate: Candidate = 'democrat', difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
+  constructor(
+    playerCandidate: Candidate = 'democrat',
+    difficulty: 'easy' | 'medium' | 'hard' = 'medium',
+    seed: number | string = `${playerCandidate}:${difficulty}:${Date.now()}`,
+  ) {
+    this.rng = new SeededRng(seed);
     this.states = new Map();
     const allStates = getAllStates();
     allStates.forEach(state => {
@@ -55,8 +62,8 @@ export class GameEngine {
       
       // Start with base percentages, but ensure total doesn't exceed 70%
       // This leaves at least 30% undecided in each state (and overall)
-      let demSupport = Math.max(0, Math.min(100, baseDem + (Math.random() - 0.5) * 10));
-      let repSupport = Math.max(0, Math.min(100, baseRep + (Math.random() - 0.5) * 10));
+      let demSupport = Math.max(0, Math.min(100, baseDem + (this.rng.next() - 0.5) * 10));
+      let repSupport = Math.max(0, Math.min(100, baseRep + (this.rng.next() - 0.5) * 10));
       
       // Ensure at least 30% undecided (dem + rep <= 70%)
       const totalDecided = demSupport + repSupport;
@@ -101,12 +108,13 @@ export class GameEngine {
       microgroupRelationships.set(abbrev, initializeRelationships());
       fundraisingPotential.set(abbrev, 100);  // Start at 100%
       // Initialize momentum with random value between 0 and 3 for each state
-      const initialMomentum = Math.random() * 3; // Random between 0 and 3
+      const initialMomentum = this.rng.next() * 3; // Random between 0 and 3
       stateMomentum.set(abbrev, initialMomentum);
       opponentStateMomentum.set(abbrev, initialMomentum);
     });
 
     return {
+      simulationSeed: this.rng.seed,
       currentWeek: 1,
       totalWeeks: 25,
       currentDate,
@@ -140,7 +148,7 @@ export class GameEngine {
 
   private getRandomMarginOfError(): number {
     // Returns a margin of error between 3% and 10%
-    return 3 + Math.random() * 7;
+    return 3 + this.rng.next() * 7;
   }
 
   /**
@@ -240,7 +248,7 @@ export class GameEngine {
       
       const demSupport = polling.democraticSupport;
       const repSupport = polling.republicanSupport;
-      const undecidedPct = state.demographics.undecided;
+      const undecidedPct = Math.max(0, 100 - demSupport - repSupport);
       
       // Check if undecideds have plurality (grey state) - exclude from lists
       if (undecidedPct > demSupport && undecidedPct > repSupport) {
@@ -275,7 +283,7 @@ export class GameEngine {
     if (!state) return 0;
     
     const currentPotential = this.gameState.fundraisingPotential.get(stateAbbreviation) || 100;
-    const baseAmount = 500000 + Math.random() * 500000; // $500K - $1M
+    const baseAmount = 500000 + this.rng.next() * 500000; // $500K - $1M
     
     // Normalize by registered voters (reference: 2.5M registered voters = 1.0 multiplier)
     // Smaller states will have proportionally lower fundraising
@@ -299,7 +307,7 @@ export class GameEngine {
       
       const demSupport = polling.democraticSupport;
       const repSupport = polling.republicanSupport;
-      const undecidedPct = state.demographics.undecided;
+      const undecidedPct = Math.max(0, 100 - demSupport - repSupport);
       
       // Check if undecideds have plurality (grey state) - exclude from count
       if (undecidedPct > demSupport && undecidedPct > repSupport) {
@@ -385,6 +393,14 @@ export class GameEngine {
       return false;
     }
 
+    // A weekly plan can contain only one instance of an action type per state.
+    // Effects are resolved together at endTurn, so validation must include the queue.
+    if (this.gameState.actionsThisWeek.some(
+      queued => queued.type === action.type && queued.targetState === action.targetState
+    )) {
+      return false;
+    }
+
     // Validate action-specific requirements
     if (action.type === 'launch_ads' && !action.adTopic) {
       return false; // Ads require a topic
@@ -429,20 +445,22 @@ export class GameEngine {
       }
     }
 
-    // Capture BEFORE state for logging
+    // Reserve the resources now, but do not mutate campaign state until the week resolves.
+    this.gameState.resources.funds -= action.cost;
+    this.gameState.resources.actionsRemaining -= 1;
+    this.gameState.actionsThisWeek.push({ ...action });
+
+    return true;
+  }
+
+  private resolvePlayerAction(action: CampaignAction): void {
     const beforePolling = this.gameState.polling.get(action.targetState);
     const beforeMomentum = {
       player: this.gameState.stateMomentum.get(action.targetState) || 0,
       opponent: this.gameState.opponentStateMomentum.get(action.targetState) || 0,
     };
     const beforeRelationships = this.gameState.microgroupRelationships.get(action.targetState);
-    
-    // Execute the action
-    this.gameState.resources.funds -= action.cost;
-    this.gameState.resources.actionsRemaining -= 1;
-    this.gameState.actionsThisWeek.push(action);
 
-    // Apply action effects first (this creates the fundraising booth with the actual amount)
     this.applyActionEffects(action);
 
     // Capture AFTER state for logging
@@ -492,10 +510,7 @@ export class GameEngine {
       });
     }
 
-    // Log the event after effects are applied (so we can get the actual fundraising amount from the booth)
     this.logCampaignEvent(action);
-
-    return true;
   }
 
   private logCampaignEvent(action: CampaignAction): void {
@@ -559,14 +574,17 @@ export class GameEngine {
       const currentPotential = this.gameState.fundraisingPotential.get(action.targetState) || 100;
       
       // Calculate fundraising amount based on state's base fundraising potential and current dynamic potential
-      const baseAmount = 500000 + Math.random() * 500000; // $500K - $1M
+      const quotedAmount = action.fundraisingAmount;
+      const baseAmount = quotedAmount == null ? 500000 + this.rng.next() * 500000 : 0;
       
       // Normalize by registered voters (reference: 2.5M registered voters = 1.0 multiplier)
       // Smaller states will have proportionally lower fundraising
       const referenceVoters = 2500000; // Medium-sized state reference
       const voterMultiplier = state.population.registeredVoters / referenceVoters;
       
-      const fundraisingAmount = baseAmount * state.campaignModifiers.fundraisingPotential * (currentPotential / 100) * voterMultiplier;
+      const fundraisingAmount = quotedAmount ?? (
+        baseAmount * state.campaignModifiers.fundraisingPotential * (currentPotential / 100) * voterMultiplier
+      );
       
       // Add immediate funds
       this.gameState.resources.funds += fundraisingAmount;
@@ -937,6 +955,11 @@ export class GameEngine {
       return;
     }
 
+    // Resolve the player's complete plan first, then let the opponent act in the
+    // same weekly resolution window. Removing a queued action before this point
+    // has no side effects beyond releasing its reserved cost and action point.
+    this.gameState.actionsThisWeek.forEach(action => this.resolvePlayerAction(action));
+
     // Process opponent actions (AI or random)
     this.processOpponentTurn();
 
@@ -962,16 +985,11 @@ export class GameEngine {
     // Process HQ effects (turnout boosts and momentum)
     this.processHQEffects();
     
-    // On hard difficulty, give opponent passive momentum boost in all states
-    if (this.gameState.difficulty === 'hard') {
-      this.gameState.opponentStateMomentum.forEach((momentum, stateAbbrev) => {
-        const newMomentum = Math.min(100, momentum + 0.1);
-        this.gameState.opponentStateMomentum.set(stateAbbrev, newMomentum);
-      });
-    }
-    
     // Calculate weekly fundraising
     this.calculateWeeklyFundraising();
+
+    // Preserve a compact replay/debug snapshot before the calendar advances.
+    gameLogger.snapshotGameState(this.gameState.currentWeek, this.gameState);
 
     // Advance to next week (next Tuesday)
     this.gameState.currentWeek += 1;
@@ -1480,7 +1498,7 @@ export class GameEngine {
   /**
    * Execute opponent HQ action
    */
-  private executeOpponentHQ(abbrev: string, opponentCandidate: Candidate): void {
+  private executeOpponentHQ(abbrev: string): void {
     // Capture BEFORE state for logging
     const beforePolling = this.gameState.polling.get(abbrev);
     const beforeMomentum = {
@@ -1876,8 +1894,8 @@ export class GameEngine {
     
     if (difficulty === 'easy') {
       // Easy: Randomly choose states
-      const numActions = Math.floor(Math.random() * 3) + 1; // 1-3 actions
-      targetStates = allStates.sort(() => Math.random() - 0.5).slice(0, numActions);
+      const numActions = this.rng.nextInt(1, 3);
+      targetStates = allStates.sort(() => this.rng.next() - 0.5).slice(0, numActions);
     } else if (difficulty === 'medium' || difficulty === 'hard') {
       // Medium & Hard: Prioritize momentum competition and reaching 270 electoral votes
       // Calculate opponent's current projected electoral votes
@@ -2252,7 +2270,7 @@ export class GameEngine {
       const newHqCount = Math.min(hqTargetCount, statesWithoutHq.length);
       for (let i = 0; i < newHqCount; i++) {
         if (statesWithoutHq.length > 0) {
-          const randomIndex = Math.floor(Math.random() * statesWithoutHq.length);
+          const randomIndex = this.rng.nextInt(0, statesWithoutHq.length - 1);
           hqTargets.push(statesWithoutHq.splice(randomIndex, 1)[0]);
         }
       }
@@ -2267,7 +2285,7 @@ export class GameEngine {
         });
         
         for (let i = 0; i < remainingHqCount && statesWithHq.length > 0; i++) {
-          const randomIndex = Math.floor(Math.random() * statesWithHq.length);
+          const randomIndex = this.rng.nextInt(0, statesWithHq.length - 1);
           hqTargets.push(statesWithHq.splice(randomIndex, 1)[0]);
         }
       }
@@ -2332,26 +2350,9 @@ export class GameEngine {
       }
     });
     
-    // Calculate how many additional actions we need to reach target total
-    // Hard: 7-8 actions, Medium: 6 actions, Easy: 3-6 actions
-    let totalActionTarget = difficulty === 'hard' ? 8 : difficulty === 'medium' ? 6 : 6;
-    
-    // Give AI extra actions if player is ahead by a lot (catch-up mechanic)
-    const projectedVotes = this.getProjectedElectoralVotes();
-    const playerVotes = this.gameState.playerCandidate === 'democrat' 
-      ? projectedVotes.democrat 
-      : projectedVotes.republican;
-    
-    // If player has over 270 projected votes, give AI 1 extra action (up to 7 total)
-    if (playerVotes > 270) {
-      totalActionTarget += 1;
-    }
-    
-    // If player has over 350 projected votes, give AI 2 extra actions total (up to 8 total)
-    // Note: This stacks with the above, so at 350+ it's +2 total (not +3)
-    if (playerVotes > 350) {
-      totalActionTarget += 1; // Additional action on top of the 270+ bonus
-    }
+    // Difficulty changes planning quality, not the rules. The opponent shares the
+    // player's six-day ceiling and gets no invisible catch-up actions.
+    const totalActionTarget = difficulty === 'hard' ? 6 : difficulty === 'medium' ? 5 : 4;
     
     // Account for fundraising if needed (counts as 1 action)
     const fundraisingCount = fundraisingState ? 1 : 0;
@@ -2367,7 +2368,7 @@ export class GameEngine {
         if (fundraisingState) usedStates.add(fundraisingState);
         const availableStates = allStates.filter(abbrev => !usedStates.has(abbrev));
         const numNeeded = Math.min(remainingActions, availableStates.length);
-        targetStates = availableStates.sort(() => Math.random() - 0.5).slice(0, numNeeded);
+        targetStates = availableStates.sort(() => this.rng.next() - 0.5).slice(0, numNeeded);
       }
     } else {
       // Limit targetStates to remaining actions needed, excluding already used states
@@ -2383,7 +2384,7 @@ export class GameEngine {
       if (fundraisingState) usedStates.add(fundraisingState);
       const availableStates = allStates.filter(abbrev => !usedStates.has(abbrev));
       const numNeeded = remainingActions - targetStates.length;
-      const additionalStates = availableStates.sort(() => Math.random() - 0.5).slice(0, numNeeded);
+      const additionalStates = availableStates.sort(() => this.rng.next() - 0.5).slice(0, numNeeded);
       targetStates = [...targetStates, ...additionalStates];
     }
     
@@ -2397,7 +2398,7 @@ export class GameEngine {
         if (fundraisingState) usedStates.add(fundraisingState);
         const availableStates = allStates.filter(abbrev => !usedStates.has(abbrev));
         const numNeeded = minActions - currentTotalActions;
-        const additionalStates = availableStates.sort(() => Math.random() - 0.5).slice(0, numNeeded);
+        const additionalStates = availableStates.sort(() => this.rng.next() - 0.5).slice(0, numNeeded);
         targetStates = [...targetStates, ...additionalStates];
       }
     }
@@ -2470,15 +2471,10 @@ export class GameEngine {
       }
     }
     
-    // Track actions executed (unused but kept for potential future use)
-    let actionsExecuted = 0;
-    const maxActions = 6;
-    const usedStatesForActions = new Set<string>();
-    
     // Helper function to simulate if an action would help the opponent
     const wouldActionHelp = (
       testActionType: CampaignAction['type'],
-      testActionData: any,
+      testActionData: Partial<CampaignAction>,
       testStateAbbrev: string
     ): boolean => {
         if (difficulty === 'easy') return true; // Easy doesn't check
@@ -2673,7 +2669,7 @@ export class GameEngine {
       
       // Determine which action to take based on difficulty
       let actionType: CampaignAction['type'] | undefined;
-      let actionData: any = {};
+      let actionData: Partial<CampaignAction> = {};
       let actionFound = false;
       const maxAttempts = 10; // Try up to 10 different actions before giving up
       let attempts = 0;
@@ -2684,7 +2680,7 @@ export class GameEngine {
           if (difficulty === 'easy') {
             // Easy: Randomly choose action type
             const actionTypes: CampaignAction['type'][] = ['large_donor_fundraiser', 'launch_ads', 'campaign_hq', 'rally'];
-            actionType = actionTypes[Math.floor(Math.random() * actionTypes.length)];
+            actionType = this.rng.pick(actionTypes);
             actionFound = true; // Easy doesn't check
           } else if (difficulty === 'medium' || difficulty === 'hard') {
             // Medium & Hard: Choose action that helps their base and indies
@@ -2736,7 +2732,7 @@ export class GameEngine {
             if (validTopics.length === 0) {
               // Fallback: if no topics help base, use random action
               const actionTypes: CampaignAction['type'][] = ['large_donor_fundraiser', 'campaign_hq'];
-              actionType = actionTypes[Math.floor(Math.random() * actionTypes.length)];
+              actionType = this.rng.pick(actionTypes);
             } else {
               validTopics.sort((a, b) => b.score - a.score);
             
@@ -2799,15 +2795,15 @@ export class GameEngine {
               // Prioritize HQs heavily - they build momentum which compounds over time
               const hqPriority = difficulty === 'hard' ? 0.8 : 0.5; // Hard: 80% chance, Medium: 50% chance
               
-              if (isCompeting && currentHqLevel < 5 && Math.random() < aggressionLevel) {
+              if (isCompeting && currentHqLevel < 5 && this.rng.next() < aggressionLevel) {
                 // When competing, prioritize HQs to build momentum
                 actionType = 'campaign_hq';
                 actionData.hqLevel = currentHqLevel + 1;
-              } else if (currentHqLevel < 5 && Math.random() < hqPriority) {
+              } else if (currentHqLevel < 5 && this.rng.next() < hqPriority) {
                 // Higher priority for HQs on hard difficulty
                 actionType = 'campaign_hq';
                 actionData.hqLevel = currentHqLevel + 1;
-              } else if (canDoAds && (isCompeting ? Math.random() < aggressionLevel : Math.random() < 0.4)) {
+              } else if (canDoAds && (isCompeting ? this.rng.next() < aggressionLevel : this.rng.next() < 0.4)) {
                 // Filter out topics that are already used for ads in this state
                 const activities = this.gameState.campaignActivities.get(abbrev) || [];
                 const usedAdTopics = new Set(
@@ -2823,10 +2819,10 @@ export class GameEngine {
                     actionData.campaignSize = 'large'; // Use large campaign for strategic advantage
                   } else if (state && state.electoralVotes >= 5) {
                     // Medium states: 50% chance of large, 50% medium
-                    actionData.campaignSize = Math.random() < 0.5 ? 'large' : 'medium';
+                    actionData.campaignSize = this.rng.next() < 0.5 ? 'large' : 'medium';
                   } else {
                     // Small states: prefer medium, occasional large
-                    actionData.campaignSize = Math.random() < 0.3 ? 'large' : 'medium';
+                    actionData.campaignSize = this.rng.next() < 0.3 ? 'large' : 'medium';
                   }
                 } else {
                   // No available topics for ads, fallback to HQ or other action
@@ -2841,14 +2837,14 @@ export class GameEngine {
                     return false;
                   }
                 }
-              } else if (canDoRally && validTopics.length >= 3 && (isCompeting ? Math.random() < aggressionLevel + 0.2 : Math.random() < 0.7)) {
+              } else if (canDoRally && validTopics.length >= 3 && (isCompeting ? this.rng.next() < aggressionLevel + 0.2 : this.rng.next() < 0.7)) {
                 // Rallies build momentum - prioritize when competing
                 actionType = 'rally';
                 actionData.rallyTopics = validTopics.slice(0, 3).map(t => t.topicId);
               } else if (fundraisingState && abbrev === fundraisingState) {
                 // If this state is already scheduled for fundraising, choose a different action
                 // Prefer HQ if available, otherwise ads
-                if (currentHqLevel < 5 && Math.random() < 0.5) {
+                if (currentHqLevel < 5 && this.rng.next() < 0.5) {
                   actionType = 'campaign_hq';
                   actionData.hqLevel = currentHqLevel + 1;
                 } else if (canDoAds) {
@@ -2867,10 +2863,10 @@ export class GameEngine {
                       actionData.campaignSize = 'large'; // Use large campaign for strategic advantage
                     } else if (state && state.electoralVotes >= 5) {
                       // Medium states: 50% chance of large, 50% medium
-                      actionData.campaignSize = Math.random() < 0.5 ? 'large' : 'medium';
+                      actionData.campaignSize = this.rng.next() < 0.5 ? 'large' : 'medium';
                     } else {
                       // Small states: prefer medium, occasional large
-                      actionData.campaignSize = Math.random() < 0.3 ? 'large' : 'medium';
+                      actionData.campaignSize = this.rng.next() < 0.3 ? 'large' : 'medium';
                     }
                   } else {
                     // No available topics for ads, skip this state
@@ -2901,7 +2897,7 @@ export class GameEngine {
                 if (actionType === 'campaign_hq') {
                   actionFound = true; // Always allow HQs
                 } else {
-                  actionType = undefined as any;
+                  actionType = undefined;
                   actionData = {};
                   continue; // Try again
                 }
@@ -2931,7 +2927,7 @@ export class GameEngine {
           
           // Execute the action
           if (actionType === 'campaign_hq') {
-            this.executeOpponentHQ(abbrev, opponentCandidate);
+            this.executeOpponentHQ(abbrev);
           } else if (actionType === 'launch_ads' && actionData.adTopic) {
             this.executeOpponentAds(abbrev, opponentCandidate, actionData.adTopic, (actionData.campaignSize as 'small' | 'medium' | 'large') || 'medium');
           } else if (actionType === 'rally' && actionData.rallyTopics) {
@@ -2963,7 +2959,6 @@ export class GameEngine {
     // Turn 1: 1/25, Turn 20: 20/25, Turn 25: 25/25 (100%)
     const weekFraction = this.gameState.currentWeek / 25;
     
-    const opponentCandidate = this.gameState.playerCandidate === 'democrat' ? 'republican' : 'democrat';
     const isPlayerDem = this.gameState.playerCandidate === 'democrat';
     
     this.gameState.polling.forEach((polling, stateAbbrev) => {
@@ -3080,13 +3075,13 @@ export class GameEngine {
 
   private updateNaturalPollingShifts(): void {
     // Small random shifts in polling each week
-    this.gameState.polling.forEach((polling, abbrev) => {
-      const shift = (Math.random() - 0.5) * 0.5;
+    this.gameState.polling.forEach((polling) => {
+      const shift = (this.rng.next() - 0.5) * 0.5;
       polling.democraticSupport += shift;
       polling.republicanSupport -= shift;
       
       // Update margin of error (can fluctuate)
-      polling.marginOfError = 3 + Math.random() * 7;
+      polling.marginOfError = 3 + this.rng.next() * 7;
       
       polling.democraticSupport = Math.max(0, Math.min(100, polling.democraticSupport));
       polling.republicanSupport = Math.max(0, Math.min(100, polling.republicanSupport));
@@ -3114,7 +3109,7 @@ export class GameEngine {
 
       const demSupport = polling.democraticSupport;
       const repSupport = polling.republicanSupport;
-      const undecidedPct = state.demographics.undecided;
+      const undecidedPct = Math.max(0, 100 - demSupport - repSupport);
       
       // Check if undecideds have plurality (grey state) - exclude from count
       if (undecidedPct > demSupport && undecidedPct > repSupport) {

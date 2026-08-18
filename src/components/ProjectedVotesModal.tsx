@@ -78,7 +78,6 @@ export default function ProjectedVotesModal({
 
   // Show all states, but highlight the ones won by the selected party
   // Calculate totals for all states
-  const totalElectoralVotesAll = stateProjections.reduce((sum, p) => sum + p.electoralVotes, 0);
   const totalProjectedVotes = stateProjections.reduce((sum, p) => 
     sum + (party === 'democrat' ? p.demVotes : p.repVotes), 0);
   

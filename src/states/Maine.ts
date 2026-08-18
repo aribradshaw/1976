@@ -3,7 +3,7 @@ import { createStateData } from './StateData';
 export const Maine = createStateData({
   name: 'Maine',
   abbreviation: 'ME',
-  electoralVotes: 2,
+  electoralVotes: 4,
   population: {
     total: 1071615,
     votingEligible: 750130,

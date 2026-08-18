@@ -1,0 +1,14 @@
+[
+  {
+    "version": "2.7.1",
+    "date": "2026-08-18",
+    "title": "Deterministic campaign foundation",
+    "notes": [
+      "Weekly actions now resolve together without remove-action side effects.",
+      "Campaigns use seeded simulation randomness and probability-based forecast helpers.",
+      "The opponent obeys the shared six-action ceiling and Maine restores the 538-EV total.",
+      "Vitest now covers replay, planning purity, action legality, and forecast invariants."
+    ]
+  }
+]
+

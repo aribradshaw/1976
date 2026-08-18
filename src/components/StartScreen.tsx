@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Candidate } from '../types/game';
 import CRTOverlay from './CRTOverlay';
 import SpotifyPlayer from './SpotifyPlayer';
@@ -6,6 +6,7 @@ import SettingsModal from './SettingsModal';
 import SpotifyConnectionModal from './SpotifyConnectionModal';
 import { playClickSound, playEndTurnSound } from '../utils/sounds';
 import { isSpotifyConnected } from '../utils/spotify';
+import packageJson from '../../package.json';
 import './StartScreen.css';
 
 interface StartScreenProps {
@@ -16,16 +17,9 @@ export default function StartScreen({ onStart }: StartScreenProps) {
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [spotifyConnected, setSpotifyConnected] = useState(false);
   const [showSpotifyModal, setShowSpotifyModal] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   
-  // Refs for TV static audio with fade in/out overlap
-  const staticAudio1Ref = useRef<HTMLAudioElement | null>(null);
-  const staticAudio2Ref = useRef<HTMLAudioElement | null>(null);
-  const fadeIntervalRef = useRef<number | null>(null);
-  const currentAudioRef = useRef<0 | 1>(0); // Track which audio is currently playing
-
   const handleCandidateSelect = (candidate: Candidate) => {
     playClickSound(); // Play click sound
     setSelectedCandidate(candidate);
@@ -34,8 +28,6 @@ export default function StartScreen({ onStart }: StartScreenProps) {
   const handleStart = () => {
     if (selectedCandidate) {
       playEndTurnSound(); // Play end week sound for start game
-      // Stop TV static when starting game
-      stopTVStatic();
       onStart(selectedCandidate, selectedDifficulty);
     }
   };
@@ -60,7 +52,6 @@ export default function StartScreen({ onStart }: StartScreenProps) {
   useEffect(() => {
     const checkConnection = () => {
       const connected = isSpotifyConnected();
-      setSpotifyConnected(connected);
       
       // Show modal on first load if not connected and user hasn't interacted yet
       if (!connected && !hasUserInteracted && !showSpotifyModal) {
@@ -82,179 +73,6 @@ export default function StartScreen({ onStart }: StartScreenProps) {
     
     return () => clearInterval(interval);
   }, [hasUserInteracted, showSpotifyModal]);
-
-  // Play TV static with fade in/out overlap when Spotify is not connected
-  // Only start after user interaction (from modal)
-  useEffect(() => {
-    if (spotifyConnected) {
-      // Stop static if Spotify connects
-      stopTVStatic();
-      return;
-    }
-
-    // Only start static if user has interacted (clicked modal button)
-    if (!hasUserInteracted) {
-      return;
-    }
-
-    // Start playing TV static after user interaction
-    startTVStaticAfterInteraction();
-
-    return () => {
-      stopTVStatic();
-    };
-  }, [spotifyConnected, hasUserInteracted]);
-
-  const startTVStaticAfterInteraction = () => {
-    if (!staticAudio1Ref.current || !staticAudio2Ref.current) {
-      const BASE_URL = import.meta.env.BASE_URL;
-      const staticPath = `${BASE_URL}audio/tvstatic.wav`;
-      
-      // Create two audio instances for seamless looping with fade
-      staticAudio1Ref.current = new Audio(staticPath);
-      staticAudio1Ref.current.loop = true;
-      staticAudio1Ref.current.volume = 0;
-      
-      staticAudio2Ref.current = new Audio(staticPath);
-      staticAudio2Ref.current.loop = true;
-      staticAudio2Ref.current.volume = 0;
-    }
-
-    // Start playing with user interaction
-    const startAudio = async () => {
-      try {
-        // Preload audio
-        staticAudio1Ref.current!.load();
-        staticAudio2Ref.current!.load();
-        
-        // Wait a bit for audio to load
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        console.log('Starting TV static after user interaction...');
-        // Set volume to 0 before playing, then fade in
-        staticAudio1Ref.current!.volume = 0;
-        await staticAudio1Ref.current!.play();
-        console.log('TV static playing, initial volume:', staticAudio1Ref.current!.volume, 'paused:', staticAudio1Ref.current!.paused, 'muted:', staticAudio1Ref.current!.muted);
-        
-        // Fade in first audio (2 seconds to match loop fade)
-        fadeIn(staticAudio1Ref.current!, 2000);
-        
-        // Set up loop with fade overlap
-        setupFadeLoop();
-      } catch (error) {
-        console.error('Could not play TV static:', error);
-      }
-    };
-
-    startAudio();
-  };
-
-
-  const setupFadeLoop = () => {
-    if (!staticAudio1Ref.current || !staticAudio2Ref.current) return;
-
-    const fadeDuration = 2000; // 2 second fade for smooth overlap
-    const switchInterval = 25000; // Switch every 25 seconds (audio is 27 seconds, so 2 second overlap)
-
-    // Function to switch to next audio
-    const switchToNext = () => {
-      if (!staticAudio1Ref.current || !staticAudio2Ref.current) return;
-
-      const currentAudio = currentAudioRef.current === 0 ? staticAudio1Ref.current : staticAudio2Ref.current;
-      const nextAudio = currentAudioRef.current === 0 ? staticAudio2Ref.current : staticAudio1Ref.current;
-
-      // Start next audio
-      nextAudio.currentTime = 0;
-      nextAudio.play().catch(() => {});
-      
-      // Fade out current, fade in next
-      fadeOut(currentAudio, fadeDuration);
-      fadeIn(nextAudio, fadeDuration);
-      
-      // Switch current audio
-      currentAudioRef.current = currentAudioRef.current === 0 ? 1 : 0;
-    };
-
-    // Set up interval to switch between audio instances every 25 seconds
-    // This creates a seamless loop with 2 second fade overlap
-    const loopInterval = setInterval(() => {
-      if (!staticAudio1Ref.current || !staticAudio2Ref.current) {
-        clearInterval(loopInterval);
-        return;
-      }
-      switchToNext();
-    }, switchInterval);
-
-    fadeIntervalRef.current = loopInterval as unknown as number;
-  };
-
-  const fadeIn = (audio: HTMLAudioElement, duration: number) => {
-    if (!audio) return;
-    
-    const startVolume = audio.volume || 0;
-    const targetVolume = 0.3; // 30% volume for TV static
-    const startTime = Date.now();
-    
-    console.log('Fading in audio from', startVolume, 'to', targetVolume);
-    
-    const fade = () => {
-      if (!audio) return;
-      
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const newVolume = startVolume + (targetVolume - startVolume) * progress;
-      audio.volume = newVolume;
-      
-      if (progress < 1) {
-        requestAnimationFrame(fade);
-      } else {
-        audio.volume = targetVolume; // Ensure we end at target volume
-        console.log('Fade in complete, final volume:', audio.volume);
-      }
-    };
-    
-    fade();
-  };
-
-  const fadeOut = (audio: HTMLAudioElement, duration: number) => {
-    if (!audio) return;
-    
-    const startVolume = audio.volume;
-    const startTime = Date.now();
-    
-    const fade = () => {
-      if (!audio) return;
-      
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      audio.volume = startVolume * (1 - progress);
-      
-      if (progress < 1) {
-        requestAnimationFrame(fade);
-      } else {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.volume = 0; // Reset volume
-      }
-    };
-    
-    fade();
-  };
-
-  const stopTVStatic = () => {
-    if (fadeIntervalRef.current) {
-      clearInterval(fadeIntervalRef.current);
-      fadeIntervalRef.current = null;
-    }
-
-    if (staticAudio1Ref.current) {
-      fadeOut(staticAudio1Ref.current, 500);
-    }
-    
-    if (staticAudio2Ref.current) {
-      fadeOut(staticAudio2Ref.current, 500);
-    }
-  };
 
   return (
     <div className="start-screen">
@@ -287,6 +105,7 @@ export default function StartScreen({ onStart }: StartScreenProps) {
               <div className="start-content">
                 <h1 className="game-title">1976</h1>
                 <p className="game-subtitle">As Seen on TV!</p>
+                <p className="game-version">v{packageJson.version}</p>
                 <p className="game-description">
                   Take control of a presidential campaign in one of the closest elections in U.S. history.
                   Navigate 25 weeks of campaigning across all 50 states to secure 270 electoral votes.

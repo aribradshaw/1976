@@ -42,6 +42,15 @@ export interface SpotifyToken {
   expires_at?: number;
 }
 
+interface SpotifyDevice {
+  id: string;
+  is_active: boolean;
+}
+
+interface SpotifyDevicesResponse {
+  devices?: SpotifyDevice[];
+}
+
 /**
  * Generate a random string for state parameter
  */
@@ -334,8 +343,8 @@ export async function playTrack(trackId: string): Promise<boolean> {
       return false;
     }
 
-    const devicesData = await devicesResponse.json();
-    const activeDevice = devicesData.devices?.find((d: any) => d.is_active) || devicesData.devices?.[0];
+    const devicesData = await devicesResponse.json() as SpotifyDevicesResponse;
+    const activeDevice = devicesData.devices?.find(device => device.is_active) || devicesData.devices?.[0];
 
     if (!activeDevice) {
       alert('No active Spotify device found. Please open Spotify on a device and try again.');

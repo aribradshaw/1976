@@ -4,10 +4,9 @@ interface ProgressBarProps {
   currentWeek: number;
   totalWeeks: number;
   currentDate?: Date;
-  electionDate?: Date;
 }
 
-export default function ProgressBar({ currentWeek, totalWeeks, currentDate, electionDate }: ProgressBarProps) {
+export default function ProgressBar({ currentWeek, totalWeeks, currentDate }: ProgressBarProps) {
   const percentage = (currentWeek / totalWeeks) * 100;
   
   const formatDate = (date: Date | undefined): string => {
