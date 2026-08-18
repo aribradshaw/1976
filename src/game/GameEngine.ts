@@ -6,6 +6,8 @@ import { TopicId, Microgroup, TOPIC_RATINGS, TOPICS } from '../data/topics';
 import { gameLogger } from '../utils/gameLogger';
 import { calculateDetailedDemographics } from '../utils/demographics';
 import { SeededRng } from './simulation/rng';
+import { CampaignEventDefinition } from '../data/events1976';
+import { resolveCampaignEvent, ResolvedCampaignEvent } from './simulation/events';
 
 export class GameEngine {
   private gameState: GameState;
@@ -124,6 +126,7 @@ export class GameEngine {
         funds: 5000000, // Starting funds: $5M
         actionsRemaining: 6, // 6 actions per week
         energy: 100,
+        credibility: 50,
         weeklyFundraising: 0,
       },
       stateMomentum,
@@ -141,6 +144,7 @@ export class GameEngine {
       fundraisingPotential,
       topicPositions: new Map<string, 'for' | 'against'>(),
       opponentTopicPositions: new Map<string, 'for' | 'against'>(),
+      historicalEvents: [],
       gameStatus: 'playing',
       difficulty,
     };
@@ -185,7 +189,57 @@ export class GameEngine {
       opponentTopicPositions: new Map(this.gameState.opponentTopicPositions),
       stateMomentum: new Map(this.gameState.stateMomentum),
       opponentStateMomentum: new Map(this.gameState.opponentStateMomentum),
+      historicalEvents: [...this.gameState.historicalEvents],
     };
+  }
+
+  applyHistoricalEventChoice(event: CampaignEventDefinition, choiceId: string): ResolvedCampaignEvent | null {
+    if (event.week !== this.gameState.currentWeek) return null;
+    if (this.gameState.historicalEvents.some(record => record.eventId === event.id)) return null;
+
+    const resolved = resolveCampaignEvent(event, choiceId, this.rng.fork(`event:${event.id}`));
+    const nextFunds = this.gameState.resources.funds + resolved.effects.funds;
+    if (nextFunds < 0) return null;
+
+    this.gameState.resources.funds = nextFunds;
+    this.gameState.resources.energy = Math.max(0, Math.min(100, this.gameState.resources.energy + resolved.effects.energy));
+    this.gameState.resources.credibility = Math.max(0, Math.min(100, this.gameState.resources.credibility + resolved.effects.credibility));
+
+    const targets = this.getEventTargetStates(event);
+    const coalitionImpact = Object.values(resolved.effects.coalition).reduce((sum, value) => sum + (value ?? 0), 0);
+    const relationshipDelta = coalitionImpact / Math.max(6, Object.keys(resolved.effects.coalition).length * 3);
+
+    targets.forEach(state => {
+      const currentMomentum = this.gameState.stateMomentum.get(state) ?? 0;
+      this.gameState.stateMomentum.set(state, Math.max(-100, Math.min(100, currentMomentum + resolved.effects.nationalMomentum)));
+
+      const relationships = this.gameState.microgroupRelationships.get(state);
+      if (!relationships) return;
+      const updated = { ...relationships };
+      const coalitionTargets: Array<keyof MicrogroupRelationships> = [
+        'lean_dem', 'swingable_dem', 'lean_rep', 'swingable_rep',
+        'lean_dem_indie', 'swingable_indie', 'lean_rep_indie',
+      ];
+      coalitionTargets.forEach(group => {
+        updated[group] = Math.max(1, Math.min(10, updated[group] + relationshipDelta));
+      });
+      this.gameState.microgroupRelationships.set(state, updated);
+    });
+
+    this.gameState.historicalEvents.push({
+      eventId: resolved.eventId,
+      choiceId: resolved.choiceId,
+      week: resolved.week,
+      publicReaction: resolved.publicReaction,
+    });
+    return resolved;
+  }
+
+  private getEventTargetStates(event: CampaignEventDefinition): string[] {
+    if (event.scope.kind === 'national') return Array.from(this.states.keys());
+    if (event.scope.kind === 'states') return event.scope.states.filter(state => this.states.has(state));
+    const regions = new Set(event.scope.regions);
+    return Array.from(this.states.keys()).filter(state => EVENT_REGIONS[state]?.some(region => regions.has(region)));
   }
 
   setTopicPosition(topicId: string, position: 'for' | 'against'): void {
@@ -3306,4 +3360,18 @@ export class GameEngine {
     return '#808080';
   }
 }
+
+const EVENT_REGIONS: Record<string, readonly string[]> = {
+  AL: ['South'], AK: ['West Coast'], AZ: ['West Coast'], AR: ['South'], CA: ['West Coast'],
+  CO: ['West Coast', 'Plains'], CT: ['Northeast'], DC: ['Mid-Atlantic'], DE: ['Mid-Atlantic'], FL: ['South'],
+  GA: ['South'], HI: ['West Coast'], IA: ['Midwest', 'Plains'], ID: ['West Coast'], IL: ['Midwest', 'Great Lakes'],
+  IN: ['Midwest', 'Great Lakes'], KS: ['Midwest', 'Plains'], KY: ['South'], LA: ['South'], MA: ['Northeast'],
+  MD: ['Mid-Atlantic'], ME: ['Northeast'], MI: ['Midwest', 'Great Lakes'], MN: ['Midwest', 'Great Lakes'], MO: ['Midwest'],
+  MS: ['South'], MT: ['Plains'], NC: ['South'], ND: ['Midwest', 'Plains'], NE: ['Midwest', 'Plains'],
+  NH: ['Northeast'], NJ: ['Northeast', 'Mid-Atlantic'], NM: ['West Coast'], NV: ['West Coast'], NY: ['Northeast'],
+  OH: ['Midwest', 'Great Lakes'], OK: ['South', 'Plains'], OR: ['West Coast'], PA: ['Northeast', 'Mid-Atlantic'], RI: ['Northeast'],
+  SC: ['South'], SD: ['Midwest', 'Plains'], TN: ['South'], TX: ['South', 'Plains'], UT: ['West Coast'],
+  VA: ['South', 'Mid-Atlantic'], VT: ['Northeast'], WA: ['West Coast'], WI: ['Midwest', 'Great Lakes'], WV: ['South', 'Mid-Atlantic'],
+  WY: ['Plains'],
+};
 

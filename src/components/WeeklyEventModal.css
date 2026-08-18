@@ -222,3 +222,20 @@
   transform: translateY(-2px);
 }
 
+.weekly-event-kicker {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #f2cf78;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.weekly-event-warning {
+  padding: 0.75rem;
+  border-left: 4px solid #f2cf78;
+  background: rgba(242, 207, 120, 0.12);
+  color: #f5f5dc;
+  font-size: 0.88rem;
+}

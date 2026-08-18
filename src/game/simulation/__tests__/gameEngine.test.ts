@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameEngine } from '../../GameEngine';
+import { EVENTS_1976 } from '../../../data/events1976';
 
 describe('GameEngine weekly resolution', () => {
   beforeEach(() => {
@@ -50,5 +51,21 @@ describe('GameEngine weekly resolution', () => {
     expect(firstState.simulationSeed).toBe(secondState.simulationSeed);
     expect(Array.from(firstState.polling.entries())).toEqual(Array.from(secondState.polling.entries()));
     expect(Array.from(firstState.campaignActivities.entries())).toEqual(Array.from(secondState.campaignActivities.entries()));
+  });
+
+  it('applies a historical choice once with deterministic bounded resources', () => {
+    const first = new GameEngine('democrat', 'medium', 'event-replay');
+    const second = new GameEngine('democrat', 'medium', 'event-replay');
+    const event = EVENTS_1976[0];
+
+    const firstResult = first.applyHistoricalEventChoice(event, event.choices[0].id);
+    const secondResult = second.applyHistoricalEventChoice(event, event.choices[0].id);
+
+    expect(firstResult).toEqual(secondResult);
+    expect(first.getGameState().historicalEvents).toHaveLength(1);
+    expect(first.getGameState().resources.credibility).toBeGreaterThanOrEqual(0);
+    expect(first.getGameState().resources.credibility).toBeLessThanOrEqual(100);
+    expect(first.applyHistoricalEventChoice(event, event.choices[1].id)).toBeNull();
+    expect(first.getGameState().historicalEvents).toHaveLength(1);
   });
 });

@@ -1,6 +1,8 @@
-import { GameEngine } from '../game/GameEngine';
-import { GameState, PollingData, StateData } from '../types/game';
 import { FaDemocrat, FaRepublican } from 'react-icons/fa';
+import { GameEngine } from '../game/GameEngine';
+import { buildElectoralForecast, ForecastBand } from '../game/simulation/forecast';
+import { buildRoadTo270 } from '../game/strategy/roadTo270';
+import { GameState } from '../types/game';
 import { playClickSound } from '../utils/sounds';
 import './ProjectedVotesModal.css';
 
@@ -12,104 +14,37 @@ interface ProjectedVotesModalProps {
   party: 'democrat' | 'republican';
 }
 
-export default function ProjectedVotesModal({ 
-  isOpen, 
-  onClose, 
-  gameEngine, 
-  gameState,
-  party 
-}: ProjectedVotesModalProps) {
+export default function ProjectedVotesModal({ isOpen, onClose, gameEngine, gameState, party }: ProjectedVotesModalProps) {
   if (!isOpen) return null;
 
-  // Get all states and calculate projected votes
   const allStates = gameEngine.getAllStates();
-  const stateProjections = allStates.map(state => {
-    const polling = gameState.polling.get(state.abbreviation);
-    if (!polling) return null;
+  const forecast = buildElectoralForecast(allStates, gameState.polling);
+  const road = buildRoadTo270({ states: allStates, pollingByState: gameState.polling, candidate: party });
+  const stateNames = new Map(allStates.map(state => [state.abbreviation, state.name]));
+  const stateProjections = forecast.stateForecasts
+    .map(state => ({
+      ...state,
+      name: stateNames.get(state.state) ?? state.state,
+      polling: gameState.polling.get(state.state),
+      winProbability: party === 'democrat' ? state.democraticWinProbability : state.republicanWinProbability,
+    }))
+    .sort((left, right) => Math.abs(left.winProbability - 0.5) - Math.abs(right.winProbability - 0.5));
 
-    const turnoutRate = polling.turnoutRate || state.historicalData.turnoutRate;
-    const projectedTurnout = state.population.registeredVoters * (turnoutRate / 100);
-    
-    // Calculate projected votes based on polling percentage
-    const demSupport = polling.democraticSupport;
-    const repSupport = polling.republicanSupport;
-    const totalSupport = demSupport + repSupport;
-    
-    // If total support is 0, skip this state
-    if (totalSupport === 0) return null;
-    
-    // Calculate projected votes for each party
-    const demVotes = totalSupport > 0 ? (demSupport / totalSupport) * projectedTurnout : 0;
-    const repVotes = totalSupport > 0 ? (repSupport / totalSupport) * projectedTurnout : 0;
-    
-    // Determine winner based on polling
-    const margin = demSupport - repSupport;
-    const winner = margin > 0 ? 'democrat' : margin < 0 ? 'republican' : 'tie';
-    
-    return {
-      state,
-      polling,
-      projectedTurnout: Math.round(projectedTurnout),
-      turnoutRate: turnoutRate.toFixed(1),
-      demVotes: Math.round(demVotes),
-      repVotes: Math.round(repVotes),
-      demSupport: demSupport.toFixed(1),
-      repSupport: repSupport.toFixed(1),
-      margin: Math.abs(margin).toFixed(1),
-      winner,
-      electoralVotes: state.electoralVotes
-    };
-  }).filter(Boolean) as Array<{
-    state: StateData;
-    polling: PollingData;
-    projectedTurnout: number;
-    turnoutRate: string;
-    demVotes: number;
-    repVotes: number;
-    demSupport: string;
-    repSupport: string;
-    margin: string;
-    winner: 'democrat' | 'republican' | 'tie';
-    electoralVotes: number;
-  }>;
-
-  // Sort by electoral votes (descending)
-  stateProjections.sort((a, b) => b.electoralVotes - a.electoralVotes);
-
-  // Show all states, but highlight the ones won by the selected party
-  // Calculate totals for all states
-  const totalProjectedVotes = stateProjections.reduce((sum, p) => 
-    sum + (party === 'democrat' ? p.demVotes : p.repVotes), 0);
-  
-  // Count states won by the selected party
-  const statesWon = stateProjections.filter(p => 
-    party === 'democrat' ? p.winner === 'democrat' : p.winner === 'republican'
-  ).length;
-  
-  // Calculate electoral votes for the selected party (only from states they're winning)
-  const totalElectoralVotes = stateProjections
-    .filter(p => party === 'democrat' ? p.winner === 'democrat' : p.winner === 'republican')
-    .reduce((sum, p) => sum + p.electoralVotes, 0);
+  const likelyElectoralVotes = forecast.likelyElectoralVotes[party];
+  const expectedElectoralVotes = Math.round(forecast.expectedElectoralVotes[party]);
+  const statesFavored = stateProjections.filter(state => state.winProbability >= 0.5).length;
 
   return (
     <div className="projected-votes-modal-overlay" onClick={onClose}>
-      <div className="projected-votes-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="projected-votes-modal" role="dialog" aria-modal="true" aria-labelledby="forecast-title" onClick={event => event.stopPropagation()}>
         <div className="projected-votes-modal-header">
-          <h2>
-            {party === 'democrat' ? (
-              <>
-                <FaDemocrat className="party-icon" />
-                Democratic Projected Votes
-              </>
-            ) : (
-              <>
-                <FaRepublican className="party-icon" />
-                Republican Projected Votes
-              </>
-            )}
+          <h2 id="forecast-title">
+            {party === 'democrat' ? <FaDemocrat className="party-icon" /> : <FaRepublican className="party-icon" />}
+            {party === 'democrat' ? 'Democratic' : 'Republican'} Electoral Forecast
           </h2>
-          <button 
-            className="projected-votes-close-btn" 
+          <button
+            className="projected-votes-close-btn"
+            aria-label="Close forecast"
             onClick={() => {
               playClickSound();
               onClose();
@@ -118,55 +53,53 @@ export default function ProjectedVotesModal({
             ×
           </button>
         </div>
-        
+
         <div className="projected-votes-modal-content">
+          <p className="projected-votes-explainer">
+            Expected EV weights every state's live win chance. Likely EV assigns each state to its current favorite. Neither is a guarantee.
+          </p>
           <div className="projected-votes-summary">
             <div className="summary-item">
-              <span className="summary-label">Total Electoral Votes:</span>
-              <span className="summary-value">{totalElectoralVotes}</span>
+              <span className="summary-label">Likely EV</span>
+              <span className="summary-value">{likelyElectoralVotes}</span>
             </div>
             <div className="summary-item">
-              <span className="summary-label">Total Projected Votes:</span>
-              <span className="summary-value">{totalProjectedVotes.toLocaleString()}</span>
+              <span className="summary-label">Expected EV</span>
+              <span className="summary-value">{expectedElectoralVotes}</span>
             </div>
             <div className="summary-item">
-              <span className="summary-label">States Won:</span>
-              <span className="summary-value">{statesWon}</span>
+              <span className="summary-label">States favored</span>
+              <span className="summary-value">{statesFavored}</span>
             </div>
+          </div>
+
+          <div className="projected-votes-route">
+            <strong>Road to 270:</strong>{' '}
+            {road.pathsTo270[0]?.label ?? `${road.electoralVotesNeeded} EV needed, with no complete path on the current board.`}
           </div>
 
           <div className="projected-votes-list">
             <div className="projected-votes-list-header">
               <span>State</span>
-              <span>Electoral Votes</span>
-              <span>Projected Votes</span>
-              <span>Support %</span>
-              <span>Turnout</span>
+              <span>EV</span>
+              <span>Win chance</span>
+              <span>Race rating</span>
+              <span>Poll confidence</span>
             </div>
-            {stateProjections.map((projection) => {
-              const isWon = party === 'democrat' 
-                ? projection.winner === 'democrat' 
-                : projection.winner === 'republican';
-              
-              return (
-                <div 
-                  key={projection.state.abbreviation} 
-                  className={`projected-votes-item ${isWon ? 'won' : ''} ${projection.winner === 'tie' ? 'tie' : ''}`}
-                >
-                  <span className="state-name">{projection.state.name}</span>
-                  <span className="ev-count">{projection.electoralVotes}</span>
-                  <span className="vote-count">
-                    {(party === 'democrat' ? projection.demVotes : projection.repVotes).toLocaleString()}
-                  </span>
-                  <span className="support-percent">
-                    {party === 'democrat' ? projection.demSupport : projection.repSupport}%
-                  </span>
-                  <span className="turnout-info">
-                    {projection.projectedTurnout.toLocaleString()} ({projection.turnoutRate}%)
-                  </span>
-                </div>
-              );
-            })}
+            {stateProjections.map(projection => (
+              <div
+                key={projection.state}
+                className={`projected-votes-item ${projection.winProbability >= 0.5 ? 'won' : ''} ${projection.band === 'toss_up' ? 'tie' : ''}`}
+              >
+                <span className="state-name">{projection.name}</span>
+                <span className="ev-count">{projection.electoralVotes}</span>
+                <span className="vote-count">{Math.round(projection.winProbability * 100)}%</span>
+                <span className="support-percent">{formatBand(projection.band)}</span>
+                <span className="turnout-info">
+                  {projection.polling ? `Wk ${projection.polling.lastUpdated} · ±${projection.polling.marginOfError.toFixed(1)}` : 'No live poll'}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -174,3 +107,6 @@ export default function ProjectedVotesModal({
   );
 }
 
+function formatBand(band: ForecastBand): string {
+  return band.split('_').map(word => word[0].toUpperCase() + word.slice(1)).join(' ');
+}

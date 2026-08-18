@@ -1,6 +1,6 @@
 {
   "name": "1976-election-sim",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "Turn-based strategy game simulating the 1976 U.S. Presidential Election",
   "type": "module",
   "scripts": {
@@ -31,4 +31,3 @@
     "vitest": "^2.1.9"
   }
 }
-

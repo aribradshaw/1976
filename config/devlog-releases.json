@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.7.2",
+    "date": "2026-08-18",
+    "title": "Historical campaign decisions and the road to 270",
+    "notes": [
+      "Every campaign week now presents a sourced 1976 decision with visible costs and tradeoffs.",
+      "The campaign desk identifies expected EV, battlegrounds, must-holds, best flips, and routes to 270.",
+      "Weekly recaps explain electoral movement, cash flow, resolved actions, and the biggest state shifts.",
+      "Automated coverage now validates the full event timeline, all debate weeks, deterministic resolution, and road-to-270 planning."
+    ]
+  },
+  {
     "version": "2.7.1",
     "date": "2026-08-18",
     "title": "Deterministic campaign foundation",
@@ -11,4 +22,3 @@
     ]
   }
 ]
-

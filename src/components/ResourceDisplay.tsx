@@ -6,6 +6,8 @@ interface ResourceDisplayProps {
   resources: {
     funds: number;
     actionsRemaining: number;
+    energy: number;
+    credibility: number;
     weeklyFundraising: number;
   };
 }
@@ -21,7 +23,7 @@ export default function ResourceDisplay({ gameEngine, resources }: ResourceDispl
         <span className="resource-value">${(resources.funds / 1000000).toFixed(2)}M</span>
       </div>
       <div className="resource-item">
-        <span className="resource-label">Energy:</span>
+        <span className="resource-label">Action Points:</span>
         <div className="energy-items">
           {[1, 2, 3, 4, 5, 6].map((index) => (
             <div
@@ -30,6 +32,16 @@ export default function ResourceDisplay({ gameEngine, resources }: ResourceDispl
             />
           ))}
         </div>
+      </div>
+      <div className="resource-item resource-track-item">
+        <span className="resource-label">Candidate Energy:</span>
+        <div className="resource-track"><span style={{ width: `${resources.energy}%` }} /></div>
+        <span className="resource-track-value">{Math.round(resources.energy)}/100</span>
+      </div>
+      <div className="resource-item resource-track-item">
+        <span className="resource-label">Credibility:</span>
+        <div className="resource-track credibility"><span style={{ width: `${resources.credibility}%` }} /></div>
+        <span className="resource-track-value">{Math.round(resources.credibility)}/100</span>
       </div>
       <div className="resource-item">
         <span className="resource-label">Weekly Fundraising:</span>

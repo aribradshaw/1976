@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
+import { TOPICS, TopicId } from '../data/topics';
 import { GameState } from '../types/game';
-import { TopicId, TOPICS } from '../data/topics';
 import './WeeklyEventModal.css';
 
 interface WeeklyEventModalProps {
@@ -9,154 +9,54 @@ interface WeeklyEventModalProps {
   onClose?: () => void;
 }
 
-export default function WeeklyEventModal({ 
-  gameState, 
-  onAnswer,
-  onClose
-}: WeeklyEventModalProps) {
-  const [randomTopic, setRandomTopic] = useState<TopicId | null>(null);
+export default function WeeklyEventModal({ gameState, onAnswer }: WeeklyEventModalProps) {
   const [selectedPosition, setSelectedPosition] = useState<'for' | 'against' | null>(null);
-  const [showTip, setShowTip] = useState(() => {
-    const tipDismissed = localStorage.getItem('weeklyEventTipDismissed');
-    return tipDismissed !== 'true';
-  });
-  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const selectedTopic = useMemo(() => {
+    const available = TOPICS.filter(topic => !gameState.topicPositions.has(topic.id));
+    if (available.length === 0) return null;
+    const index = (gameState.simulationSeed + gameState.currentWeek - 1) % available.length;
+    return available[index];
+  }, [gameState.currentWeek, gameState.simulationSeed, gameState.topicPositions]);
 
-  useEffect(() => {
-    // Get a random topic that hasn't been locked yet
-    const lockedTopics = Array.from(gameState.topicPositions.keys());
-    const availableTopics = TOPICS
-      .map(t => t.id)
-      .filter(topicId => !lockedTopics.includes(topicId));
-    
-    if (availableTopics.length === 0) {
-      // All topics are locked, don't show event
-      // Close the modal to prevent showing "Loading..." indefinitely
-      setRandomTopic(null);
-      // Close the modal if onClose callback is provided
-      if (onClose) {
-        // Use setTimeout to avoid calling onClose during render
-        setTimeout(() => {
-          onClose();
-        }, 0);
-      }
-      return;
-    }
-    
-    const randomIndex = Math.floor(Math.random() * availableTopics.length);
-    setRandomTopic(availableTopics[randomIndex]);
-    setSelectedPosition(null); // Reset position selection
-    
-    // Show tip on first weekly event (when no positions are locked yet)
-    if (lockedTopics.length === 0 && showTip) {
-      // First weekly event - tip will be shown
-    }
-  }, [gameState.currentWeek, gameState.topicPositions, onClose, showTip]);
-
-  if (!randomTopic) {
-    return (
-      <div className="weekly-event-overlay">
-        <div className="weekly-event-modal">
-          <h2>Loading...</h2>
-        </div>
-      </div>
-    );
-  }
-
-  const topic = TOPICS.find(t => t.id === randomTopic);
-  if (!topic) {
-    return null;
-  }
-
-  const handleTipDismiss = () => {
-    if (dontShowAgain) {
-      localStorage.setItem('weeklyEventTipDismissed', 'true');
-    }
-    setShowTip(false);
-  };
-
-  const handleConfirm = () => {
-    if (selectedPosition && randomTopic) {
-      // Dismiss tip if it's showing
-      if (showTip) {
-        handleTipDismiss();
-      }
-      onAnswer(randomTopic, selectedPosition);
-    }
-  };
-
-  // Check if this is the first weekly event (no positions locked yet)
-  const isFirstEvent = gameState.topicPositions.size === 0;
+  if (!selectedTopic) return null;
 
   return (
-    <div className="weekly-event-overlay">
-      {showTip && isFirstEvent && (
-        <div className="tip-popup-overlay">
-          <div className="tip-popup">
-            <h4>⚠️ Strategic Decision Ahead!</h4>
-            <p>
-              <strong>Your position on this issue will be PERMANENT and LOCKED for the entire campaign.</strong>
-            </p>
-            <p>
-              Once you choose FOR or AGAINST, you cannot change your position on this topic. This decision will have a NATIONAL IMPACT:
-            </p>
-            <ul>
-              <li><strong>National Impact:</strong> Your position affects voter relationships in ALL 50 states</li>
-              <li><strong>All Subgroups:</strong> All voter microgroups (Democrats, Republicans, Independents) will react to your position</li>
-              <li><strong>Future Campaigns:</strong> You can only use topics you've locked positions on in rallies and ads</li>
-              <li><strong>Strategic Choice:</strong> Choose positions that align with your base while appealing to swing voters</li>
-            </ul>
-            <p>
-              <strong>Choose strategically!</strong> Consider how this position will appeal to your base, independents, and swing voters.
-            </p>
-            <div className="tip-checkbox">
-              <input
-                type="checkbox"
-                id="dontShowAgain"
-                checked={dontShowAgain}
-                onChange={(e) => setDontShowAgain(e.target.checked)}
-              />
-              <label htmlFor="dontShowAgain">Don't show this tip again</label>
-            </div>
-            <button className="tip-dismiss-btn" onClick={handleTipDismiss}>
-              I Understand
-            </button>
-          </div>
-        </div>
-      )}
+    <div className="weekly-event-overlay" role="dialog" aria-modal="true" aria-labelledby="weekly-interview-title">
       <div className="weekly-event-modal">
-        <h2>Weekly Interview</h2>
+        <span className="weekly-event-kicker">National television interview</span>
+        <h2 id="weekly-interview-title">Define your position</h2>
         <p className="event-description">
-          You've been invited to a major national interview. This is your chance to take a position on an important issue that will be seen by voters across all 50 states.
+          Your answer on <strong>{selectedTopic.name}</strong> becomes part of your permanent platform and affects voters nationwide.
         </p>
-        <div className="event-topic">
-          <h3>{topic.name}</h3>
-        </div>
-        <div className="position-selection">
+        <p className="weekly-event-warning">
+          This position cannot be reversed. It also unlocks this issue for future ads and rallies.
+        </p>
+        <div className="position-selection" aria-label={`Position on ${selectedTopic.name}`}>
           <button
             className={`position-btn ${selectedPosition === 'for' ? 'selected' : ''}`}
+            aria-pressed={selectedPosition === 'for'}
             onClick={() => setSelectedPosition('for')}
           >
-            FOR
+            Support it
           </button>
           <button
             className={`position-btn ${selectedPosition === 'against' ? 'selected' : ''}`}
+            aria-pressed={selectedPosition === 'against'}
             onClick={() => setSelectedPosition('against')}
           >
-            AGAINST
+            Oppose it
           </button>
         </div>
         <div className="event-actions">
           <button
             className="confirm-btn"
-            onClick={handleConfirm}
+            onClick={() => selectedPosition && onAnswer(selectedTopic.id, selectedPosition)}
             disabled={!selectedPosition}
           >
-            Confirm Response
+            Go on the record
           </button>
         </div>
       </div>
     </div>
   );
 }
-

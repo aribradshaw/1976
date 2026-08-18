@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GameEngine } from '../game/GameEngine';
 import { Candidate, CampaignAction } from '../types/game';
 import StateMap from './StateMap';
@@ -13,8 +13,14 @@ import WeeklyEventModal from './WeeklyEventModal';
 import SpotifyPlayer from './SpotifyPlayer';
 import SettingsModal from './SettingsModal';
 import ProjectedVotesModal from './ProjectedVotesModal';
+import CampaignDesk from './CampaignDesk';
+import WeeklyRecapModal, { WeekRecap } from './WeeklyRecapModal';
+import HistoricalEventModal from './HistoricalEventModal';
 import { FaDemocrat, FaRepublican } from 'react-icons/fa';
 import { TopicId, TOPICS } from '../data/topics';
+import { buildElectoralForecast } from '../game/simulation/forecast';
+import { EVENTS_1976 } from '../data/events1976';
+import { getEventForWeek } from '../game/simulation/events';
 import { playClickSound, playStateSelectSound, playStateDeselectSound } from '../utils/sounds';
 import { isSpotifyConnected, searchTrack, playTrack } from '../utils/spotify';
 import './GameInterface.css';
@@ -35,6 +41,9 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
   const [showWeeklyEvent, setShowWeeklyEvent] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showProjectedVotes, setShowProjectedVotes] = useState<'democrat' | 'republican' | null>(null);
+  const [weekRecap, setWeekRecap] = useState<WeekRecap | null>(null);
+  const [showHistoricalEvent, setShowHistoricalEvent] = useState(false);
+  const resolutionBaseline = useRef(gameState);
 
   useEffect(() => {
     // Update game state when it changes
@@ -79,12 +88,58 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
   };
 
   const resolveWeek = () => {
+    const baseline = resolutionBaseline.current;
+    const week = baseline.currentWeek;
+    const fundsBefore = baseline.resources.funds;
+    const actionsResolved = baseline.actionsThisWeek.length;
+    const states = gameEngine.getAllStates();
+    const forecastBefore = buildElectoralForecast(states, baseline.polling);
+    const beforeByState = new Map(forecastBefore.stateForecasts.map(state => [state.state, state]));
+    const expectedEvBefore = forecastBefore.expectedElectoralVotes[baseline.playerCandidate];
+
     gameEngine.endTurn();
-    setGameState(gameEngine.getGameState());
+    const nextState = gameEngine.getGameState();
+    const forecastAfter = buildElectoralForecast(states, nextState.polling);
+    const expectedEvAfter = forecastAfter.expectedElectoralVotes[nextState.playerCandidate];
+    const movers = forecastAfter.stateForecasts
+      .map(state => {
+        const before = beforeByState.get(state.state);
+        const beforeProbability = nextState.playerCandidate === 'democrat'
+          ? before?.democraticWinProbability ?? 0.5
+          : before?.republicanWinProbability ?? 0.5;
+        const afterProbability = nextState.playerCandidate === 'democrat'
+          ? state.democraticWinProbability
+          : state.republicanWinProbability;
+        return {
+          state: state.state,
+          electoralVotes: state.electoralVotes,
+          probabilityChange: afterProbability - beforeProbability,
+        };
+      })
+      .sort((a, b) => Math.abs(b.probabilityChange) - Math.abs(a.probabilityChange))
+      .slice(0, 5);
+
+    setGameState(nextState);
+    setWeekRecap({
+      week,
+      actionsResolved,
+      fundsChange: nextState.resources.funds - fundsBefore,
+      expectedEvBefore,
+      expectedEvAfter,
+      movers,
+    });
     setShowWeeklyEvent(false);
   };
 
   const handleEndTurn = () => {
+    resolutionBaseline.current = gameState;
+    const weeklyEvent = getEventForWeek(EVENTS_1976, gameState.currentWeek);
+    const alreadyResolved = weeklyEvent && gameState.historicalEvents.some(record => record.eventId === weeklyEvent.id);
+    if (weeklyEvent && !alreadyResolved) {
+      setShowHistoricalEvent(true);
+      return;
+    }
+
     // The interview is part of this week's plan and must affect the same polling
     // window as the opponent's response. If every issue is already locked, skip it.
     if (gameState.topicPositions.size < TOPICS.length) {
@@ -92,6 +147,23 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
       return;
     }
     resolveWeek();
+  };
+
+  const handleHistoricalEventChoice = (choiceId: string): boolean => {
+    const event = getEventForWeek(EVENTS_1976, gameState.currentWeek);
+    if (!event) return false;
+    const resolved = gameEngine.applyHistoricalEventChoice(event, choiceId);
+    if (!resolved) return false;
+
+    const nextState = gameEngine.getGameState();
+    setGameState(nextState);
+    setShowHistoricalEvent(false);
+    if (nextState.topicPositions.size < TOPICS.length) {
+      setShowWeeklyEvent(true);
+    } else {
+      resolveWeek();
+    }
+    return true;
   };
 
   const handleWeeklyEventAnswer = (topicId: TopicId, position: 'for' | 'against') => {
@@ -170,6 +242,8 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
     );
   }
 
+  const liveForecast = buildElectoralForecast(gameEngine.getAllStates(), gameState.polling);
+
   return (
     <div className="game-interface">
       <CRTOverlay />
@@ -201,14 +275,19 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
       <div className="game-main">
         <div className="left-panel">
           <ResourceDisplay gameEngine={gameEngine} resources={gameState.resources} />
-          <SpotifyPlayer currentWeek={gameState.currentWeek} />
           <ProgressBar 
             currentWeek={gameState.currentWeek} 
             totalWeeks={gameState.totalWeeks}
             currentDate={gameState.currentDate}
           />
+          <CampaignDesk
+            gameState={gameState}
+            states={gameEngine.getAllStates()}
+            onOpenForecast={() => setShowProjectedVotes(gameState.playerCandidate)}
+          />
+          <SpotifyPlayer currentWeek={gameState.currentWeek} />
           <div className="electoral-votes">
-            <h3>Electoral Votes</h3>
+            <h3>Expected Electoral Votes</h3>
             <div className="ev-display">
               <div 
                 className="ev-item democrat clickable"
@@ -218,7 +297,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
                 }}
               >
                 <FaDemocrat className="party-icon" />
-                <span className="ev-value">{gameEngine.getProjectedElectoralVotes().democrat}</span>
+                <span className="ev-value">{Math.round(liveForecast.expectedElectoralVotes.democrat)}</span>
               </div>
               <div 
                 className="ev-item republican clickable"
@@ -228,7 +307,7 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
                 }}
               >
                 <FaRepublican className="party-icon" />
-                <span className="ev-value">{gameEngine.getProjectedElectoralVotes().republican}</span>
+                <span className="ev-value">{Math.round(liveForecast.expectedElectoralVotes.republican)}</span>
               </div>
             </div>
             {expandedEvParty === 'democrat' && (() => {
@@ -400,6 +479,21 @@ export default function GameInterface({ gameEngine, playerCandidate, onReset }: 
           gameState={gameState}
           party={showProjectedVotes}
         />
+      )}
+
+      {showHistoricalEvent && (() => {
+        const event = getEventForWeek(EVENTS_1976, gameState.currentWeek);
+        return event ? (
+          <HistoricalEventModal
+            event={event}
+            funds={gameState.resources.funds}
+            onChoose={handleHistoricalEventChoice}
+          />
+        ) : null;
+      })()}
+
+      {weekRecap && (
+        <WeeklyRecapModal recap={weekRecap} onContinue={() => setWeekRecap(null)} />
       )}
     </div>
   );

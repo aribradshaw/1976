@@ -121,6 +121,7 @@ export interface GameState {
     funds: number;
     actionsRemaining: number;
     energy: number;               // 0-100
+    credibility: number;          // 0-100 public trust in the campaign
     weeklyFundraising: number;      // Weekly fundraising amount
   };
   stateMomentum: Map<string, number>;  // State -> player momentum (-100 to 100)
@@ -138,6 +139,12 @@ export interface GameState {
   fundraisingPotential: Map<string, number>;  // State -> fundraising potential (100-125%)
   topicPositions: Map<string, 'for' | 'against'>;  // Topic ID -> position (locked globally for player)
   opponentTopicPositions: Map<string, 'for' | 'against'>;  // Topic ID -> position (locked globally for opponent)
+  historicalEvents: Array<{
+    eventId: string;
+    choiceId: string;
+    week: number;
+    publicReaction: 'muted' | 'as_expected' | 'strong';
+  }>;
   gameStatus: 'playing' | 'won' | 'lost' | 'paused';
   difficulty: 'easy' | 'medium' | 'hard';
 }

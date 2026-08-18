@@ -46,6 +46,34 @@
   width: 100%;
 }
 
+.resource-track-item {
+  position: relative;
+}
+
+.resource-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.resource-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #b45309, #f2cf78);
+}
+
+.resource-track.credibility span {
+  background: linear-gradient(90deg, #1d4ed8, #93c5fd);
+}
+
+.resource-track-value {
+  margin-top: 0.2rem;
+  color: #f5f5dc;
+  font-size: 0.68rem;
+  text-align: right;
+}
+
 .energy-item {
   width: calc((100% - 1.5vw) / 6);
   height: calc((100% - 1.5vw) / 6);

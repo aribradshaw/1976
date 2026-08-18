@@ -1,0 +1,148 @@
+.campaign-desk {
+  margin-top: 0.9rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(245, 245, 220, 0.45);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(245, 245, 220, 0.12), rgba(0, 0, 0, 0.2));
+}
+
+.campaign-desk-heading,
+.campaign-desk-target {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.campaign-desk-kicker,
+.campaign-desk-label {
+  display: block;
+  color: #f2cf78;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.campaign-desk-heading h3 {
+  margin: 0.1rem 0 0;
+}
+
+.campaign-desk-status {
+  padding: 0.3rem 0.45rem;
+  border-radius: 999px;
+  background: #7f1d1d;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.campaign-desk-status.on-track {
+  background: #166534;
+}
+
+.campaign-desk-score {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+  margin: 0.8rem 0 0.45rem;
+}
+
+.campaign-desk-score div {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.45rem 0.2rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.23);
+  text-align: center;
+}
+
+.campaign-desk-score strong {
+  color: #fff8dc;
+  font-size: 1.15rem;
+}
+
+.campaign-desk-score span {
+  font-size: 0.62rem;
+  opacity: 0.78;
+}
+
+.campaign-desk-meter {
+  position: relative;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.campaign-desk-meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #d19a32, #f7dc91);
+}
+
+.campaign-desk-meter i {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: #fff;
+}
+
+.campaign-desk-targets {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.8rem;
+}
+
+.campaign-desk-target {
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid rgba(245, 245, 220, 0.14);
+  font-size: 0.72rem;
+}
+
+.campaign-desk-target span:last-child {
+  opacity: 0.8;
+}
+
+.campaign-desk-empty {
+  margin: 0;
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.campaign-desk-route {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  padding: 0.6rem;
+  border-left: 3px solid #f2cf78;
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 0.72rem;
+}
+
+.campaign-desk-route strong {
+  color: #fff8dc;
+}
+
+.campaign-desk-route > span:last-child {
+  opacity: 0.75;
+}
+
+.campaign-desk-button {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.55rem;
+  border: 1px solid #f2cf78;
+  border-radius: 6px;
+  background: transparent;
+  color: #fff8dc;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.campaign-desk-button:hover,
+.campaign-desk-button:focus-visible {
+  background: rgba(242, 207, 120, 0.16);
+}

@@ -83,6 +83,18 @@
   min-height: 0;
 }
 
+.projected-votes-explainer {
+  margin: 0;
+  color: rgba(245, 245, 220, 0.82);
+  line-height: 1.45;
+}
+
+.projected-votes-route {
+  padding: 0.8rem 1rem;
+  border-left: 4px solid #f2cf78;
+  background: rgba(242, 207, 120, 0.1);
+}
+
 .projected-votes-summary {
   display: flex;
   gap: 2vw;
@@ -138,6 +150,8 @@
 }
 
 .projected-votes-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 42px;
   display: grid;
   grid-template-columns: 2fr 1fr 1.5fr 1fr 1.5fr;
   gap: 1vw;
