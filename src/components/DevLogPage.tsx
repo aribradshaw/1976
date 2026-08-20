@@ -1,4 +1,5 @@
 import { FiArrowLeft, FiExternalLink, FiGithub, FiStar } from 'react-icons/fi';
+import type { DevLogEntry } from '@aribradshaw/devlog';
 import releases from '../../config/devlog-releases.json';
 import './DevLogPage.css';
 
@@ -15,7 +16,7 @@ function formatReleaseDate(date: string) {
 }
 
 export default function DevLogPage() {
-  const [current, ...history] = releases;
+  const [current, ...history] = releases as DevLogEntry[];
 
   return (
     <main className="devlog-page">
