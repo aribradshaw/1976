@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.7.12",
+    "date": "2026-08-19",
+    "title": "Keep release history verifiable",
+    "notes": [
+      "Move shared release metadata onto the open-source DevLog package without changing gameplay or the election-broadcast presentation.",
+      "Block future DevLog package updates unless the game version and public release record advance together."
+    ]
+  },
+  {
     "version": "2.7.11",
     "date": "2026-08-18",
     "title": "Readable decisions and the election-night desk",
