@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.7.13",
+    "date": "2026-08-20",
+    "title": "Guard the playable HTML5 package",
+    "notes": [
+      "Repair the itch.io browser build by promoting the complete Butler upload and hiding the obsolete manual ZIP whose hashed assets were missing.",
+      "Reject release packages with missing entrypoint assets, empty files, directory escapes, or root-relative paths that fail inside hosted subdirectories.",
+      "Run the static-package integrity check in both the GitHub quality gate and GitHub Pages deployment before publishing.",
+      "Document the one-browser-upload rule and exact public iframe verification step for future itch.io releases."
+    ]
+  },
+  {
     "version": "2.7.12",
     "date": "2026-08-19",
     "title": "Keep release history verifiable",

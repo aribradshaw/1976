@@ -19,15 +19,24 @@ This creates a `dist` folder with all production-ready files.
 The live project is `aribradshaw/1976`. Use itch.io's official Butler uploader so releases are incremental and versioned.
 
 1. Build and verify the project.
+   ```bash
+   npm run build
+   npm run verify:static
+   ```
 2. Authenticate once with `butler login`.
 3. Push the built directory as the HTML5 channel:
 
 ```bash
-butler push dist aribradshaw/1976:html5 --userversion 2.7.10
+butler push dist aribradshaw/1976:html5 --userversion 2.7.13
 ```
 
-4. In the itch.io edit page, mark the `html5` upload as **This file will be played in the browser** and save.
+4. In the itch.io edit page, mark only the current `html5` Butler upload as **This file will be played in the browser**, hide superseded manual ZIP uploads, and save.
 5. Verify the public game at `https://aribradshaw.itch.io/1976` in both desktop and mobile layouts.
+6. Verify the exact public iframe and all of its entrypoint assets:
+
+```bash
+npm run verify:static -- --url=https://html-classic.itch.zone/html/UPLOAD-BUILD/index.html
+```
 
 Use `butler status aribradshaw/1976:html5` to confirm the processed build and displayed version.
 
