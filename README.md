@@ -63,10 +63,11 @@ npm run release:verify
 npm run lint
 npm test
 npm run build
+npm run verify:static
 npm run test:e2e
 ```
 
-Version 2.7.10 passes 33 deterministic and unit tests plus 17 shipped Chromium journeys. Browser coverage includes setup, the responsive spotlight tutorial, the two-family typography and spacing system, short-screen and receiver breakpoint behavior, portrait-safe candidate cards, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, State Table drill-in, and complete 25-week campaigns at 320x568, 360x640, 390x844, 430x932, and 768x1024 through election night. The complete dependency tree audits cleanly.
+Version 2.7.13 passes 37 deterministic and unit tests plus 19 shipped Chromium journeys. Browser coverage includes setup, the responsive spotlight tutorial, the two-family typography and spacing system, short-screen and receiver breakpoint behavior, portrait-safe candidate cards, the weekly decision and recap loop, autosave and resume, keyboard setup, persisted accessibility settings, State Table drill-in, and complete 25-week campaigns at 320x568, 360x640, 390x844, 430x932, and 768x1024 through election night. The release gate also verifies that every script and stylesheet referenced by the static HTML5 entrypoint exists and uses portable relative paths. The complete dependency tree audits cleanly.
 
 ## Architecture
 

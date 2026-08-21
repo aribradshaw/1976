@@ -7,6 +7,32 @@ Production-style releases use the same Arizona-calendar versioning policy as Cam
 - The first live push in a new year advances the major number, sets minor to the Arizona calendar month minus one, and resets patch to `1`.
 - Rebuilds of the same commit do not create another release.
 
+## 2.7.13, August 20, 2026
+
+Playable HTML5 release guard
+
+- Repaired the itch.io browser build by promoting the complete Butler upload and hiding the obsolete manual ZIP whose hashed assets were missing.
+- Added a static-package verifier that rejects missing entrypoint assets, empty files, directory escapes, and root-relative paths that break inside hosted subdirectories.
+- Added the package-integrity check to both the GitHub quality gate and GitHub Pages deployment before anything is published.
+- Documented the one-browser-upload rule and exact public iframe verification step for future itch.io releases.
+
+## 2.7.12, August 19, 2026
+
+Keep release history verifiable
+
+- Moved shared release metadata onto the open-source DevLog package without changing gameplay or the election-broadcast presentation.
+- Blocked future DevLog package updates unless the game version and public release record advance together.
+
+## 2.7.11, August 18, 2026
+
+Readable decisions and the election-night desk
+
+- Brought campaign day labels, historical decision effects, and source links to WCAG AA contrast on dark broadcast panels and warm editorial paper.
+- Contained election night in a two-column desktop spread that keeps the scoreboard, outcome, and latest state calls inside the results desk.
+- Added a native public DevLog with the full release history, playable return path, GitHub star prompt, and contributor entry point.
+- Expanded automated contrast coverage across setup, planning, reports, forecasts, decisions, interviews, recaps, election night, and the DevLog.
+- Added a deterministic 50-second trailer capture workflow.
+
 ## 2.7.10, August 18, 2026
 
 Mobile campaign tour and state drill-in
